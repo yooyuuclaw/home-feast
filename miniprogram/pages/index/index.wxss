@@ -42,12 +42,14 @@
   border-radius: 20rpx;
   padding: 40rpx;
   border: 1rpx solid #D4B080;
-  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
-  transition: transform 0.3s;
+  box-shadow: 0 4rpx 6rpx rgba(212, 176, 128, 0.3);
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .feature-card:active {
-  transform: scale(0.98);
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 3rpx rgba(212, 176, 128, 0.4);
 }
 
 .card-icon {
