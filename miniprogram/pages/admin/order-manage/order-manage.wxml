@@ -43,10 +43,10 @@
           <image class="user-avatar" src="{{item.userAvatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
           <view class="user-name">{{item.userName}}</view>
         </view>
-        <view class="order-status {{item.status}}">{{getStatusText(item.status)}}</view>
+        <view class="order-status {{item.status}}">{{item.statusText}}</view>
       </view>
 
-      <view class="order-time">下单时间：{{formatTime(item.createTime)}}</view>
+      <view class="order-time">下单时间：{{item.createTimeFormatted}}</view>
 
       <!-- 菜品列表 -->
       <view class="order-dishes">

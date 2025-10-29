@@ -34,8 +34,15 @@ Page({
       })
 
       if (res.result.success) {
+        // 格式化订单数据
+        const orders = res.result.data.map(order => ({
+          ...order,
+          createTimeFormatted: this.formatTime(order.createTime),
+          statusText: this.getStatusText(order.status)
+        }))
+
         this.setData({
-          orders: res.result.data,
+          orders: orders,
           loading: false
         })
       } else {

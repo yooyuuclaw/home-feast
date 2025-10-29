@@ -64,7 +64,7 @@
 
   <!-- 购物车按钮 -->
   <view class="cart-float-btn" bindtap="goToCart">
-    <view class="cart-icon">🛒</view>
+    <image class="cart-icon" src="/images/spatula-check.svg" mode="aspectFit"></image>
     <view wx:if="{{cartCount > 0}}" class="cart-badge">{{cartCount}}</view>
   </view>
 </view>

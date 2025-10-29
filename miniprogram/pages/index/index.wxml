@@ -2,8 +2,8 @@
 <view class="container index-container">
   <!-- 顶部欢迎区域 -->
   <view class="welcome-section">
-    <view class="welcome-title">家庭点餐系统</view>
-    <view class="welcome-desc">欢迎来到家庭点餐，快来选择您喜欢的菜品吧</view>
+    <view class="welcome-title">璐璐和曼丽家聚餐点餐站</view>
+    <view class="welcome-desc">亲爱的，来我家前先选好菜～我好提前准备，等你开吃！</view>
   </view>
 
   <!-- 功能卡片 -->
@@ -11,21 +11,21 @@
     <!-- 点餐卡片 -->
     <view class="feature-card" bindtap="goToMenu">
       <view class="card-icon">🍽️</view>
-      <view class="card-title">开始点餐</view>
+      <view class="card-title">选你想吃的菜</view>
       <view class="card-desc">浏览菜单，选择您喜欢的菜品</view>
     </view>
 
     <!-- 我的订单卡片 -->
     <view class="feature-card" bindtap="goToOrderHistory">
       <view class="card-icon">📋</view>
-      <view class="card-title">我的订单</view>
+      <view class="card-title">我点的菜</view>
       <view class="card-desc">查看历史订单记录</view>
     </view>
 
     <!-- 管理后台卡片（仅管理员可见） -->
     <view class="feature-card admin-card" wx:if="{{isAdmin}}" bindtap="goToAdmin">
       <view class="card-icon">⚙️</view>
-      <view class="card-title">管理后台</view>
+      <view class="card-title">主厨入口</view>
       <view class="card-desc">管理菜单、订单和用户</view>
     </view>
   </view>

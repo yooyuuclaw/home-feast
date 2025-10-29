@@ -1,27 +1,32 @@
 /* pages/index/index.wxss */
 .index-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #F9F9F9;
   padding: 40rpx 30rpx;
 }
 
 /* 欢迎区域 */
 .welcome-section {
-  text-align: center;
-  color: white;
-  margin-bottom: 60rpx;
-  padding-top: 40rpx;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
 }
 
 .welcome-title {
-  font-size: 48rpx;
+  font-size: 44rpx;
   font-weight: bold;
+  color: #8B6E4E;
   margin-bottom: 20rpx;
+  text-align: center;
 }
 
 .welcome-desc {
   font-size: 28rpx;
-  opacity: 0.9;
+  color: #666666;
+  text-align: center;
+  line-height: 1.6;
 }
 
 /* 功能卡片 */
@@ -33,10 +38,11 @@
 }
 
 .feature-card {
-  background: white;
+  background: #E6C8A0;
   border-radius: 20rpx;
   padding: 40rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+  border: 1rpx solid #D4B080;
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
   transition: transform 0.3s;
 }
 
@@ -53,32 +59,37 @@
 .card-title {
   font-size: 36rpx;
   font-weight: bold;
-  color: #333;
+  color: #8B6E4E;
   text-align: center;
   margin-bottom: 10rpx;
 }
 
 .card-desc {
   font-size: 26rpx;
-  color: #666;
+  color: #8B6E4E;
   text-align: center;
+  opacity: 0.8;
 }
 
 .admin-card {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: #FFFFFF;
+  border: 1rpx solid #E0E0E0;
 }
 
-.admin-card .card-title,
+.admin-card .card-title {
+  color: #8B6E4E;
+}
+
 .admin-card .card-desc {
-  color: white;
+  color: #666666;
 }
 
 /* 用户信息 */
 .user-info-section {
-  background: white;
+  background: #FFFFFF;
   border-radius: 20rpx;
   padding: 30rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
 }
 
 .user-info-btn {
@@ -105,7 +116,7 @@
   height: 100rpx;
   border-radius: 50%;
   margin-right: 20rpx;
-  background-color: #f0f0f0;
+  background-color: #F9F9F9;
 }
 
 .user-details {
@@ -115,14 +126,14 @@
 .user-name {
   font-size: 32rpx;
   font-weight: bold;
-  color: #333;
+  color: #8B6E4E;
   margin-bottom: 10rpx;
 }
 
 .user-name-input {
   font-size: 32rpx;
   font-weight: bold;
-  color: #333;
+  color: #8B6E4E;
   margin-bottom: 10rpx;
   width: 100%;
   padding: 0;

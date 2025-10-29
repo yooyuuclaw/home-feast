@@ -37,7 +37,8 @@
 
 .order-time {
   font-size: 26rpx;
-  color: #999;
+  color: #666;
+  font-weight: 500;
 }
 
 .order-status {

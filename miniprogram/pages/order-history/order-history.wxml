@@ -11,8 +11,8 @@
     <view wx:for="{{orders}}" wx:key="_id" class="order-card">
       <!-- 订单头部 -->
       <view class="order-header">
-        <view class="order-time">{{formatTime(item.createTime)}}</view>
-        <view class="order-status {{item.status}}">{{getStatusText(item.status)}}</view>
+        <view class="order-time">下单时间：{{item.createTimeFormatted}}</view>
+        <view class="order-status {{item.status}}">{{item.statusText}}</view>
       </view>
 
       <!-- 订单菜品列表 -->
