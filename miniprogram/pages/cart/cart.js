@@ -6,15 +6,20 @@ Page({
   data: {
     cart: [],
     notes: '',
-    totalCount: 0
+    totalCount: 0,
+    gatheringDays: [], // 可用的聚餐日列表
+    selectedGatheringIndex: -1, // 选中的聚餐日索引
+    selectedGathering: null // 选中的聚餐日对象
   },
 
   onLoad() {
     this.loadCart()
+    this.loadGatheringDays()
   },
 
   onShow() {
     this.loadCart()
+    this.loadGatheringDays()
   },
 
   /**
@@ -93,14 +98,190 @@ Page({
   },
 
   /**
+   * 加载聚餐日列表
+   */
+  async loadGatheringDays() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'gathering-day',
+        data: {
+          action: 'list'
+        }
+      })
+
+      // 获取今天、明天、后天的日期
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const todayStr = this.formatDate(today)
+
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const tomorrowStr = this.formatDate(tomorrow)
+
+      const dayAfterTomorrow = new Date(today)
+      dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2)
+      const dayAfterTomorrowStr = this.formatDate(dayAfterTomorrow)
+
+      // 创建一个日期到聚餐日的映射
+      const dateMap = new Map()
+
+      // 先处理后台的聚餐日
+      if (res.result.success) {
+        res.result.data.forEach(day => {
+          if (day.date >= todayStr) {
+            dateMap.set(day.date, day)
+          }
+        })
+      }
+
+      // 构建最终的选项列表
+      const allDays = []
+
+      // 今天
+      const todayGathering = dateMap.get(todayStr)
+      if (todayGathering) {
+        // 有后台设定的聚餐日，合并显示
+        const mealLabels = []
+        if (todayGathering.meals.includes('breakfast')) mealLabels.push('早餐')
+        if (todayGathering.meals.includes('lunch')) mealLabels.push('午餐')
+        if (todayGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+
+        allDays.push({
+          ...todayGathering,
+          displayText: `${todayGathering.theme} - 今天 (${todayStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          dateLabel: '今天'
+        })
+      } else {
+        // 只有快捷选项
+        allDays.push({
+          _id: 'quick-today',
+          theme: '今天',
+          date: todayStr,
+          meals: [],
+          displayText: `今天 (${todayStr})`,
+          isQuickOption: true,
+          dateLabel: '今天'
+        })
+      }
+
+      // 明天
+      const tomorrowGathering = dateMap.get(tomorrowStr)
+      if (tomorrowGathering) {
+        const mealLabels = []
+        if (tomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
+        if (tomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
+        if (tomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+
+        allDays.push({
+          ...tomorrowGathering,
+          displayText: `${tomorrowGathering.theme} - 明天 (${tomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          dateLabel: '明天'
+        })
+      } else {
+        allDays.push({
+          _id: 'quick-tomorrow',
+          theme: '明天',
+          date: tomorrowStr,
+          meals: [],
+          displayText: `明天 (${tomorrowStr})`,
+          isQuickOption: true,
+          dateLabel: '明天'
+        })
+      }
+
+      // 后天
+      const dayAfterTomorrowGathering = dateMap.get(dayAfterTomorrowStr)
+      if (dayAfterTomorrowGathering) {
+        const mealLabels = []
+        if (dayAfterTomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
+        if (dayAfterTomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
+        if (dayAfterTomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+
+        allDays.push({
+          ...dayAfterTomorrowGathering,
+          displayText: `${dayAfterTomorrowGathering.theme} - 后天 (${dayAfterTomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          dateLabel: '后天'
+        })
+      } else {
+        allDays.push({
+          _id: 'quick-day-after-tomorrow',
+          theme: '后天',
+          date: dayAfterTomorrowStr,
+          meals: [],
+          displayText: `后天 (${dayAfterTomorrowStr})`,
+          isQuickOption: true,
+          dateLabel: '后天'
+        })
+      }
+
+      // 添加其他后台聚餐日（不是今天、明天、后天的）
+      if (res.result.success) {
+        res.result.data.forEach(day => {
+          if (day.date > dayAfterTomorrowStr) {
+            const mealLabels = []
+            if (day.meals.includes('breakfast')) mealLabels.push('早餐')
+            if (day.meals.includes('lunch')) mealLabels.push('午餐')
+            if (day.meals.includes('dinner')) mealLabels.push('晚餐')
+
+            allDays.push({
+              ...day,
+              displayText: `${day.theme} - ${day.date} (${mealLabels.join('、')})`,
+              dateLabel: day.date
+            })
+          }
+        })
+      }
+
+      // 默认选择第一个选项（今天）
+      this.setData({
+        gatheringDays: allDays,
+        selectedGatheringIndex: 0,
+        selectedGathering: allDays[0]
+      })
+    } catch (err) {
+      console.error('加载聚餐日失败', err)
+    }
+  },
+
+  /**
+   * 格式化日期为 YYYY-MM-DD
+   */
+  formatDate(date) {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  },
+
+  /**
+   * 选择聚餐日
+   */
+  onGatheringChange(e) {
+    const index = parseInt(e.detail.value)
+    this.setData({
+      selectedGatheringIndex: index,
+      selectedGathering: this.data.gatheringDays[index]
+    })
+  },
+
+  /**
    * 提交订单
    */
   async submitOrder() {
-    const { cart, notes } = this.data
+    const { cart, notes, selectedGathering } = this.data
 
     if (cart.length === 0) {
       wx.showToast({
         title: '购物车是空的',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 检查是否选择了聚餐日
+    if (!selectedGathering) {
+      wx.showToast({
+        title: '请选择聚餐日',
         icon: 'none'
       })
       return
@@ -122,7 +303,10 @@ Page({
         data: {
           action: 'create',
           dishes: dishes,
-          notes: notes
+          notes: notes,
+          gatheringDayId: selectedGathering._id,
+          gatheringDayTheme: selectedGathering.theme,
+          gatheringDayDate: selectedGathering.date
         }
       })
 

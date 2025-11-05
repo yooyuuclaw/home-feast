@@ -15,6 +15,68 @@
 .order-list {
   display: flex;
   flex-direction: column;
+  gap: 40rpx;
+}
+
+/* 聚餐日分组 */
+.gathering-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* 聚餐日横幅 */
+.gathering-banner {
+  background: linear-gradient(135deg, #E6C8A0 0%, #D4B080 100%);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(139, 110, 78, 0.15);
+}
+
+.gathering-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.gathering-icon {
+  font-size: 60rpx;
+  line-height: 1;
+}
+
+.gathering-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.gathering-theme {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+}
+
+.gathering-date {
+  font-size: 26rpx;
+  color: #8B6E4E;
+  opacity: 0.8;
+}
+
+.gathering-count {
+  font-size: 24rpx;
+  color: #8B6E4E;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+/* 分组内的订单列表 */
+.group-orders {
+  display: flex;
+  flex-direction: column;
   gap: 20rpx;
 }
 
@@ -25,13 +87,36 @@
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
+/* 用户信息 */
+.order-user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding-bottom: 15rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.order-user-info .user-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  margin-right: 15rpx;
+  background: #f5f5f5;
+}
+
+.order-user-info .user-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+}
+
 /* 订单头部 */
 .order-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20rpx;
-  padding-bottom: 20rpx;
+  padding-bottom: 15rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
 
@@ -66,23 +151,37 @@
 /* 订单菜品 */
 .order-dishes {
   margin-bottom: 20rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
 
 .dish-item {
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
   align-items: center;
-  padding: 12rpx 0;
+  gap: 8rpx;
+  background: linear-gradient(135deg, #FFF9F0 0%, #FFE6CC 100%);
+  border: 2rpx solid #E6C8A0;
+  border-radius: 20rpx;
+  padding: 10rpx 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(230, 200, 160, 0.2);
 }
 
 .dish-name {
   font-size: 28rpx;
-  color: #333;
+  font-weight: bold;
+  color: #8B6E4E;
 }
 
 .dish-count {
-  font-size: 26rpx;
-  color: #999;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #ff9a56;
+  background: white;
+  padding: 2rpx 12rpx;
+  border-radius: 12rpx;
+  min-width: 40rpx;
+  text-align: center;
 }
 
 /* 订单备注 */
@@ -100,4 +199,27 @@
 
 .notes-text {
   color: #333;
+}
+
+/* 订单操作 */
+.order-actions {
+  margin-top: 20rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.delete-btn {
+  padding: 12rpx 32rpx;
+  font-size: 26rpx;
+  color: #fa5151;
+  background: #fff;
+  border: 1rpx solid #fa5151;
+  border-radius: 8rpx;
+  line-height: normal;
+}
+
+.delete-btn:active {
+  background: #fff5f5;
 }

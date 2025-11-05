@@ -1,6 +1,8 @@
 /* pages/menu/menu.wxss */
 .menu-container {
   padding-bottom: 120rpx;
+  background: #F9F9F9;
+  min-height: 100vh;
 }
 
 /* 分类导航 */
@@ -8,9 +10,9 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: white;
+  background: #FFFFFF;
   padding: 20rpx 0;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
 }
 
 .category-scroll {
@@ -28,15 +30,18 @@
   margin-right: 20rpx;
   border-radius: 40rpx;
   font-size: 28rpx;
-  color: #666;
-  background: #f5f5f5;
-  transition: all 0.3s;
+  color: #8B6E4E;
+  background: #F9F9F9;
+  border: 1rpx solid #E0E0E0;
+  transition: all 0.2s ease;
 }
 
 .category-item.active {
-  background: #07c160;
-  color: white;
+  background: #E6C8A0;
+  color: #8B6E4E;
   font-weight: bold;
+  border: 1rpx solid #D4B080;
+  box-shadow: 0 2rpx 4rpx rgba(212, 176, 128, 0.3);
 }
 
 /* 菜品列表 */
@@ -51,16 +56,16 @@
 }
 
 .dish-card {
-  background: white;
+  background: #FFFFFF;
   border-radius: 16rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
 }
 
 .dish-image-wrapper {
   width: 100%;
   height: 280rpx;
-  background: #f5f5f5;
+  background: #F9F9F9;
 }
 
 .dish-image {
@@ -75,7 +80,7 @@
 .dish-name {
   font-size: 30rpx;
   font-weight: bold;
-  color: #333;
+  color: #8B6E4E;
   margin-bottom: 8rpx;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -96,49 +101,81 @@
 .add-btn {
   width: auto;
   min-width: 140rpx;
-  background: #07c160;
-  color: white;
+  background: #E6C8A0;
+  color: #8B6E4E;
   border-radius: 40rpx;
   font-size: 26rpx;
+  font-weight: bold;
   padding: 12rpx 32rpx;
-  border: none;
+  border: 1rpx solid #D4B080;
+  box-shadow: 0 2rpx 4rpx rgba(212, 176, 128, 0.3);
+  transition: all 0.2s ease;
 }
 
-/* 购物车浮动按钮 */
-.cart-float-btn {
+.add-btn:active {
+  transform: translateY(1rpx);
+  box-shadow: 0 1rpx 2rpx rgba(212, 176, 128, 0.4);
+}
+
+/* 确认菜单按钮 */
+.confirm-btn-container {
   position: fixed;
-  right: 30rpx;
-  bottom: 30rpx;
-  width: 120rpx;
-  height: 120rpx;
-  background: linear-gradient(135deg, #ff9a56 0%, #d87a47 100%);
-  border-radius: 50%;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(249, 249, 249, 0.98) 0%, rgba(249, 249, 249, 0.95) 70%, transparent 100%);
+  z-index: 1000;
+  backdrop-filter: blur(10rpx);
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, #E6C8A0 0%, #D4B080 100%);
+  border-radius: 50rpx;
+  padding: 24rpx 40rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(216, 122, 71, 0.35);
-  z-index: 1000;
+  gap: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(139, 110, 78, 0.3);
   transition: all 0.3s ease;
 }
 
-.cart-float-btn:active {
-  transform: scale(0.95);
+.confirm-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 16rpx rgba(139, 110, 78, 0.4);
 }
 
-.cart-icon {
+.confirm-btn-icon {
   width: 60rpx;
   height: 60rpx;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #52c41a;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
-.cart-badge {
-  position: absolute;
-  top: 10rpx;
-  right: 10rpx;
-  background: #fa5151;
-  color: white;
-  font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 20rpx;
-  min-width: 32rpx;
-  text-align: center;
+.confirm-btn-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.confirm-btn-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+  letter-spacing: 2rpx;
+}
+
+.confirm-btn-count {
+  font-size: 24rpx;
+  color: #8B6E4E;
+  opacity: 0.8;
 }

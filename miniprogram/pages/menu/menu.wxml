@@ -62,9 +62,14 @@
     </view>
   </view>
 
-  <!-- 购物车按钮 -->
-  <view class="cart-float-btn" bindtap="goToCart">
-    <image class="cart-icon" src="/images/spatula-check.svg" mode="aspectFit"></image>
-    <view wx:if="{{cartCount > 0}}" class="cart-badge">{{cartCount}}</view>
+  <!-- 确认菜单按钮 -->
+  <view wx:if="{{cartCount > 0}}" class="confirm-btn-container" bindtap="goToCart">
+    <view class="confirm-btn">
+      <view class="confirm-btn-icon">✓</view>
+      <view class="confirm-btn-text">
+        <view class="confirm-btn-title">确认菜单</view>
+        <view class="confirm-btn-count">已选 {{cartCount}} 道菜</view>
+      </view>
+    </view>
   </view>
 </view>

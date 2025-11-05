@@ -35,6 +35,17 @@
       </view>
     </view>
 
+    <!-- 聚餐日选择 -->
+    <view class="gathering-section card">
+      <view class="section-title">选择聚餐日 <text class="required">*</text></view>
+      <picker mode="selector" range="{{gatheringDays}}" range-key="displayText" value="{{selectedGatheringIndex}}" bindchange="onGatheringChange">
+        <view class="gathering-picker">
+          <text>{{gatheringDays[selectedGatheringIndex].displayText}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
     <!-- 备注 -->
     <view class="notes-section card">
       <view class="section-title">备注信息</view>

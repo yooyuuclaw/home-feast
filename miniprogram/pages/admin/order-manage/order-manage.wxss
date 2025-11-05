@@ -136,10 +136,12 @@
 .order-actions {
   display: flex;
   gap: 20rpx;
+  flex-wrap: wrap;
 }
 
 .action-btn {
   flex: 1;
+  min-width: 180rpx;
   border-radius: 8rpx;
   font-size: 28rpx;
   padding: 20rpx;
@@ -154,4 +156,14 @@
 .complete-btn {
   background: #52c41a;
   color: white;
+}
+
+.delete-btn {
+  background: #fff;
+  color: #fa5151;
+  border: 1rpx solid #fa5151 !important;
+}
+
+.delete-btn:active {
+  background: #fff5f5;
 }

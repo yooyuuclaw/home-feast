@@ -7,6 +7,8 @@
     "pages/order-history/order-history",
     "pages/admin/admin",
     "pages/admin/order-manage/order-manage",
+    "pages/admin/gathering-manage/gathering-manage",
+    "pages/admin/gathering-edit/gathering-edit",
     "pages/admin/menu-manage/menu-manage",
     "pages/admin/menu-edit/menu-edit",
     "pages/admin/user-manage/user-manage",

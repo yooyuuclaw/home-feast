@@ -1,0 +1,123 @@
+/* pages/admin/gathering-edit/gathering-edit.wxss */
+.gathering-edit-container {
+  padding: 20rpx;
+  background: #F9F9F9;
+  min-height: 100vh;
+}
+
+/* 表单卡片 */
+.form-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
+}
+
+.form-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+/* 表单项 */
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 20rpx;
+  border: 1rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+  background: #F9F9F9;
+}
+
+.form-picker {
+  width: 100%;
+}
+
+.picker-display {
+  padding: 20rpx;
+  border: 1rpx solid #E0E0E0;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+  background: #F9F9F9;
+}
+
+/* 餐次复选框 */
+.meal-checkboxes {
+  display: flex;
+  gap: 30rpx;
+  flex-wrap: wrap;
+}
+
+.meal-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 15rpx 25rpx;
+  background: #F9F9F9;
+  border: 1rpx solid #E0E0E0;
+  border-radius: 8rpx;
+}
+
+.meal-checkbox checkbox {
+  margin-right: 10rpx;
+}
+
+.meal-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 按钮 */
+.form-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 50rpx;
+}
+
+.submit-btn {
+  flex: 1;
+  background: #E6C8A0;
+  color: #8B6E4E;
+  font-size: 30rpx;
+  font-weight: bold;
+  padding: 25rpx;
+  border-radius: 40rpx;
+  border: 1rpx solid #D4B080;
+  box-shadow: 0 4rpx 6rpx rgba(212, 176, 128, 0.3);
+  transition: all 0.2s ease;
+  line-height: normal;
+}
+
+.submit-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 3rpx rgba(212, 176, 128, 0.4);
+}
+
+.cancel-btn {
+  flex: 1;
+  background: #fff;
+  color: #999;
+  font-size: 30rpx;
+  padding: 25rpx;
+  border-radius: 40rpx;
+  border: 1rpx solid #E0E0E0;
+  line-height: normal;
+}
+
+.cancel-btn:active {
+  background: #F9F9F9;
+}

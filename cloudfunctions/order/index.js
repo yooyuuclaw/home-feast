@@ -34,7 +34,7 @@ async function getUserInfo(openid) {
 
 /**
  * 订单管理云函数
- * 支持操作：create, getUserOrders, getAllOrders, updateStatus
+ * 支持操作：create, getUserOrders, getAllOrders, updateStatus, deleteOrder, adminDeleteOrder
  */
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
@@ -51,6 +51,10 @@ exports.main = async (event, context) => {
         return await getAllOrders(event, openid)
       case 'updateStatus':
         return await updateOrderStatus(event, openid)
+      case 'deleteOrder':
+        return await deleteOrder(event, openid)
+      case 'adminDeleteOrder':
+        return await adminDeleteOrder(event, openid)
       default:
         return {
           success: false,
@@ -69,10 +73,10 @@ exports.main = async (event, context) => {
 
 /**
  * 创建订单
- * 参数：dishes（菜品数组）, notes（备注）
+ * 参数：dishes（菜品数组）, notes（备注）, gatheringDayId（聚餐日ID）, gatheringDayTheme（聚餐日主题）, gatheringDayDate（聚餐日日期）
  */
 async function createOrder(event, openid) {
-  const { dishes, notes } = event
+  const { dishes, notes, gatheringDayId, gatheringDayTheme, gatheringDayDate } = event
 
   if (!dishes || dishes.length === 0) {
     return {
@@ -99,6 +103,9 @@ async function createOrder(event, openid) {
       dishes: dishes,
       status: 'pending',
       notes: notes || '',
+      gatheringDayId: gatheringDayId || '',
+      gatheringDayTheme: gatheringDayTheme || '',
+      gatheringDayDate: gatheringDayDate || '',
       createTime: db.serverDate(),
       updateTime: db.serverDate()
     }
@@ -112,19 +119,18 @@ async function createOrder(event, openid) {
 }
 
 /**
- * 获取当前用户的订单
+ * 获取所有用户的订单（聚餐场景，大家可以互相看到）
  */
 async function getUserOrders(event, openid) {
+  // 获取所有订单，按时间倒序
   const res = await db.collection('orders')
-    .where({
-      _openid: openid
-    })
     .orderBy('createTime', 'desc')
     .get()
 
   return {
     success: true,
     data: res.data,
+    currentOpenid: openid, // 返回当前用户的 openid
     message: '获取成功'
   }
 }
@@ -202,5 +208,87 @@ async function updateOrderStatus(event, openid) {
   return {
     success: true,
     message: '状态更新成功'
+  }
+}
+
+/**
+ * 删除订单（用户只能删除自己的订单）
+ * 参数：id
+ */
+async function deleteOrder(event, openid) {
+  const { id } = event
+
+  if (!id) {
+    return {
+      success: false,
+      message: '订单ID不能为空'
+    }
+  }
+
+  // 先查询订单，确认是否属于当前用户
+  const orderRes = await db.collection('orders').doc(id).get()
+
+  if (!orderRes.data) {
+    return {
+      success: false,
+      message: '订单不存在'
+    }
+  }
+
+  // 检查订单是否属于当前用户
+  if (orderRes.data._openid !== openid) {
+    return {
+      success: false,
+      message: '无权删除他人订单'
+    }
+  }
+
+  // 删除订单
+  await db.collection('orders').doc(id).remove()
+
+  return {
+    success: true,
+    message: '订单删除成功'
+  }
+}
+
+/**
+ * 管理员删除订单（需要管理员权限，可以删除任何订单）
+ * 参数：id
+ */
+async function adminDeleteOrder(event, openid) {
+  const isAdmin = await checkAdmin(openid)
+  if (!isAdmin) {
+    return {
+      success: false,
+      message: '无权限操作'
+    }
+  }
+
+  const { id } = event
+
+  if (!id) {
+    return {
+      success: false,
+      message: '订单ID不能为空'
+    }
+  }
+
+  // 先查询订单是否存在
+  const orderRes = await db.collection('orders').doc(id).get()
+
+  if (!orderRes.data) {
+    return {
+      success: false,
+      message: '订单不存在'
+    }
+  }
+
+  // 管理员可以删除任何订单
+  await db.collection('orders').doc(id).remove()
+
+  return {
+    success: true,
+    message: '订单删除成功'
   }
 }

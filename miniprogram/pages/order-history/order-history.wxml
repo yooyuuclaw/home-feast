@@ -2,31 +2,62 @@
 <view class="container order-history-container">
   <view wx:if="{{loading}}" class="loading">加载中...</view>
 
-  <view wx:elif="{{orders.length === 0}}" class="empty-state">
+  <view wx:elif="{{groupedOrders.length === 0}}" class="empty-state">
     <view class="empty-icon">📋</view>
     <view class="empty-text">暂无订单</view>
   </view>
 
   <view wx:else class="order-list">
-    <view wx:for="{{orders}}" wx:key="_id" class="order-card">
-      <!-- 订单头部 -->
-      <view class="order-header">
-        <view class="order-time">下单时间：{{item.createTimeFormatted}}</view>
-        <view class="order-status {{item.status}}">{{item.statusText}}</view>
-      </view>
-
-      <!-- 订单菜品列表 -->
-      <view class="order-dishes">
-        <view wx:for="{{item.dishes}}" wx:key="dishId" wx:for-item="dish" class="dish-item">
-          <view class="dish-name">{{dish.name}}</view>
-          <view class="dish-count">x{{dish.count}}</view>
+    <!-- 按聚餐日分组显示 -->
+    <view wx:for="{{groupedOrders}}" wx:key="gatheringDayId" wx:for-item="group" class="gathering-group">
+      <!-- 聚餐日横幅 -->
+      <view class="gathering-banner">
+        <view class="gathering-banner-left">
+          <view class="gathering-icon">🎉</view>
+          <view class="gathering-info">
+            <view class="gathering-theme">{{group.displayTitle}}</view>
+            <view class="gathering-date">{{group.displaySubtitle}}</view>
+          </view>
         </view>
+        <view class="gathering-count">{{group.orders.length}} 个订单</view>
       </view>
 
-      <!-- 订单备注 -->
-      <view wx:if="{{item.notes}}" class="order-notes">
-        <view class="notes-label">备注：</view>
-        <view class="notes-text">{{item.notes}}</view>
+      <!-- 该聚餐日下的订单列表 -->
+      <view class="group-orders">
+        <view wx:for="{{group.orders}}" wx:key="_id" wx:for-item="item" class="order-card">
+          <!-- 订单头部 - 用户信息 -->
+          <view class="order-user-info">
+            <image class="user-avatar" src="{{item.userAvatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+            <view class="user-name">{{item.userName || '匿名用户'}}</view>
+          </view>
+
+          <!-- 订单时间和状态 -->
+          <view class="order-header">
+            <view class="order-time">下单时间：{{item.createTimeFormatted}}</view>
+            <view class="order-status {{item.status}}">{{item.statusText}}</view>
+          </view>
+
+          <!-- 订单菜品列表 -->
+          <view class="order-dishes">
+            <view wx:for="{{item.dishes}}" wx:key="dishId" wx:for-item="dish" class="dish-item">
+              <view class="dish-name">{{dish.name}}</view>
+              <view class="dish-count">x{{dish.count}}</view>
+            </view>
+          </view>
+
+          <!-- 订单备注 -->
+          <view wx:if="{{item.notes}}" class="order-notes">
+            <view class="notes-label">备注：</view>
+            <view class="notes-text">{{item.notes}}</view>
+          </view>
+
+          <!-- 删除按钮（仅自己的订单显示） -->
+          <view wx:if="{{item.isMyOrder}}" class="order-actions">
+            <button class="delete-btn" bindtap="deleteOrder" data-id="{{item._id}}">
+              删除订单
+            </button>
+          </view>
+        </view>
       </view>
     </view>
   </view>

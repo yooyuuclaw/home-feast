@@ -1,0 +1,56 @@
+<!-- pages/admin/gathering-edit/gathering-edit.wxml -->
+<view class="container gathering-edit-container">
+  <view class="form-card">
+    <view class="form-title">{{isEdit ? '编辑聚餐日' : '新增聚餐日'}}</view>
+
+    <!-- 主题 -->
+    <view class="form-item">
+      <view class="form-label">聚餐日主题</view>
+      <input
+        class="form-input"
+        placeholder="请输入主题，如：璐璐家春日聚餐"
+        value="{{formData.theme}}"
+        bindinput="onThemeInput"
+      />
+    </view>
+
+    <!-- 日期 -->
+    <view class="form-item">
+      <view class="form-label">聚餐日期</view>
+      <picker
+        mode="date"
+        value="{{formData.date}}"
+        bindchange="onDateChange"
+        class="form-picker">
+        <view class="picker-display">
+          {{formData.date || '请选择日期'}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 餐次选择 -->
+    <view class="form-item">
+      <view class="form-label">餐次选择</view>
+      <view class="meal-checkboxes">
+        <label class="meal-checkbox">
+          <checkbox value="breakfast" checked="{{formData.hasBreakfast}}" bindtap="onMealChange" data-meal="breakfast"/>
+          <text class="meal-label">早餐</text>
+        </label>
+        <label class="meal-checkbox">
+          <checkbox value="lunch" checked="{{formData.hasLunch}}" bindtap="onMealChange" data-meal="lunch"/>
+          <text class="meal-label">午餐</text>
+        </label>
+        <label class="meal-checkbox">
+          <checkbox value="dinner" checked="{{formData.hasDinner}}" bindtap="onMealChange" data-meal="dinner"/>
+          <text class="meal-label">晚餐</text>
+        </label>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="form-actions">
+      <button class="submit-btn" bindtap="submitForm">{{isEdit ? '保存修改' : '创建聚餐日'}}</button>
+      <button class="cancel-btn" bindtap="cancelForm">取消</button>
+    </view>
+  </view>
+</view>

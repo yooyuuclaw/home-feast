@@ -1,0 +1,40 @@
+<!-- pages/admin/gathering-manage/gathering-manage.wxml -->
+<view class="container gathering-manage-container">
+  <view class="page-header">
+    <view class="page-title">聚餐日管理</view>
+    <button class="add-btn" bindtap="goToEdit">+ 新增聚餐日</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <view wx:elif="{{gatheringDays.length === 0}}" class="empty-state">
+    <text>暂无聚餐日</text>
+  </view>
+
+  <view wx:else class="gathering-list">
+    <view wx:for="{{gatheringDays}}" wx:key="_id" class="gathering-card">
+      <!-- 聚餐日信息 -->
+      <view class="gathering-header">
+        <view class="gathering-theme">{{item.theme}}</view>
+        <view class="gathering-date">{{item.date}}</view>
+      </view>
+
+      <!-- 餐次信息 -->
+      <view class="meal-tags">
+        <view wx:if="{{item.hasBreakfast}}" class="meal-tag breakfast">早餐</view>
+        <view wx:if="{{item.hasLunch}}" class="meal-tag lunch">午餐</view>
+        <view wx:if="{{item.hasDinner}}" class="meal-tag dinner">晚餐</view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="gathering-actions">
+        <button class="action-btn edit-btn" bindtap="goToEdit" data-id="{{item._id}}">
+          编辑
+        </button>
+        <button class="action-btn delete-btn" bindtap="deleteGatheringDay" data-id="{{item._id}}">
+          删除
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

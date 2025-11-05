@@ -17,6 +17,15 @@
       <view class="menu-arrow">›</view>
     </view>
 
+    <view class="menu-item" bindtap="goToGatheringManage">
+      <view class="menu-icon">🎉</view>
+      <view class="menu-info">
+        <view class="menu-title">聚餐日管理</view>
+        <view class="menu-desc">创建和管理聚餐日</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+
     <view class="menu-item" bindtap="goToMenuManage">
       <view class="menu-icon">🍽️</view>
       <view class="menu-info">

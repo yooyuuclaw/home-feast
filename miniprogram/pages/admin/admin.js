@@ -44,6 +44,15 @@ Page({
   },
 
   /**
+   * 跳转到聚餐日管理
+   */
+  goToGatheringManage() {
+    wx.navigateTo({
+      url: '/pages/admin/gathering-manage/gathering-manage'
+    })
+  },
+
+  /**
    * 跳转到菜单管理
    */
   goToMenuManage() {

@@ -1,0 +1,158 @@
+/* pages/admin/gathering-manage/gathering-manage.wxss */
+.gathering-manage-container {
+  padding: 20rpx;
+  background: #F9F9F9;
+  min-height: 100vh;
+}
+
+/* 页面头部 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  background: #FFFFFF;
+  padding: 30rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+}
+
+.add-btn {
+  background: #E6C8A0;
+  color: #8B6E4E;
+  font-size: 28rpx;
+  font-weight: bold;
+  padding: 16rpx 32rpx;
+  border-radius: 40rpx;
+  border: 1rpx solid #D4B080;
+  box-shadow: 0 2rpx 4rpx rgba(212, 176, 128, 0.3);
+  line-height: normal;
+}
+
+.add-btn:active {
+  transform: translateY(1rpx);
+  box-shadow: 0 1rpx 2rpx rgba(212, 176, 128, 0.4);
+}
+
+/* 聚餐日列表 */
+.gathering-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.gathering-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
+}
+
+/* 聚餐日信息 */
+.gathering-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.gathering-theme {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+}
+
+.gathering-date {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 餐次标签 */
+.meal-tags {
+  display: flex;
+  gap: 15rpx;
+  margin-bottom: 20rpx;
+}
+
+.meal-tag {
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.meal-tag.breakfast {
+  background: #fff7e6;
+  color: #faad14;
+}
+
+.meal-tag.lunch {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.meal-tag.dinner {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+/* 操作按钮 */
+.gathering-actions {
+  display: flex;
+  gap: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.action-btn {
+  flex: 1;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  padding: 20rpx;
+  border: none;
+  line-height: normal;
+}
+
+.edit-btn {
+  background: #E6C8A0;
+  color: #8B6E4E;
+  border: 1rpx solid #D4B080 !important;
+}
+
+.edit-btn:active {
+  background: #d4b080;
+}
+
+.delete-btn {
+  background: #fff;
+  color: #fa5151;
+  border: 1rpx solid #fa5151 !important;
+}
+
+.delete-btn:active {
+  background: #fff5f5;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 加载中 */
+.loading {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
