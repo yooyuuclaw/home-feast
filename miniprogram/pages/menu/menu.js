@@ -292,6 +292,9 @@ Page({
       showGatheringPicker: false
     })
 
+    // 保存到全局
+    app.setSelectedGathering(selectedGathering)
+
     // 加载该聚餐日其他人的订单
     this.loadOthersOrders()
   },

@@ -32,7 +32,8 @@ App({
   globalData: {
     userInfo: null,
     isAdmin: false,
-    cart: [] // 购物车数据
+    cart: [], // 购物车数据
+    selectedGathering: null // 当前选中的聚餐日
   },
 
   /**
@@ -191,5 +192,28 @@ App({
     if (cart) {
       this.globalData.cart = cart
     }
+  },
+
+  // 设置选中的聚餐日
+  setSelectedGathering(gathering) {
+    this.globalData.selectedGathering = gathering
+    wx.setStorageSync('selectedGathering', gathering)
+  },
+
+  // 获取选中的聚餐日
+  getSelectedGathering() {
+    if (!this.globalData.selectedGathering) {
+      const cached = wx.getStorageSync('selectedGathering')
+      if (cached) {
+        this.globalData.selectedGathering = cached
+      }
+    }
+    return this.globalData.selectedGathering
+  },
+
+  // 清除选中的聚餐日
+  clearSelectedGathering() {
+    this.globalData.selectedGathering = null
+    wx.removeStorageSync('selectedGathering')
   }
 })

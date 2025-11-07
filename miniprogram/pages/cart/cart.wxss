@@ -107,6 +107,57 @@
   color: #333;
 }
 
+/* 聚餐日显示区域 */
+.gathering-section {
+  margin: 20rpx;
+}
+
+.gathering-display {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  background: #FFF9F0;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  border: 2rpx solid #E6C8A0;
+}
+
+.calendar-icon {
+  font-size: 40rpx;
+}
+
+.gathering-text {
+  flex: 1;
+}
+
+.gathering-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+  margin-bottom: 6rpx;
+}
+
+.gathering-date {
+  font-size: 24rpx;
+  color: #A68968;
+}
+
+.gathering-empty {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 20rpx;
+  background: #FFF0F0;
+  border-radius: 12rpx;
+  border: 2rpx solid #FFD0D0;
+  color: #D32F2F;
+  font-size: 28rpx;
+}
+
+.warning-icon {
+  font-size: 32rpx;
+}
+
 /* 备注区域 */
 .notes-section {
   margin: 20rpx;
