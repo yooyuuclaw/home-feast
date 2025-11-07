@@ -110,7 +110,7 @@
 
   <!-- 聚餐日选择器弹窗 -->
   <view wx:if="{{showGatheringPicker}}" class="gathering-picker-modal">
-    <view class="modal-mask" bindtap="{{() => this.setData({showGatheringPicker: false})}}"></view>
+    <view class="modal-mask" catchtap="closeGatheringPicker"></view>
     <view class="modal-content">
       <view class="modal-header">
         <text class="modal-title">选择聚餐日</text>

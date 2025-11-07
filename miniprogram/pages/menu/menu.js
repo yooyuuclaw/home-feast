@@ -297,6 +297,15 @@ Page({
   },
 
   /**
+   * 关闭聚餐日选择器
+   */
+  closeGatheringPicker() {
+    this.setData({
+      showGatheringPicker: false
+    })
+  },
+
+  /**
    * 加载其他人的订单（作为参考）
    */
   async loadOthersOrders() {
