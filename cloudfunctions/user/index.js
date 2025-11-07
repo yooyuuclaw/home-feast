@@ -21,7 +21,7 @@ async function checkAdmin(openid) {
 
 /**
  * 用户管理云函数
- * 支持操作：getAllUsers, updateRole
+ * 支持操作：getAllUsers, list, getUserInfo, updateRole
  */
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
@@ -32,6 +32,10 @@ exports.main = async (event, context) => {
     switch (action) {
       case 'getAllUsers':
         return await getAllUsers(openid)
+      case 'list':
+        return await getAllUsers(openid) // list 和 getAllUsers 是同一个功能
+      case 'getUserInfo':
+        return await getUserInfo(openid)
       case 'updateRole':
         return await updateUserRole(event, openid)
       default:
@@ -69,6 +73,28 @@ async function getAllUsers(openid) {
   return {
     success: true,
     data: res.data,
+    message: '获取成功'
+  }
+}
+
+/**
+ * 获取当前用户信息
+ */
+async function getUserInfo(openid) {
+  const res = await db.collection('users').where({
+    _openid: openid
+  }).get()
+
+  if (res.data.length === 0) {
+    return {
+      success: false,
+      message: '用户不存在'
+    }
+  }
+
+  return {
+    success: true,
+    data: res.data[0],
     message: '获取成功'
   }
 }

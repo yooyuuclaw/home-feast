@@ -107,16 +107,13 @@
       </view>
 
       <view class="guest-list" wx:else>
-        <label class="guest-item" wx:for="{{allInvitedGuests}}" wx:key="_openid">
-          <checkbox
-            value="{{item._openid}}"
-            checked="{{selectedGuests.includes(item._openid)}}"
-            bindtap="toggleGuest"
-            data-openid="{{item._openid}}"
-          />
-          <image class="guest-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
-          <text class="guest-name">{{item.nickname || '未命名'}}</text>
-        </label>
+        <checkbox-group value="{{selectedGuests}}" bindchange="onGuestCheckboxChange">
+          <label class="guest-item" wx:for="{{allInvitedGuests}}" wx:key="_openid">
+            <checkbox value="{{item._openid}}" />
+            <image class="guest-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+            <text class="guest-name">{{item.nickname || '未命名'}}</text>
+          </label>
+        </checkbox-group>
       </view>
     </view>
 

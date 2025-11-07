@@ -147,21 +147,10 @@ Page({
   },
 
   /**
-   * 切换访客选择状态
+   * checkbox-group change事件
    */
-  toggleGuest(e) {
-    const openid = e.currentTarget.dataset.openid
-    const selectedGuests = [...this.data.selectedGuests]
-    const index = selectedGuests.indexOf(openid)
-
-    if (index > -1) {
-      // 取消选择
-      selectedGuests.splice(index, 1)
-    } else {
-      // 选择
-      selectedGuests.push(openid)
-    }
-
+  onGuestCheckboxChange(e) {
+    const selectedGuests = e.detail.value
     this.setData({
       selectedGuests: selectedGuests
     })

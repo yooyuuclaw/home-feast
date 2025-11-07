@@ -1,5 +1,33 @@
 <!-- pages/menu/menu.wxml -->
 <view class="container menu-container">
+  <!-- 聚餐日选择横幅 -->
+  <view class="gathering-banner" bindtap="openGatheringPicker">
+    <view class="gathering-banner-content">
+      <view wx:if="{{!canOrder}}" class="gathering-no-permission">
+        <text class="lock-icon">🔒</text>
+        <text class="permission-text">权限不足，需升级</text>
+      </view>
+      <view wx:elif="{{selectedGathering}}" class="gathering-selected">
+        <text class="calendar-icon">📅</text>
+        <view class="gathering-info">
+          <text class="gathering-title">{{selectedGathering.theme || selectedGathering.displayText}}</text>
+          <text class="gathering-subtitle">{{selectedGathering.dateLabel}} · 点击切换</text>
+        </view>
+      </view>
+      <view wx:else class="gathering-empty">
+        <text class="warning-icon">⚠️</text>
+        <text class="empty-text">暂无可选聚餐日</text>
+      </view>
+    </view>
+    <text class="arrow-icon">›</text>
+  </view>
+
+  <!-- 其他人已点的菜提示 -->
+  <view wx:if="{{selectedGathering && Object.keys(othersOrdersMap).length > 0}}" class="others-orders-hint">
+    <text class="hint-icon">👥</text>
+    <text class="hint-text">灰色菜品为其他人已点（仅供参考，数量不可修改）</text>
+  </view>
+
   <!-- 分类导航 -->
   <view class="category-nav">
     <scroll-view scroll-x class="category-scroll">
@@ -34,7 +62,7 @@
       <view
         wx:for="{{filteredDishes}}"
         wx:key="_id"
-        class="dish-card"
+        class="dish-card {{othersOrdersMap[item._id] ? 'others-dish' : ''}}"
         bindtap="showDishDetail"
         data-dish="{{item}}">
         <!-- 菜品图片 -->
@@ -44,6 +72,10 @@
             src="{{item.image || '/images/default-dish.png'}}"
             mode="aspectFill">
           </image>
+          <!-- 其他人已点标记 -->
+          <view wx:if="{{othersOrdersMap[item._id]}}" class="others-badge">
+            <text class="others-badge-text">{{othersOrdersMap[item._id]}}份</text>
+          </view>
         </view>
 
         <!-- 菜品信息 -->
@@ -54,7 +86,10 @@
 
         <!-- 添加按钮 -->
         <view class="dish-action">
-          <button class="add-btn" catchtap="addToCart" data-dish="{{item}}">
+          <button
+            class="add-btn {{othersOrdersMap[item._id] ? 'others-add-btn' : ''}}"
+            catchtap="addToCart"
+            data-dish="{{item}}">
             + 加入
           </button>
         </view>
@@ -70,6 +105,32 @@
         <view class="confirm-btn-title">确认菜单</view>
         <view class="confirm-btn-count">已选 {{cartCount}} 道菜</view>
       </view>
+    </view>
+  </view>
+
+  <!-- 聚餐日选择器弹窗 -->
+  <view wx:if="{{showGatheringPicker}}" class="gathering-picker-modal">
+    <view class="modal-mask" bindtap="{{() => this.setData({showGatheringPicker: false})}}"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">选择聚餐日</text>
+      </view>
+      <picker
+        mode="selector"
+        range="{{gatheringDays}}"
+        range-key="displayText"
+        value="{{selectedGatheringIndex}}"
+        bindchange="onGatheringChange">
+        <view class="gathering-picker-list">
+          <view
+            wx:for="{{gatheringDays}}"
+            wx:key="_id"
+            class="gathering-picker-item {{selectedGatheringIndex === index ? 'selected' : ''}}">
+            <text class="gathering-picker-text">{{item.displayText}}</text>
+            <text wx:if="{{selectedGatheringIndex === index}}" class="check-icon">✓</text>
+          </view>
+        </view>
+      </picker>
     </view>
   </view>
 </view>
