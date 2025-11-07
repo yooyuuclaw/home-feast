@@ -95,8 +95,8 @@ async function updateUserRole(event, openid) {
     }
   }
 
-  // 验证角色是否有效
-  const validRoles = ['admin', 'guest']
+  // 验证角色是否有效（支持五种角色）
+  const validRoles = ['uninvited_guest', 'invited_guest', 'regular', 'chef', 'admin']
   if (!validRoles.includes(role)) {
     return {
       success: false,

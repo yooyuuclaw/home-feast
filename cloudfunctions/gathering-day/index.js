@@ -56,7 +56,7 @@ exports.main = async (event, context) => {
 
 /**
  * 创建聚餐日（需要管理员权限）
- * 参数：theme（主题）, date（日期）, meals（餐次：breakfast/lunch/dinner）
+ * 参数：theme（主题）, date（日期）, meals（餐次：breakfast/lunch/dinner）, invitedGuests（受邀访客openid数组）
  */
 async function createGatheringDay(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -67,7 +67,7 @@ async function createGatheringDay(event, openid) {
     }
   }
 
-  const { theme, date, meals } = event
+  const { theme, date, meals, invitedGuests } = event
 
   if (!theme || !date || !meals || meals.length === 0) {
     return {
@@ -93,6 +93,7 @@ async function createGatheringDay(event, openid) {
       theme: theme,
       date: date,
       meals: meals, // ['breakfast', 'lunch', 'dinner']
+      invitedGuests: invitedGuests || [], // 受邀访客的openid数组
       createTime: db.serverDate(),
       updateTime: db.serverDate()
     }
@@ -122,7 +123,7 @@ async function listGatheringDays(event, openid) {
 
 /**
  * 更新聚餐日（需要管理员权限）
- * 参数：id, theme, date, meals
+ * 参数：id, theme, date, meals, invitedGuests
  */
 async function updateGatheringDay(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -133,7 +134,7 @@ async function updateGatheringDay(event, openid) {
     }
   }
 
-  const { id, theme, date, meals } = event
+  const { id, theme, date, meals, invitedGuests } = event
 
   if (!id) {
     return {
@@ -169,6 +170,7 @@ async function updateGatheringDay(event, openid) {
       theme: theme,
       date: date,
       meals: meals,
+      invitedGuests: invitedGuests || [], // 受邀访客的openid数组
       updateTime: db.serverDate()
     }
   })

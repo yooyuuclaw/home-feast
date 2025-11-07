@@ -26,12 +26,12 @@ exports.main = async (event, context) => {
     let userData
 
     if (userRes.data.length === 0) {
-      // 用户不存在，创建新用户（默认为访客）
+      // 用户不存在，创建新用户（默认为未受邀访客）
       const createRes = await db.collection('users').add({
         data: {
           _openid: openid,
-          role: 'guest',
-          nickname: nickname || '用户' + openid.substr(-6),
+          role: 'uninvited_guest', // 未受邀访客
+          nickname: nickname || '昵称',
           avatar: avatar || '',
           createTime: db.serverDate()
         }
@@ -61,6 +61,13 @@ exports.main = async (event, context) => {
         // 更新本地数据
         userData = { ...userData, ...updateData }
       }
+
+      // 每次调用都更新最后上线时间
+      await db.collection('users').doc(userData._id).update({
+        data: {
+          lastOnlineTime: db.serverDate()
+        }
+      })
     }
 
     return {

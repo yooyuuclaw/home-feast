@@ -12,15 +12,15 @@
 
       <view class="user-info">
         <view class="user-name">{{item.nickname}}</view>
-        <view class="user-role {{item.role}}">{{item.role === 'admin' ? '管理员' : '访客'}}</view>
+        <view class="user-role {{item.role}}">{{item.roleName}}</view>
       </view>
 
       <button
-        class="role-btn {{item.role}}"
-        bindtap="toggleRole"
+        class="role-btn"
+        bindtap="changeRole"
         data-id="{{item._id}}"
         data-role="{{item.role}}">
-        {{item.role === 'admin' ? '设为访客' : '设为管理员'}}
+        修改角色
       </button>
     </view>
   </view>

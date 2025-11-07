@@ -1,20 +1,33 @@
 // pages/admin/statistics/statistics.js
+const { getRoleName } = require('../../../utils/roles.js')
+
 Page({
   data: {
     orderStats: { total: 0, pending: 0, confirmed: 0, completed: 0 },
     dishStats: [],
-    loading: true
+    userStats: [],
+    loading: true,
+    currentTab: 0, // 当前选中的标签：0-订单统计，1-用户活动，2-热门菜品
+    tabs: ['订单统计', '用户活动', '热门菜品']
   },
 
   onLoad() {
     this.loadStatistics()
   },
 
+  /**
+   * 切换标签
+   */
+  onTabChange(e) {
+    const index = e.currentTarget.dataset.index
+    this.setData({ currentTab: index })
+  },
+
   async loadStatistics() {
     try {
       this.setData({ loading: true })
 
-      const [orderRes, dishRes] = await Promise.all([
+      const [orderRes, dishRes, userRes] = await Promise.all([
         wx.cloud.callFunction({
           name: 'statistics',
           data: { action: 'getOrderStatistics' }
@@ -22,18 +35,56 @@ Page({
         wx.cloud.callFunction({
           name: 'statistics',
           data: { action: 'getDishStatistics' }
+        }),
+        wx.cloud.callFunction({
+          name: 'user-activity',
+          data: { action: 'getStatistics' }
         })
       ])
 
       this.setData({
         orderStats: orderRes.result.data,
         dishStats: dishRes.result.data.slice(0, 10),
+        userStats: (userRes.result.data || []).map(user => ({
+          ...user,
+          roleName: getRoleName(user.role)
+        })),
         loading: false
       })
     } catch (err) {
       console.error('加载统计失败', err)
       this.setData({ loading: false })
       wx.showToast({ title: '加载失败', icon: 'none' })
+    }
+  },
+
+  /**
+   * 格式化时间
+   */
+  formatTime(timestamp) {
+    if (!timestamp) return '-'
+    const date = new Date(timestamp)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hour = String(date.getHours()).padStart(2, '0')
+    const minute = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hour}:${minute}`
+  },
+
+  /**
+   * 格式化时长（秒 → 小时分钟）
+   */
+  formatDuration(seconds) {
+    if (!seconds || seconds <= 0) return '0分钟'
+
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+
+    if (hours > 0) {
+      return `${hours}小时${minutes}分钟`
+    } else {
+      return `${minutes}分钟`
     }
   }
 })

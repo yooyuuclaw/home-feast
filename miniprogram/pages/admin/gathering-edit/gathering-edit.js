@@ -1,4 +1,6 @@
 // pages/admin/gathering-edit/gathering-edit.js
+const { getRoleName } = require('../../../utils/roles')
+
 Page({
   data: {
     isEdit: false,
@@ -9,10 +11,17 @@ Page({
       hasBreakfast: false,
       hasLunch: false,
       hasDinner: false
-    }
+    },
+    // 受邀访客相关
+    allInvitedGuests: [], // 所有受邀访客用户
+    selectedGuests: [], // 已选择的受邀访客openid数组
+    showGuestPicker: false
   },
 
   onLoad(options) {
+    // 加载所有受邀访客
+    this.loadInvitedGuests()
+
     if (options.id) {
       // 编辑模式
       this.setData({
@@ -20,6 +29,30 @@ Page({
         gatheringId: options.id
       })
       this.loadGatheringDay(options.id)
+    }
+  },
+
+  /**
+   * 加载所有受邀访客
+   */
+  async loadInvitedGuests() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'user',
+        data: {
+          action: 'list'
+        }
+      })
+
+      if (res.result.success) {
+        // 筛选出受邀访客
+        const invitedGuests = res.result.data.filter(user => user.role === 'invited_guest')
+        this.setData({
+          allInvitedGuests: invitedGuests
+        })
+      }
+    } catch (err) {
+      console.error('加载受邀访客失败', err)
     }
   },
 
@@ -49,7 +82,8 @@ Page({
               hasBreakfast: item.meals.includes('breakfast'),
               hasLunch: item.meals.includes('lunch'),
               hasDinner: item.meals.includes('dinner')
-            }
+            },
+            selectedGuests: item.invitedGuests || []
           })
         }
       }
@@ -89,6 +123,67 @@ Page({
     const key = `formData.has${meal.charAt(0).toUpperCase() + meal.slice(1)}`
     this.setData({
       [key]: !this.data.formData[`has${meal.charAt(0).toUpperCase() + meal.slice(1)}`]
+    })
+  },
+
+  /**
+   * 打开受邀访客选择器
+   */
+  openGuestPicker() {
+    // 打开时刷新受邀访客列表，确保数据最新
+    this.loadInvitedGuests()
+    this.setData({
+      showGuestPicker: true
+    })
+  },
+
+  /**
+   * 关闭受邀访客选择器
+   */
+  closeGuestPicker() {
+    this.setData({
+      showGuestPicker: false
+    })
+  },
+
+  /**
+   * 切换访客选择状态
+   */
+  toggleGuest(e) {
+    const openid = e.currentTarget.dataset.openid
+    const selectedGuests = [...this.data.selectedGuests]
+    const index = selectedGuests.indexOf(openid)
+
+    if (index > -1) {
+      // 取消选择
+      selectedGuests.splice(index, 1)
+    } else {
+      // 选择
+      selectedGuests.push(openid)
+    }
+
+    this.setData({
+      selectedGuests: selectedGuests
+    })
+  },
+
+  /**
+   * 确认选择受邀访客
+   */
+  confirmGuestSelection() {
+    this.setData({
+      showGuestPicker: false
+    })
+  },
+
+  /**
+   * 移除已选择的访客
+   */
+  removeGuest(e) {
+    const openid = e.currentTarget.dataset.openid
+    const selectedGuests = this.data.selectedGuests.filter(g => g !== openid)
+    this.setData({
+      selectedGuests: selectedGuests
     })
   },
 
@@ -137,7 +232,8 @@ Page({
         action: action,
         theme: theme,
         date: date,
-        meals: meals
+        meals: meals,
+        invitedGuests: this.data.selectedGuests // 添加受邀访客
       }
 
       if (this.data.isEdit) {

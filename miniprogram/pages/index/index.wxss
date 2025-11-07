@@ -94,57 +94,93 @@
   box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
 }
 
-.user-info-btn {
-  width: 100%;
+/* 信息完善提示 */
+.info-reminder {
+  background: linear-gradient(135deg, #FFF9F0 0%, #FFE6CC 100%);
+  border: 2rpx solid #E6C8A0;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2rpx 8rpx rgba(230, 200, 160, 0.2);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 4rpx 12rpx rgba(230, 200, 160, 0.3);
+  }
+}
+
+.reminder-icon {
+  font-size: 40rpx;
+  line-height: 1;
+}
+
+.reminder-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #8B6E4E;
+  font-weight: 500;
+}
+
+/* 横向布局 */
+.user-info-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+}
+
+.avatar-btn {
+  width: auto;
   padding: 0;
   margin: 0;
   background: transparent;
   border: none;
-  text-align: left;
   line-height: normal;
 }
 
-.user-info-btn::after {
+.avatar-btn::after {
   border: none;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-}
-
-.user-avatar {
-  width: 100rpx;
-  height: 100rpx;
+.user-avatar-large {
+  width: 140rpx;
+  height: 140rpx;
   border-radius: 50%;
-  margin-right: 20rpx;
   background-color: #F9F9F9;
+  border: 4rpx solid #E6C8A0;
+  box-shadow: 0 4rpx 12rpx rgba(230, 200, 160, 0.2);
 }
 
-.user-details {
+.user-info-right {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
 }
 
-.user-name {
-  font-size: 32rpx;
+.user-name-input-large {
+  font-size: 44rpx;
   font-weight: bold;
   color: #8B6E4E;
-  margin-bottom: 10rpx;
-}
-
-.user-name-input {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #8B6E4E;
-  margin-bottom: 10rpx;
   width: 100%;
   padding: 0;
   background: transparent;
+  border-bottom: 2rpx solid #E6C8A0;
+  padding-bottom: 10rpx;
 }
 
-.user-role {
-  font-size: 26rpx;
+.user-role-large {
+  font-size: 28rpx;
   color: #999;
+  font-weight: 500;
 }
 
 .user-info-tip {

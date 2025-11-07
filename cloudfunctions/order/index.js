@@ -120,16 +120,51 @@ async function createOrder(event, openid) {
 
 /**
  * 获取所有用户的订单（聚餐场景，大家可以互相看到）
+ * 根据用户角色过滤：
+ * - 受邀访客：只能看到自己被邀请的聚餐日的订单
+ * - 常客及以上：可以看到所有订单
  */
 async function getUserOrders(event, openid) {
+  // 获取用户信息
+  const userInfo = await getUserInfo(openid)
+  if (!userInfo) {
+    return {
+      success: false,
+      message: '用户信息不存在'
+    }
+  }
+
   // 获取所有订单，按时间倒序
   const res = await db.collection('orders')
     .orderBy('createTime', 'desc')
     .get()
 
+  let filteredOrders = res.data
+
+  // 如果是受邀访客，需要过滤订单
+  if (userInfo.role === 'invited_guest') {
+    // 获取所有聚餐日信息
+    const gatheringDaysRes = await db.collection('gathering_days').get()
+
+    // 找出用户被邀请的聚餐日ID列表
+    const invitedGatheringDayIds = gatheringDaysRes.data
+      .filter(day => day.invitedGuests && day.invitedGuests.includes(openid))
+      .map(day => day._id)
+
+    // 只保留被邀请的聚餐日的订单
+    filteredOrders = res.data.filter(order => {
+      // 如果订单有聚餐日ID，检查是否在被邀请列表中
+      if (order.gatheringDayId) {
+        return invitedGatheringDayIds.includes(order.gatheringDayId)
+      }
+      // 没有聚餐日ID的订单不显示给受邀访客
+      return false
+    })
+  }
+
   return {
     success: true,
-    data: res.data,
+    data: filteredOrders,
     currentOpenid: openid, // 返回当前用户的 openid
     message: '获取成功'
   }

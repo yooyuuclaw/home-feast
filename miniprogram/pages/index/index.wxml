@@ -32,21 +32,32 @@
 
   <!-- 用户信息 -->
   <view class="user-info-section">
-    <button class="user-info-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-      <view class="user-info">
-        <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
-        <view class="user-details">
-          <input
-            class="user-name-input"
-            type="nickname"
-            placeholder="点击输入昵称"
-            value="{{userInfo.nickname || ''}}"
-            bindblur="onNicknameBlur"
-          />
-          <view class="user-role">{{isAdmin ? '管理员' : '访客'}}</view>
-        </view>
+    <!-- 提示完善信息（当用户信息为默认值时显示） -->
+    <view wx:if="{{userInfo.nickname === '昵称' || !userInfo.avatar}}" class="info-reminder">
+      <view class="reminder-icon">👋</view>
+      <view class="reminder-text">点击下方头像和昵称，完善个人信息</view>
+    </view>
+
+    <!-- 横向布局 -->
+    <view class="user-info-horizontal">
+      <!-- 头像 -->
+      <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="user-avatar-large" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      </button>
+
+      <!-- 昵称和角色 -->
+      <view class="user-info-right">
+        <input
+          class="user-name-input-large"
+          type="nickname"
+          placeholder="点击输入昵称"
+          value="{{userInfo.nickname || ''}}"
+          bindblur="onNicknameBlur"
+        />
+        <view class="user-role-large">{{roleName}}</view>
       </view>
-    </button>
+    </view>
+
     <view class="user-info-tip">点击头像和昵称可修改</view>
   </view>
 </view>

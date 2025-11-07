@@ -1,13 +1,16 @@
 // pages/order-history/order-history.js
 const { ORDER_STATUS_TEXT } = require('../../utils/constants.js')
 const { formatTime } = require('../../utils/util.js')
+const { hasPermission } = require('../../utils/roles.js')
 
 Page({
   data: {
     orders: [],
     groupedOrders: [], // 按聚餐日分组的订单
     loading: true,
-    currentOpenid: '' // 当前用户的 openid
+    currentOpenid: '', // 当前用户的 openid
+    userRole: '', // 用户角色
+    canViewOrders: false // 是否有查看订单权限
   },
 
   onLoad() {
@@ -20,6 +23,37 @@ Page({
   async loadOrders() {
     try {
       this.setData({ loading: true })
+
+      // 先获取用户信息检查权限
+      const userRes = await wx.cloud.callFunction({
+        name: 'user',
+        data: {
+          action: 'getUserInfo'
+        }
+      })
+
+      if (!userRes.result.success) {
+        throw new Error('获取用户信息失败')
+      }
+
+      const userInfo = userRes.result.data
+      const userRole = userInfo.role
+      const canViewOrders = hasPermission(userRole, 'canViewOrders')
+
+      this.setData({
+        userRole: userRole,
+        canViewOrders: canViewOrders
+      })
+
+      // 如果没有查看订单权限，直接返回
+      if (!canViewOrders) {
+        this.setData({
+          orders: [],
+          groupedOrders: [],
+          loading: false
+        })
+        return
+      }
 
       const res = await wx.cloud.callFunction({
         name: 'order',

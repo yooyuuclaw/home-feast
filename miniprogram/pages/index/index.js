@@ -1,10 +1,12 @@
 // pages/index/index.js
 const app = getApp()
+const { getRoleName } = require('../../utils/roles.js')
 
 Page({
   data: {
     userInfo: null,
-    isAdmin: false
+    isAdmin: false,
+    roleName: ''
   },
 
   onLoad() {
@@ -38,7 +40,8 @@ Page({
         const userInfo = res.result.data
         this.setData({
           userInfo: userInfo,
-          isAdmin: userInfo.role === 'admin'
+          isAdmin: userInfo.role === 'admin',
+          roleName: getRoleName(userInfo.role)
         })
 
         // 更新全局数据

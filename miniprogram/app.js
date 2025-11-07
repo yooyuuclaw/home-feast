@@ -13,6 +13,19 @@ App({
 
     // 检查登录状态
     this.checkLoginStatus()
+
+    // 记录开始时间
+    this.sessionStartTime = Date.now()
+  },
+
+  onShow() {
+    // 小程序从后台进入前台
+    this.sessionStartTime = Date.now()
+  },
+
+  onHide() {
+    // 小程序从前台进入后台，记录本次会话时长
+    this.recordSession()
   },
 
   // 全局数据
@@ -20,6 +33,31 @@ App({
     userInfo: null,
     isAdmin: false,
     cart: [] // 购物车数据
+  },
+
+  /**
+   * 记录会话时长
+   */
+  async recordSession() {
+    if (!this.sessionStartTime) return
+
+    const duration = Math.floor((Date.now() - this.sessionStartTime) / 1000) // 秒
+
+    // 只记录超过5秒的会话
+    if (duration < 5) return
+
+    try {
+      await wx.cloud.callFunction({
+        name: 'user-activity',
+        data: {
+          action: 'recordSession',
+          duration: duration
+        }
+      })
+      console.log('会话记录成功，时长：', duration, '秒')
+    } catch (err) {
+      console.error('记录会话失败', err)
+    }
   },
 
   // 检查登录状态
@@ -57,13 +95,13 @@ App({
 
       // 如果没有缓存，返回默认值（等待用户授权）
       return {
-        nickName: '微信用户',
+        nickName: '昵称',
         avatarUrl: ''
       }
     } catch (err) {
       console.error('获取用户信息失败', err)
       return {
-        nickName: '微信用户',
+        nickName: '昵称',
         avatarUrl: ''
       }
     }

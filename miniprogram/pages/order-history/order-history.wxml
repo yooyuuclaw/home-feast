@@ -2,6 +2,13 @@
 <view class="container order-history-container">
   <view wx:if="{{loading}}" class="loading">加载中...</view>
 
+  <!-- 无权限提示 -->
+  <view wx:elif="{{!canViewOrders}}" class="empty-state">
+    <view class="empty-icon">🔒</view>
+    <view class="empty-text">您暂无查看订单的权限</view>
+    <view class="empty-hint">请联系管理员升级您的账号权限</view>
+  </view>
+
   <view wx:elif="{{groupedOrders.length === 0}}" class="empty-state">
     <view class="empty-icon">📋</view>
     <view class="empty-text">暂无订单</view>

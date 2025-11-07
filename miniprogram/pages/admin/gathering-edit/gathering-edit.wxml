@@ -1,4 +1,20 @@
 <!-- pages/admin/gathering-edit/gathering-edit.wxml -->
+<wxs module="utils">
+  // 根据openid获取访客昵称
+  function getGuestNickname(allGuests, openid) {
+    for (var i = 0; i < allGuests.length; i++) {
+      if (allGuests[i]._openid === openid) {
+        return allGuests[i].nickname || '未命名';
+      }
+    }
+    return '未命名';
+  }
+
+  module.exports = {
+    getGuestNickname: getGuestNickname
+  };
+</wxs>
+
 <view class="container gathering-edit-container">
   <view class="form-card">
     <view class="form-title">{{isEdit ? '编辑聚餐日' : '新增聚餐日'}}</view>
@@ -47,10 +63,65 @@
       </view>
     </view>
 
+    <!-- 受邀访客选择 -->
+    <view class="form-item">
+      <view class="form-label">受邀访客（可选）</view>
+      <view class="guest-section">
+        <view class="guest-hint">选择受邀访客后，仅这些访客可以在该聚餐日下单和查看订单</view>
+
+        <!-- 已选择的访客列表 -->
+        <view class="selected-guests" wx:if="{{selectedGuests.length > 0}}">
+          <view class="selected-guest-item" wx:for="{{selectedGuests}}" wx:key="index">
+            <text class="selected-guest-name">{{utils.getGuestNickname(allInvitedGuests, item)}}</text>
+            <text class="remove-guest-btn" bindtap="removeGuest" data-openid="{{item}}">×</text>
+          </view>
+        </view>
+
+        <!-- 添加访客按钮 -->
+        <button class="add-guest-btn" bindtap="openGuestPicker">
+          {{selectedGuests.length > 0 ? '添加/修改受邀访客' : '选择受邀访客'}}
+        </button>
+      </view>
+    </view>
+
     <!-- 提交按钮 -->
     <view class="form-actions">
       <button class="submit-btn" bindtap="submitForm">{{isEdit ? '保存修改' : '创建聚餐日'}}</button>
       <button class="cancel-btn" bindtap="cancelForm">取消</button>
+    </view>
+  </view>
+</view>
+
+<!-- 受邀访客选择弹窗 -->
+<view class="guest-picker-modal" wx:if="{{showGuestPicker}}">
+  <view class="modal-mask" bindtap="closeGuestPicker"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">选择受邀访客</text>
+      <text class="modal-close" bindtap="closeGuestPicker">×</text>
+    </view>
+
+    <view class="modal-body">
+      <view wx:if="{{allInvitedGuests.length === 0}}" class="no-guests">
+        暂无受邀访客用户
+      </view>
+
+      <view class="guest-list" wx:else>
+        <label class="guest-item" wx:for="{{allInvitedGuests}}" wx:key="_openid">
+          <checkbox
+            value="{{item._openid}}"
+            checked="{{selectedGuests.includes(item._openid)}}"
+            bindtap="toggleGuest"
+            data-openid="{{item._openid}}"
+          />
+          <image class="guest-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <text class="guest-name">{{item.nickname || '未命名'}}</text>
+        </label>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="confirm-btn" bindtap="confirmGuestSelection">确定（已选{{selectedGuests.length}}人）</button>
     </view>
   </view>
 </view>
