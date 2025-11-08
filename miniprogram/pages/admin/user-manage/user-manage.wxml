@@ -29,17 +29,14 @@
       <!-- 用户信息 -->
       <view class="user-info">
         <view class="user-name">{{item.nickname}}</view>
-        <view class="user-role-badge {{item.role}}">{{item.roleName}}</view>
+        <view
+          class="user-role-badge {{item.role}}"
+          bindtap="changeRole"
+          data-id="{{item._id}}"
+          data-role="{{item.role}}">
+          {{item.roleName}}
+        </view>
       </view>
-
-      <!-- 操作按钮 -->
-      <button
-        class="role-btn"
-        bindtap="changeRole"
-        data-id="{{item._id}}"
-        data-role="{{item.role}}">
-        修改角色
-      </button>
     </view>
   </view>
 </view>
