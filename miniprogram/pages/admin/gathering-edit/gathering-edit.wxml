@@ -10,8 +10,24 @@
     return '未命名';
   }
 
+  // 检查访客是否被选中
+  function isGuestSelected(selectedGuests, openid) {
+    if (!selectedGuests || selectedGuests.length === 0) {
+      return false;
+    }
+    for (var i = 0; i < selectedGuests.length; i++) {
+      // 直接比较，不转换类型
+      if (selectedGuests[i] === openid) {
+        console.log('匹配成功:', selectedGuests[i], '===', openid);
+        return true;
+      }
+    }
+    return false;
+  }
+
   module.exports = {
-    getGuestNickname: getGuestNickname
+    getGuestNickname: getGuestNickname,
+    isGuestSelected: isGuestSelected
   };
 </wxs>
 
@@ -107,9 +123,9 @@
       </view>
 
       <view class="guest-list" wx:else>
-        <checkbox-group value="{{selectedGuests}}" bindchange="onGuestCheckboxChange">
+        <checkbox-group bindchange="onGuestCheckboxChange">
           <label class="guest-item" wx:for="{{allInvitedGuests}}" wx:key="_openid">
-            <checkbox value="{{item._openid}}" />
+            <checkbox value="{{item._openid}}" checked="{{utils.isGuestSelected(selectedGuests, item._openid)}}" />
             <image class="guest-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
             <text class="guest-name">{{item.nickname || '未命名'}}</text>
           </label>
