@@ -233,8 +233,9 @@ Page({
         selectedGathering: selectedGathering
       })
 
-      // 如果有选中的聚餐日，加载其他人的订单
+      // 如果有选中的聚餐日，保存到全局并加载其他人的订单
       if (selectedGathering) {
+        app.setSelectedGathering(selectedGathering)
         this.loadOthersOrders()
       }
     } catch (err) {

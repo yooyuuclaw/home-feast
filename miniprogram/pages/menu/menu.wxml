@@ -11,7 +11,11 @@
         <text class="calendar-icon">📅</text>
         <view class="gathering-info">
           <text class="gathering-title">{{selectedGathering.theme || selectedGathering.displayText}}</text>
-          <text class="gathering-subtitle">{{selectedGathering.dateLabel}} · 点击切换</text>
+          <text class="gathering-subtitle">{{selectedGathering.dateLabel}}</text>
+        </view>
+        <view class="switch-hint">
+          <text class="switch-text">点击切换</text>
+          <text class="arrow-icon">›</text>
         </view>
       </view>
       <view wx:else class="gathering-empty">
@@ -19,7 +23,6 @@
         <text class="empty-text">暂无可选聚餐日</text>
       </view>
     </view>
-    <text class="arrow-icon">›</text>
   </view>
 
   <!-- 其他人已点的菜提示 -->

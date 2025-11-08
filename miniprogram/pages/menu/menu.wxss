@@ -182,12 +182,25 @@
 
 /* 聚餐日选择横幅 */
 .gathering-banner {
-  background: linear-gradient(135deg, #E6C8A0 0%, #D4B080 100%);
-  padding: 24rpx 30rpx;
+  background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  padding: 28rpx 30rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4rpx 12rpx rgba(139, 110, 78, 0.15);
+  box-shadow: 0 6rpx 16rpx rgba(255, 152, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.gathering-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
 }
 
 .gathering-banner-content {
@@ -195,6 +208,8 @@
   display: flex;
   align-items: center;
   gap: 16rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .gathering-no-permission {
@@ -209,36 +224,64 @@
 
 .permission-text {
   font-size: 28rpx;
-  color: #8B6E4E;
-  font-weight: 500;
+  color: #FFFFFF;
+  font-weight: 600;
 }
 
 .gathering-selected {
   display: flex;
   align-items: center;
   gap: 16rpx;
+  flex: 1;
 }
 
 .calendar-icon {
-  font-size: 44rpx;
+  font-size: 48rpx;
+  filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.1));
 }
 
 .gathering-info {
   display: flex;
   flex-direction: column;
-  gap: 4rpx;
+  gap: 6rpx;
+  flex: 1;
 }
 
 .gathering-title {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: bold;
-  color: #8B6E4E;
+  color: #FFFFFF;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
 }
 
 .gathering-subtitle {
   font-size: 24rpx;
-  color: #8B6E4E;
-  opacity: 0.7;
+  color: #FFFFFF;
+  opacity: 0.9;
+}
+
+.switch-hint {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 10rpx 20rpx;
+  border-radius: 30rpx;
+  backdrop-filter: blur(10rpx);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.switch-text {
+  font-size: 24rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.arrow-icon {
+  font-size: 32rpx;
+  color: #FFFFFF;
+  font-weight: bold;
 }
 
 .gathering-empty {
