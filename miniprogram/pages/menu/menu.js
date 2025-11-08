@@ -310,7 +310,7 @@ Page({
   },
 
   /**
-   * 加载其他人的订单(作为参考)
+   * 加载订单数据(包括已提交订单和购物车)
    */
   async loadOthersOrders() {
     if (!this.data.selectedGathering) {
@@ -318,6 +318,7 @@ Page({
     }
 
     try {
+      // 1. 加载已提交的订单
       const res = await wx.cloud.callFunction({
         name: 'order',
         data: {
@@ -329,58 +330,89 @@ Page({
         const currentOpenid = res.result.currentOpenid
         const selectedGatheringId = this.data.selectedGathering._id
 
-        // 筛选出该聚餐日的所有订单(包括自己和他人)
-        const allOrders = res.result.data.filter(order => {
+        // 筛选出该聚餐日的所有已提交订单
+        const submittedOrders = res.result.data.filter(order => {
           // 匹配聚餐日ID
           if (selectedGatheringId.startsWith('quick-')) {
-            // 快捷选项,按日期匹配
             return order.gatheringDayDate === this.data.selectedGathering.date
           } else {
-            // 后台聚餐日,按ID匹配
             return order.gatheringDayId === selectedGatheringId
           }
         })
 
-        // 构建菜品 -> 订单人列表的映射
-        // dishId -> [{openid, nickname, avatar, count}, ...]
+        // 2. 获取当前用户信息
+        const userInfo = this.data.userInfo
+
+        // 3. 获取购物车数据(未提交的订单)
+        const cart = app.getCart()
+
+        // 4. 构建菜品 -> 订单人列表的映射
+        // dishId -> [{openid, nickname, avatar, count, isMe, isPending}, ...]
         const dishOrdersMap = {}
 
-        allOrders.forEach(order => {
+        // 处理已提交的订单
+        submittedOrders.forEach(order => {
           order.dishes.forEach(dish => {
             if (!dishOrdersMap[dish.dishId]) {
               dishOrdersMap[dish.dishId] = []
             }
 
-            // 查找是否已有该用户的订单
             const existingOrder = dishOrdersMap[dish.dishId].find(
-              item => item.openid === order._openid
+              item => item.openid === order._openid && !item.isPending
             )
 
             if (existingOrder) {
-              // 已存在,累加数量
               existingOrder.count += dish.count
             } else {
-              // 不存在,新增
               dishOrdersMap[dish.dishId].push({
                 openid: order._openid,
                 nickname: order.userNickname || '微信用户',
                 avatar: order.userAvatar || '',
                 count: dish.count,
-                isMe: order._openid === currentOpenid
+                isMe: order._openid === currentOpenid,
+                isPending: false // 已提交的订单
               })
             }
           })
         })
 
-        // 对每个菜品的订单列表按以下规则排序:
-        // 1. 我的订单排在最前面
-        // 2. 其他人按订单时间排序(先点的在前)
-        // 3. 最多显示5个
+        // 处理购物车中的订单(当前用户的待提交订单)
+        cart.forEach(item => {
+          if (!dishOrdersMap[item._id]) {
+            dishOrdersMap[item._id] = []
+          }
+
+          // 查找是否已有当前用户的待提交订单
+          const existingPending = dishOrdersMap[item._id].find(
+            order => order.openid === currentOpenid && order.isPending
+          )
+
+          if (existingPending) {
+            existingPending.count = item.count
+          } else {
+            dishOrdersMap[item._id].push({
+              openid: currentOpenid,
+              nickname: userInfo.nickname || '微信用户',
+              avatar: userInfo.avatar || '',
+              count: item.count,
+              isMe: true,
+              isPending: true // 购物车中的订单(待提交)
+            })
+          }
+        })
+
+        // 5. 对每个菜品的订单列表排序
+        // 规则: 我的待提交订单 > 我的已提交订单 > 其他人的订单
         Object.keys(dishOrdersMap).forEach(dishId => {
           const orders = dishOrdersMap[dishId]
           orders.sort((a, b) => {
-            if (a.isMe && !b.isMe) return -1
-            if (!a.isMe && b.isMe) return 1
+            // 我的待提交订单排最前
+            if (a.isMe && a.isPending && !(b.isMe && b.isPending)) return -1
+            if (!(a.isMe && a.isPending) && b.isMe && b.isPending) return 1
+            // 我的已提交订单排第二
+            if (a.isMe && !a.isPending && !(b.isMe && !b.isPending)) return -1
+            if (!(a.isMe && !a.isPending) && b.isMe && !b.isPending) return 1
+            // 其他保持原顺序
             return 0
           })
           // 限制最多5个

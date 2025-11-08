@@ -59,7 +59,7 @@
       <view
         wx:for="{{filteredDishes}}"
         wx:key="_id"
-        class="dish-card"
+        class="dish-card {{dishOrdersMap[item._id] && dishOrdersMap[item._id].length > 0 ? 'ordered-dish' : ''}}"
         bindtap="showDishDetail"
         data-dish="{{item}}">
         <!-- 菜品图片 -->
@@ -76,7 +76,7 @@
               wx:for="{{dishOrdersMap[item._id]}}"
               wx:key="openid"
               wx:for-item="orderItem"
-              class="order-item {{orderItem.isMe ? 'my-order' : 'others-order'}}">
+              class="order-item {{orderItem.isMe ? 'my-order' : 'others-order'}} {{orderItem.isPending ? 'pending-order' : ''}}">
               <image class="order-avatar" src="{{orderItem.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
               <view class="order-count">{{orderItem.count}}份</view>
             </view>
