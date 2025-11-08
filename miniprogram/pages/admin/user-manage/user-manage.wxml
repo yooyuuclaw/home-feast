@@ -8,7 +8,8 @@
 
   <view wx:else class="user-list">
     <view wx:for="{{users}}" wx:key="_id" class="user-card">
-      <image class="user-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <image wx:if="{{item.avatar}}" class="user-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+      <view wx:else class="user-avatar-placeholder">{{item.nickname ? item.nickname.charAt(0) : '?'}}</view>
 
       <view class="user-info">
         <view class="user-name">{{item.nickname}}</view>

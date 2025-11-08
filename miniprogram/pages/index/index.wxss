@@ -159,6 +159,21 @@
   box-shadow: 0 4rpx 12rpx rgba(230, 200, 160, 0.2);
 }
 
+.user-avatar-placeholder {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E6C8A0, #D4B080);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
+  font-weight: bold;
+  color: #8B6E4E;
+  border: 4rpx solid #E6C8A0;
+  box-shadow: 0 4rpx 12rpx rgba(230, 200, 160, 0.2);
+}
+
 .user-info-right {
   flex: 1;
   display: flex;

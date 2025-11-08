@@ -77,7 +77,8 @@
               wx:key="openid"
               wx:for-item="orderItem"
               class="order-item {{orderItem.isMe ? 'my-order' : 'others-order'}} {{orderItem.isPending ? 'pending-order' : ''}}">
-              <image class="order-avatar" src="{{orderItem.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+              <image wx:if="{{orderItem.avatar}}" class="order-avatar" src="{{orderItem.avatar}}" mode="aspectFill"></image>
+              <view wx:else class="order-avatar-placeholder">{{orderItem.nickname ? orderItem.nickname.charAt(0) : '?'}}</view>
               <view class="order-count">{{orderItem.count}}份</view>
             </view>
           </view>

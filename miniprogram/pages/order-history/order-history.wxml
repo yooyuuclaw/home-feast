@@ -34,7 +34,8 @@
         <view wx:for="{{group.orders}}" wx:key="_id" wx:for-item="item" class="order-card">
           <!-- 订单头部 - 用户信息 -->
           <view class="order-user-info">
-            <image class="user-avatar" src="{{item.userAvatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+            <image wx:if="{{item.userAvatar}}" class="user-avatar" src="{{item.userAvatar}}" mode="aspectFill"></image>
+            <view wx:else class="user-avatar-placeholder">{{item.userName ? item.userName.charAt(0) : '?'}}</view>
             <view class="user-name">{{item.userName || '匿名用户'}}</view>
           </view>
 

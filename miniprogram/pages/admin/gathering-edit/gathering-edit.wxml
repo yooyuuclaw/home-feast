@@ -16,9 +16,7 @@
       return false;
     }
     for (var i = 0; i < selectedGuests.length; i++) {
-      // 直接比较，不转换类型
       if (selectedGuests[i] === openid) {
-        console.log('匹配成功:', selectedGuests[i], '===', openid);
         return true;
       }
     }
@@ -126,7 +124,8 @@
         <checkbox-group bindchange="onGuestCheckboxChange">
           <label class="guest-item" wx:for="{{allInvitedGuests}}" wx:key="_openid">
             <checkbox value="{{item._openid}}" checked="{{utils.isGuestSelected(selectedGuests, item._openid)}}" />
-            <image class="guest-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+            <image wx:if="{{item.avatar}}" class="guest-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+            <view wx:else class="guest-avatar-placeholder">{{item.nickname ? item.nickname.charAt(0) : '?'}}</view>
             <text class="guest-name">{{item.nickname || '未命名'}}</text>
           </label>
         </checkbox-group>

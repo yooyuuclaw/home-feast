@@ -49,7 +49,8 @@
             <view wx:for="{{userStats}}" wx:key="_id" class="user-stat-item">
               <!-- 用户信息 -->
               <view class="user-stat-header">
-                <image class="user-stat-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+                <image wx:if="{{item.avatar}}" class="user-stat-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+                <view wx:else class="user-stat-avatar-placeholder">{{item.nickname ? item.nickname.charAt(0) : '?'}}</view>
                 <view class="user-stat-basic">
                   <view class="user-stat-name">{{item.nickname}}</view>
                   <view class="user-stat-role">{{item.roleName}}</view>

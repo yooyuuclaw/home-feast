@@ -40,7 +40,8 @@
       <!-- 订单信息 -->
       <view class="order-header">
         <view class="user-info">
-          <image class="user-avatar" src="{{item.userAvatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <image wx:if="{{item.userAvatar}}" class="user-avatar" src="{{item.userAvatar}}" mode="aspectFill"></image>
+          <view wx:else class="user-avatar-placeholder">{{item.userName ? item.userName.charAt(0) : '?'}}</view>
           <view class="user-name">{{item.userName}}</view>
         </view>
         <view class="order-status {{item.status}}">{{item.statusText}}</view>

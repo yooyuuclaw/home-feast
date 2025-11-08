@@ -51,7 +51,6 @@ Page({
       if (res.result.success) {
         // 筛选出受邀访客
         const invitedGuests = res.result.data.filter(user => user.role === 'invited_guest')
-        console.log('加载的所有受邀访客:', invitedGuests.map(u => u._openid))
 
         this.setData({
           allInvitedGuests: invitedGuests
@@ -87,13 +86,6 @@ Page({
           // 确保 invitedGuests 是一个字符串数组
           const invitedGuests = (item.invitedGuests || []).map(String)
 
-          console.log('=== 聚餐日数据加载 ===')
-          console.log('加载的受邀访客:', invitedGuests)
-          console.log('当前所有受邀访客:', this.data.allInvitedGuests.map(u => u._openid))
-          console.log('受邀访客是否匹配:', invitedGuests.every(id =>
-            this.data.allInvitedGuests.some(u => u._openid === id)
-          ))
-
           this.setData({
             formData: {
               theme: item.theme,
@@ -103,8 +95,6 @@ Page({
               hasDinner: item.meals.includes('dinner')
             },
             selectedGuests: invitedGuests
-          }, () => {
-            console.log('setData完成, selectedGuests:', this.data.selectedGuests)
           })
         }
       }
@@ -151,15 +141,6 @@ Page({
    * 打开受邀访客选择器
    */
   openGuestPicker() {
-    console.log('=== 打开访客选择器 ===')
-    console.log('当前selectedGuests:', this.data.selectedGuests)
-    console.log('selectedGuests类型:', typeof this.data.selectedGuests)
-    console.log('selectedGuests是否为数组:', Array.isArray(this.data.selectedGuests))
-    if (this.data.selectedGuests.length > 0) {
-      console.log('第一个元素:', this.data.selectedGuests[0])
-      console.log('第一个元素类型:', typeof this.data.selectedGuests[0])
-    }
-
     // 打开时刷新受邀访客列表，确保数据最新
     this.loadInvitedGuests()
     this.setData({
@@ -181,11 +162,9 @@ Page({
    */
   onGuestCheckboxChange(e) {
     const selectedGuests = e.detail.value
-    console.log('checkbox change:', selectedGuests)
 
     // 去重,防止重复添加
     const uniqueGuests = [...new Set(selectedGuests)]
-    console.log('去重后:', uniqueGuests)
 
     this.setData({
       selectedGuests: uniqueGuests
