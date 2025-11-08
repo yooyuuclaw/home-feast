@@ -25,10 +25,16 @@
     </view>
   </view>
 
-  <!-- 其他人已点的菜提示 -->
-  <view wx:if="{{selectedGathering && Object.keys(othersOrdersMap).length > 0}}" class="others-orders-hint">
-    <text class="hint-icon">👥</text>
-    <text class="hint-text">灰色菜品为其他人已点（仅供参考，数量不可修改）</text>
+  <!-- 菜品提示 -->
+  <view wx:if="{{selectedGathering && (Object.keys(othersOrdersMap).length > 0 || Object.keys(myCartMap).length > 0)}}" class="dishes-hint">
+    <view wx:if="{{Object.keys(othersOrdersMap).length > 0}}" class="hint-item">
+      <text class="hint-icon">👥</text>
+      <text class="hint-text">灰色为他人已点</text>
+    </view>
+    <view wx:if="{{Object.keys(myCartMap).length > 0}}" class="hint-item">
+      <text class="hint-icon">✓</text>
+      <text class="hint-text">蓝色为我已选</text>
+    </view>
   </view>
 
   <!-- 分类导航 -->
@@ -65,7 +71,7 @@
       <view
         wx:for="{{filteredDishes}}"
         wx:key="_id"
-        class="dish-card {{othersOrdersMap[item._id] ? 'others-dish' : ''}}"
+        class="dish-card {{othersOrdersMap[item._id] ? 'others-dish' : ''}} {{myCartMap[item._id] ? 'my-dish' : ''}}"
         bindtap="showDishDetail"
         data-dish="{{item}}">
         <!-- 菜品图片 -->
@@ -77,7 +83,11 @@
           </image>
           <!-- 其他人已点标记 -->
           <view wx:if="{{othersOrdersMap[item._id]}}" class="others-badge">
-            <text class="others-badge-text">{{othersOrdersMap[item._id]}}份</text>
+            <text class="others-badge-text">他人{{othersOrdersMap[item._id]}}份</text>
+          </view>
+          <!-- 我自己已点标记 -->
+          <view wx:if="{{myCartMap[item._id]}}" class="my-badge">
+            <text class="my-badge-text">已选{{myCartMap[item._id]}}份</text>
           </view>
         </view>
 
@@ -90,7 +100,7 @@
         <!-- 添加按钮 -->
         <view class="dish-action">
           <button
-            class="add-btn {{othersOrdersMap[item._id] ? 'others-add-btn' : ''}}"
+            class="add-btn {{othersOrdersMap[item._id] ? 'others-add-btn' : ''}} {{myCartMap[item._id] ? 'my-add-btn' : ''}}"
             catchtap="addToCart"
             data-dish="{{item}}">
             + 加入

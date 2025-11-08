@@ -25,7 +25,10 @@ Page({
 
     // 其他人的订单（作为参考）
     othersOrders: [], // 其他人的订单菜品
-    othersOrdersMap: {} // dishId -> count 的映射
+    othersOrdersMap: {}, // dishId -> count 的映射
+
+    // 我自己的购物车（实时显示）
+    myCartMap: {} // dishId -> count 的映射
   },
 
   onLoad() {
@@ -34,8 +37,9 @@ Page({
   },
 
   onShow() {
-    // 更新购物车数量
+    // 更新购物车数量和我的购物车映射
     this.updateCartCount()
+    this.updateMyCartMap()
     // 如果已选择聚餐日，重新加载其他人的订单
     if (this.data.selectedGathering) {
       this.loadOthersOrders()
@@ -459,6 +463,7 @@ Page({
     })
 
     this.updateCartCount()
+    this.updateMyCartMap() // 实时更新我的购物车映射
 
     wx.showToast({
       title: '已加入购物车',
@@ -474,6 +479,20 @@ Page({
     const cart = app.getCart()
     const count = cart.reduce((sum, item) => sum + item.count, 0)
     this.setData({ cartCount: count })
+  },
+
+  /**
+   * 更新我的购物车映射
+   */
+  updateMyCartMap() {
+    const cart = app.getCart()
+    const myCartMap = {}
+
+    cart.forEach(item => {
+      myCartMap[item._id] = item.count
+    })
+
+    this.setData({ myCartMap: myCartMap })
   },
 
   /**

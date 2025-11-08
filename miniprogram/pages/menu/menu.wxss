@@ -305,23 +305,29 @@
   opacity: 0.6;
 }
 
-/* 其他人已点菜品提示 */
-.others-orders-hint {
-  background: #FFF9F0;
+/* 菜品提示区域 */
+.dishes-hint {
+  background: #FFFFFF;
   padding: 16rpx 30rpx;
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  border-bottom: 1rpx solid #F0E8D8;
+  gap: 30rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
 }
 
 .hint-icon {
-  font-size: 32rpx;
+  font-size: 28rpx;
 }
 
 .hint-text {
   font-size: 24rpx;
-  color: #999;
+  color: #666;
   line-height: 1.5;
 }
 
@@ -355,6 +361,45 @@
   background: #D0D0D0;
   border-color: #BBB;
   color: #888;
+}
+
+/* 我自己已点的菜品样式 */
+.my-dish {
+  position: relative;
+}
+
+.my-dish .dish-card {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  border: 2rpx solid #42A5F5;
+  box-shadow: 0 4rpx 12rpx rgba(66, 165, 245, 0.25);
+}
+
+.my-badge {
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  background: rgba(25, 118, 210, 0.95);
+  border-radius: 20rpx;
+  padding: 6rpx 16rpx;
+  backdrop-filter: blur(10rpx);
+  box-shadow: 0 2rpx 6rpx rgba(25, 118, 210, 0.3);
+}
+
+.my-badge-text {
+  font-size: 22rpx;
+  color: #FFF;
+  font-weight: bold;
+}
+
+.my-add-btn {
+  background: linear-gradient(135deg, #42A5F5 0%, #1976D2 100%);
+  border-color: #1976D2;
+  color: #FFFFFF;
+  box-shadow: 0 2rpx 8rpx rgba(25, 118, 210, 0.3);
+}
+
+.my-add-btn:active {
+  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
 }
 
 /* 聚餐日选择器弹窗 */
