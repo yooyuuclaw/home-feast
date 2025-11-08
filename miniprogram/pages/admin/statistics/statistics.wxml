@@ -60,11 +60,11 @@
               <view class="user-stat-data">
                 <view class="user-stat-row">
                   <view class="user-stat-label">首次上线：</view>
-                  <view class="user-stat-value">{{formatTime(item.createTime)}}</view>
+                  <view class="user-stat-value">{{item.createTimeFormatted}}</view>
                 </view>
                 <view class="user-stat-row">
                   <view class="user-stat-label">最后上线：</view>
-                  <view class="user-stat-value">{{formatTime(item.lastOnlineTime)}}</view>
+                  <view class="user-stat-value">{{item.lastOnlineTimeFormatted}}</view>
                 </view>
                 <view class="user-stat-row">
                   <view class="user-stat-label">访问次数：</view>
@@ -72,11 +72,11 @@
                 </view>
                 <view class="user-stat-row">
                   <view class="user-stat-label">总在线时长：</view>
-                  <view class="user-stat-value">{{formatDuration(item.totalDuration)}}</view>
+                  <view class="user-stat-value">{{item.totalDurationFormatted}}</view>
                 </view>
                 <view class="user-stat-row">
                   <view class="user-stat-label">平均时长：</view>
-                  <view class="user-stat-value">{{formatDuration(item.avgDuration)}}</view>
+                  <view class="user-stat-value">{{item.avgDurationFormatted}}</view>
                 </view>
               </view>
             </view>

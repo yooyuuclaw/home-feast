@@ -53,21 +53,17 @@ exports.main = async (event, context) => {
         updateData.avatar = avatar
       }
 
-      // 如果有需要更新的字段，执行更新
-      if (Object.keys(updateData).length > 0) {
-        await db.collection('users').doc(userData._id).update({
-          data: updateData
-        })
-        // 更新本地数据
-        userData = { ...userData, ...updateData }
-      }
-
       // 每次调用都更新最后上线时间
+      updateData.lastOnlineTime = db.serverDate()
+
+      // 执行更新
       await db.collection('users').doc(userData._id).update({
-        data: {
-          lastOnlineTime: db.serverDate()
-        }
+        data: updateData
       })
+
+      // 重新获取用户数据以包含最新的 lastOnlineTime
+      const updatedUserRes = await db.collection('users').doc(userData._id).get()
+      userData = updatedUserRes.data
     }
 
     return {

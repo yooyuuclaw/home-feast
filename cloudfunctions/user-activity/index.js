@@ -104,7 +104,33 @@ async function getStatistics(event, openid) {
     const sessionCount = userSessions.length
 
     // 平均在线时长（秒）
-    const avgDuration = sessionCount > 0 ? totalDuration / sessionCount : 0
+    const avgDuration = sessionCount > 0 ? Math.floor(totalDuration / sessionCount) : 0
+
+    // 处理时间字段 - 将服务端时间对象转换为时间戳
+    let createTime = null
+    let lastOnlineTime = null
+
+    if (user.createTime) {
+      if (user.createTime.$date) {
+        createTime = new Date(user.createTime.$date).getTime()
+      } else if (typeof user.createTime === 'object' && user.createTime instanceof Date) {
+        createTime = user.createTime.getTime()
+      } else {
+        createTime = new Date(user.createTime).getTime()
+      }
+    }
+
+    if (user.lastOnlineTime) {
+      if (user.lastOnlineTime.$date) {
+        lastOnlineTime = new Date(user.lastOnlineTime.$date).getTime()
+      } else if (typeof user.lastOnlineTime === 'object' && user.lastOnlineTime instanceof Date) {
+        lastOnlineTime = user.lastOnlineTime.getTime()
+      } else {
+        lastOnlineTime = new Date(user.lastOnlineTime).getTime()
+      }
+    } else {
+      lastOnlineTime = createTime // 如果没有 lastOnlineTime，使用 createTime
+    }
 
     return {
       _id: user._id,
@@ -112,8 +138,8 @@ async function getStatistics(event, openid) {
       nickname: user.nickname || '微信用户',
       avatar: user.avatar || '',
       role: user.role,
-      createTime: user.createTime, // 首次上线时间
-      lastOnlineTime: user.lastOnlineTime || user.createTime, // 最后上线时间
+      createTime: createTime, // 首次上线时间（时间戳）
+      lastOnlineTime: lastOnlineTime, // 最后上线时间（时间戳）
       sessionCount: sessionCount, // 会话次数
       totalDuration: totalDuration, // 总在线时长（秒）
       avgDuration: avgDuration // 平均在线时长（秒）
@@ -122,9 +148,9 @@ async function getStatistics(event, openid) {
 
   // 按最后上线时间倒序排序
   statistics.sort((a, b) => {
-    const timeA = a.lastOnlineTime || a.createTime
-    const timeB = b.lastOnlineTime || b.createTime
-    return new Date(timeB) - new Date(timeA)
+    const timeA = a.lastOnlineTime || a.createTime || 0
+    const timeB = b.lastOnlineTime || b.createTime || 0
+    return timeB - timeA
   })
 
   return {

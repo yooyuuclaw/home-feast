@@ -42,13 +42,22 @@ Page({
         })
       ])
 
+      // 预处理用户统计数据
+      const processedUserStats = (userRes.result.data || []).map(user => ({
+        ...user,
+        roleName: getRoleName(user.role),
+        // 预格式化时间
+        createTimeFormatted: this.formatTime(user.createTime),
+        lastOnlineTimeFormatted: this.formatTime(user.lastOnlineTime),
+        // 预格式化时长
+        totalDurationFormatted: this.formatDuration(user.totalDuration),
+        avgDurationFormatted: this.formatDuration(user.avgDuration)
+      }))
+
       this.setData({
         orderStats: orderRes.result.data,
         dishStats: dishRes.result.data.slice(0, 10),
-        userStats: (userRes.result.data || []).map(user => ({
-          ...user,
-          roleName: getRoleName(user.role)
-        })),
+        userStats: processedUserStats,
         loading: false
       })
     } catch (err) {
