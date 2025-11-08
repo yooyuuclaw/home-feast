@@ -25,18 +25,6 @@
     </view>
   </view>
 
-  <!-- 菜品提示 -->
-  <view wx:if="{{selectedGathering && (Object.keys(othersOrdersMap).length > 0 || Object.keys(myCartMap).length > 0)}}" class="dishes-hint">
-    <view wx:if="{{Object.keys(othersOrdersMap).length > 0}}" class="hint-item">
-      <text class="hint-icon">👥</text>
-      <text class="hint-text">灰色为他人已点</text>
-    </view>
-    <view wx:if="{{Object.keys(myCartMap).length > 0}}" class="hint-item">
-      <text class="hint-icon">✓</text>
-      <text class="hint-text">蓝色为我已选</text>
-    </view>
-  </view>
-
   <!-- 分类导航 -->
   <view class="category-nav">
     <scroll-view scroll-x class="category-scroll">
@@ -71,7 +59,7 @@
       <view
         wx:for="{{filteredDishes}}"
         wx:key="_id"
-        class="dish-card {{othersOrdersMap[item._id] ? 'others-dish' : ''}} {{myCartMap[item._id] ? 'my-dish' : ''}}"
+        class="dish-card"
         bindtap="showDishDetail"
         data-dish="{{item}}">
         <!-- 菜品图片 -->
@@ -81,13 +69,17 @@
             src="{{item.image || '/images/default-dish.png'}}"
             mode="aspectFill">
           </image>
-          <!-- 其他人已点标记 -->
-          <view wx:if="{{othersOrdersMap[item._id]}}" class="others-badge">
-            <text class="others-badge-text">他人{{othersOrdersMap[item._id]}}份</text>
-          </view>
-          <!-- 我自己已点标记 -->
-          <view wx:if="{{myCartMap[item._id]}}" class="my-badge">
-            <text class="my-badge-text">已选{{myCartMap[item._id]}}份</text>
+
+          <!-- 订单人列表(最多5行) -->
+          <view wx:if="{{dishOrdersMap[item._id] && dishOrdersMap[item._id].length > 0}}" class="order-list">
+            <view
+              wx:for="{{dishOrdersMap[item._id]}}"
+              wx:key="openid"
+              wx:for-item="orderItem"
+              class="order-item {{orderItem.isMe ? 'my-order' : 'others-order'}}">
+              <image class="order-avatar" src="{{orderItem.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+              <view class="order-count">{{orderItem.count}}份</view>
+            </view>
           </view>
         </view>
 
@@ -100,7 +92,7 @@
         <!-- 添加按钮 -->
         <view class="dish-action">
           <button
-            class="add-btn {{othersOrdersMap[item._id] ? 'others-add-btn' : ''}} {{myCartMap[item._id] ? 'my-add-btn' : ''}}"
+            class="add-btn"
             catchtap="addToCart"
             data-dish="{{item}}">
             + 加入

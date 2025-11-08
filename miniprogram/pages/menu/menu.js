@@ -23,12 +23,9 @@ Page({
     selectedGathering: null,
     showGatheringPicker: false,
 
-    // 其他人的订单（作为参考）
-    othersOrders: [], // 其他人的订单菜品
-    othersOrdersMap: {}, // dishId -> count 的映射
-
-    // 我自己的购物车（实时显示）
-    myCartMap: {} // dishId -> count 的映射
+    // 菜品订单详情映射
+    // dishId -> [{openid, nickname, avatar, count, isMe}, ...]
+    dishOrdersMap: {}
   },
 
   onLoad() {
@@ -37,10 +34,9 @@ Page({
   },
 
   onShow() {
-    // 更新购物车数量和我的购物车映射
+    // 更新购物车数量
     this.updateCartCount()
-    this.updateMyCartMap()
-    // 如果已选择聚餐日，重新加载其他人的订单
+    // 如果已选择聚餐日，重新加载订单
     if (this.data.selectedGathering) {
       this.loadOthersOrders()
     }
@@ -314,7 +310,7 @@ Page({
   },
 
   /**
-   * 加载其他人的订单（作为参考）
+   * 加载其他人的订单(作为参考)
    */
   async loadOthersOrders() {
     if (!this.data.selectedGathering) {
@@ -333,39 +329,70 @@ Page({
         const currentOpenid = res.result.currentOpenid
         const selectedGatheringId = this.data.selectedGathering._id
 
-        // 筛选出该聚餐日其他人的订单
-        const othersOrders = res.result.data.filter(order => {
-          // 排除自己的订单
-          if (order._openid === currentOpenid) return false
+        // 筛选出该聚餐日的所有订单(包括自己和他人)
+        const allOrders = res.result.data.filter(order => {
           // 匹配聚餐日ID
           if (selectedGatheringId.startsWith('quick-')) {
-            // 快捷选项，按日期匹配
+            // 快捷选项,按日期匹配
             return order.gatheringDayDate === this.data.selectedGathering.date
           } else {
-            // 后台聚餐日，按ID匹配
+            // 后台聚餐日,按ID匹配
             return order.gatheringDayId === selectedGatheringId
           }
         })
 
-        // 构建菜品计数映射
-        const dishCountMap = {}
-        othersOrders.forEach(order => {
+        // 构建菜品 -> 订单人列表的映射
+        // dishId -> [{openid, nickname, avatar, count}, ...]
+        const dishOrdersMap = {}
+
+        allOrders.forEach(order => {
           order.dishes.forEach(dish => {
-            if (dishCountMap[dish.dishId]) {
-              dishCountMap[dish.dishId] += dish.count
+            if (!dishOrdersMap[dish.dishId]) {
+              dishOrdersMap[dish.dishId] = []
+            }
+
+            // 查找是否已有该用户的订单
+            const existingOrder = dishOrdersMap[dish.dishId].find(
+              item => item.openid === order._openid
+            )
+
+            if (existingOrder) {
+              // 已存在,累加数量
+              existingOrder.count += dish.count
             } else {
-              dishCountMap[dish.dishId] = dish.count
+              // 不存在,新增
+              dishOrdersMap[dish.dishId].push({
+                openid: order._openid,
+                nickname: order.userNickname || '微信用户',
+                avatar: order.userAvatar || '',
+                count: dish.count,
+                isMe: order._openid === currentOpenid
+              })
             }
           })
         })
 
+        // 对每个菜品的订单列表按以下规则排序:
+        // 1. 我的订单排在最前面
+        // 2. 其他人按订单时间排序(先点的在前)
+        // 3. 最多显示5个
+        Object.keys(dishOrdersMap).forEach(dishId => {
+          const orders = dishOrdersMap[dishId]
+          orders.sort((a, b) => {
+            if (a.isMe && !b.isMe) return -1
+            if (!a.isMe && b.isMe) return 1
+            return 0
+          })
+          // 限制最多5个
+          dishOrdersMap[dishId] = orders.slice(0, 5)
+        })
+
         this.setData({
-          othersOrders: othersOrders,
-          othersOrdersMap: dishCountMap
+          dishOrdersMap: dishOrdersMap
         })
       }
     } catch (err) {
-      console.error('加载其他人订单失败', err)
+      console.error('加载订单失败', err)
     }
   },
 
@@ -463,7 +490,8 @@ Page({
     })
 
     this.updateCartCount()
-    this.updateMyCartMap() // 实时更新我的购物车映射
+    // 重新加载订单以更新显示
+    this.loadOthersOrders()
 
     wx.showToast({
       title: '已加入购物车',
@@ -479,20 +507,6 @@ Page({
     const cart = app.getCart()
     const count = cart.reduce((sum, item) => sum + item.count, 0)
     this.setData({ cartCount: count })
-  },
-
-  /**
-   * 更新我的购物车映射
-   */
-  updateMyCartMap() {
-    const cart = app.getCart()
-    const myCartMap = {}
-
-    cart.forEach(item => {
-      myCartMap[item._id] = item.count
-    })
-
-    this.setData({ myCartMap: myCartMap })
   },
 
   /**
