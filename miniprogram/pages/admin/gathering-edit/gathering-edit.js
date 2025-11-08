@@ -75,6 +75,12 @@ Page({
       if (res.result.success) {
         const item = res.result.data.find(g => g._id === id)
         if (item) {
+          // 确保 invitedGuests 是一个字符串数组
+          const invitedGuests = (item.invitedGuests || []).map(String)
+
+          console.log('加载的受邀访客:', invitedGuests)
+          console.log('所有受邀访客:', this.data.allInvitedGuests.map(u => u._openid))
+
           this.setData({
             formData: {
               theme: item.theme,
@@ -83,7 +89,7 @@ Page({
               hasLunch: item.meals.includes('lunch'),
               hasDinner: item.meals.includes('dinner')
             },
-            selectedGuests: item.invitedGuests || []
+            selectedGuests: invitedGuests
           })
         }
       }
@@ -151,8 +157,14 @@ Page({
    */
   onGuestCheckboxChange(e) {
     const selectedGuests = e.detail.value
+    console.log('checkbox change:', selectedGuests)
+
+    // 去重,防止重复添加
+    const uniqueGuests = [...new Set(selectedGuests)]
+    console.log('去重后:', uniqueGuests)
+
     this.setData({
-      selectedGuests: selectedGuests
+      selectedGuests: uniqueGuests
     })
   },
 

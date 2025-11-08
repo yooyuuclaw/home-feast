@@ -60,12 +60,17 @@
   border-radius: 16rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
+  transition: all 0.3s ease;
 }
 
-/* 已点过的菜品 - 降低对比度 */
+/* 已点过的菜品 - 只让图片变暗,文字和按钮不变 */
+.ordered-dish .dish-card {
+  background: #F5F5F5;
+}
+
 .ordered-dish .dish-image {
-  filter: contrast(0.7) brightness(1.1);
-  opacity: 0.85;
+  opacity: 0.5;
+  filter: grayscale(30%);
 }
 
 .dish-image-wrapper {
