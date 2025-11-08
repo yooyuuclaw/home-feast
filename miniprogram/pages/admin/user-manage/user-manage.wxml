@@ -1,21 +1,38 @@
 <!-- pages/admin/user-manage/user-manage.wxml -->
 <view class="container user-manage-container">
+  <!-- 顶部标题栏 -->
+  <view class="header-bar">
+    <view class="header-left">
+      <view class="header-title">👥 用户管理</view>
+      <view class="user-count">共 {{users.length}} 位</view>
+    </view>
+    <view class="sort-btn" bindtap="selectSort">
+      <text class="sort-icon">⇅</text>
+      <text class="sort-text">{{currentSortLabel}}</text>
+    </view>
+  </view>
+
   <view wx:if="{{loading}}" class="loading">加载中...</view>
 
   <view wx:elif="{{users.length === 0}}" class="empty-state">
     <text>暂无用户</text>
   </view>
 
-  <view wx:else class="user-list">
-    <view wx:for="{{users}}" wx:key="_id" class="user-card">
-      <image wx:if="{{item.avatar}}" class="user-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
-      <view wx:else class="user-avatar-placeholder">{{item.nickname ? item.nickname.charAt(0) : '?'}}</view>
-
-      <view class="user-info">
-        <view class="user-name">{{item.nickname}}</view>
-        <view class="user-role {{item.role}}">{{item.roleName}}</view>
+  <view wx:else class="user-grid">
+    <view wx:for="{{displayUsers}}" wx:key="_id" class="user-card">
+      <!-- 用户头像 -->
+      <view class="user-avatar-wrapper">
+        <image wx:if="{{item.avatar}}" class="user-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+        <view wx:else class="user-avatar-placeholder">{{item.nickname ? item.nickname.charAt(0) : '?'}}</view>
       </view>
 
+      <!-- 用户信息 -->
+      <view class="user-info">
+        <view class="user-name">{{item.nickname}}</view>
+        <view class="user-role-badge {{item.role}}">{{item.roleName}}</view>
+      </view>
+
+      <!-- 操作按钮 -->
       <button
         class="role-btn"
         bindtap="changeRole"

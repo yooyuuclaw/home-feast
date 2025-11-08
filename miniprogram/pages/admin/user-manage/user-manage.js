@@ -4,9 +4,13 @@ const { getAllRoles, getRoleName } = require('../../../utils/roles.js')
 Page({
   data: {
     users: [],
+    displayUsers: [], // 用于显示的排序后的用户列表
     loading: true,
     allRoles: [],
-    roleNames: []
+    roleNames: [],
+    sortOptions: ['访问次数', '总在线时长', '最后访问时间'],
+    currentSortIndex: 0,
+    currentSortLabel: '访问次数'
   },
 
   onLoad() {
@@ -23,30 +27,89 @@ Page({
     try {
       this.setData({ loading: true })
 
-      const res = await wx.cloud.callFunction({
+      // 获取用户列表
+      const userRes = await wx.cloud.callFunction({
         name: 'user',
         data: {
           action: 'getAllUsers'
         }
       })
 
-      if (res.result.success) {
-        // 为每个用户添加角色显示名称
-        const users = res.result.data.map(user => ({
+      // 获取用户活动统计
+      const statsRes = await wx.cloud.callFunction({
+        name: 'user-activity',
+        data: {
+          action: 'getUserStats'
+        }
+      })
+
+      if (userRes.result.success) {
+        // 合并用户数据和统计数据
+        const statsMap = {}
+        if (statsRes.result.success) {
+          statsRes.result.data.forEach(stat => {
+            statsMap[stat._id] = stat
+          })
+        }
+
+        const users = userRes.result.data.map(user => ({
           ...user,
-          roleName: getRoleName(user.role)
+          roleName: getRoleName(user.role),
+          visitCount: statsMap[user._openid]?.visitCount || 0,
+          totalDuration: statsMap[user._openid]?.totalDuration || 0,
+          lastOnlineTime: statsMap[user._openid]?.lastOnlineTime || 0
         }))
 
         this.setData({
           users: users,
           loading: false
         })
+
+        // 应用当前排序
+        this.sortUsers(this.data.currentSortIndex)
       }
     } catch (err) {
       console.error('加载用户失败', err)
       this.setData({ loading: false })
       wx.showToast({ title: '加载失败', icon: 'none' })
     }
+  },
+
+  /**
+   * 选择排序方式
+   */
+  selectSort() {
+    wx.showActionSheet({
+      itemList: this.data.sortOptions,
+      success: (res) => {
+        this.sortUsers(res.tapIndex)
+      }
+    })
+  },
+
+  /**
+   * 排序用户列表
+   */
+  sortUsers(sortIndex) {
+    const users = [...this.data.users]
+
+    switch(sortIndex) {
+      case 0: // 访问次数
+        users.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0))
+        break
+      case 1: // 总在线时长
+        users.sort((a, b) => (b.totalDuration || 0) - (a.totalDuration || 0))
+        break
+      case 2: // 最后访问时间
+        users.sort((a, b) => (b.lastOnlineTime || 0) - (a.lastOnlineTime || 0))
+        break
+    }
+
+    this.setData({
+      displayUsers: users,
+      currentSortIndex: sortIndex,
+      currentSortLabel: this.data.sortOptions[sortIndex]
+    })
   },
 
   /**
