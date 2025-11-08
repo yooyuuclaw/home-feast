@@ -43,17 +43,14 @@
 
       <!-- 操作按钮 -->
       <view class="dish-actions">
-        <button class="action-btn edit-btn" bindtap="editDish" data-id="{{item._id}}">
+        <button class="action-btn" bindtap="editDish" data-id="{{item._id}}">
           <text class="btn-icon">✏️</text>
-          <text class="btn-text">编辑</text>
         </button>
-        <button class="action-btn toggle-btn" bindtap="toggleStatus" data-id="{{item._id}}" data-status="{{item.status}}">
+        <button class="action-btn" bindtap="toggleStatus" data-id="{{item._id}}" data-status="{{item.status}}">
           <text class="btn-icon">{{item.status === 'online' ? '📦' : '📤'}}</text>
-          <text class="btn-text">{{item.status === 'online' ? '下架' : '上架'}}</text>
         </button>
-        <button class="action-btn delete-btn" bindtap="deleteDish" data-id="{{item._id}}">
+        <button class="action-btn" bindtap="deleteDish" data-id="{{item._id}}">
           <text class="btn-icon">🗑️</text>
-          <text class="btn-text">删除</text>
         </button>
       </view>
     </view>

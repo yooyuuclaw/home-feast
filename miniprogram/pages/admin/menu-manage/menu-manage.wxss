@@ -175,20 +175,22 @@
 .dish-actions {
   display: flex;
   padding: 12rpx;
-  gap: 8rpx;
+  gap: 12rpx;
+  justify-content: center;
 }
 
 .action-btn {
-  flex: 1;
+  width: 68rpx;
+  height: 68rpx;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16rpx 8rpx;
-  border-radius: 12rpx;
-  font-size: 22rpx;
+  padding: 0;
+  border-radius: 50%;
   border: none;
+  background: #F5F5F5;
   transition: all 0.2s ease;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.08);
 }
 
 .action-btn::after {
@@ -196,34 +198,14 @@
 }
 
 .action-btn:active {
-  transform: scale(0.95);
-  opacity: 0.8;
+  transform: scale(0.9);
+  background: #E8E8E8;
+  box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.12);
 }
 
 .btn-icon {
-  font-size: 32rpx;
-  margin-bottom: 6rpx;
+  font-size: 36rpx;
   line-height: 1;
-}
-
-.btn-text {
-  font-size: 22rpx;
-  font-weight: 500;
-}
-
-.edit-btn {
-  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-  color: #1976D2;
-}
-
-.toggle-btn {
-  background: linear-gradient(135deg, #FFF9E6 0%, #FFE9A8 100%);
-  color: #F57C00;
-}
-
-.delete-btn {
-  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
-  color: #D32F2F;
 }
 
 /* 加载状态 */
