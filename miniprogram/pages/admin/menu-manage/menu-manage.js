@@ -57,6 +57,14 @@ Page({
   },
 
   /**
+   * 获取分类图标
+   */
+  getCategoryIcon(categoryId) {
+    const category = CATEGORIES.find(cat => cat.id === categoryId)
+    return category ? category.icon : '🍽️'
+  },
+
+  /**
    * 添加菜品
    */
   addDish() {
