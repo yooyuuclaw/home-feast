@@ -39,7 +39,7 @@ Page({
       const statsRes = await wx.cloud.callFunction({
         name: 'user-activity',
         data: {
-          action: 'getUserStats'
+          action: 'getStatistics'
         }
       })
 
@@ -48,17 +48,20 @@ Page({
         const statsMap = {}
         if (statsRes.result.success) {
           statsRes.result.data.forEach(stat => {
-            statsMap[stat._id] = stat
+            statsMap[stat._openid] = stat
           })
         }
 
         const users = userRes.result.data.map(user => ({
           ...user,
           roleName: getRoleName(user.role),
-          visitCount: statsMap[user._openid]?.visitCount || 0,
+          visitCount: statsMap[user._openid]?.sessionCount || 0,
           totalDuration: statsMap[user._openid]?.totalDuration || 0,
           lastOnlineTime: statsMap[user._openid]?.lastOnlineTime || 0
         }))
+
+        console.log('用户数据:', users)
+        console.log('统计数据:', statsRes.result.data)
 
         this.setData({
           users: users,
