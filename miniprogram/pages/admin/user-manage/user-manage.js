@@ -45,19 +45,20 @@ Page({
 
       if (userRes.result.success) {
         // 合并用户数据和统计数据
+        // 修复：使用 _id 而不是 _openid 来匹配，因为统计数据中已移除 _openid
         const statsMap = {}
         if (statsRes.result.success) {
           statsRes.result.data.forEach(stat => {
-            statsMap[stat._openid] = stat
+            statsMap[stat._id] = stat
           })
         }
 
         const users = userRes.result.data.map(user => ({
           ...user,
           roleName: getRoleName(user.role),
-          visitCount: statsMap[user._openid]?.sessionCount || 0,
-          totalDuration: statsMap[user._openid]?.totalDuration || 0,
-          lastOnlineTime: statsMap[user._openid]?.lastOnlineTime || 0
+          visitCount: statsMap[user._id]?.sessionCount || 0,
+          totalDuration: statsMap[user._id]?.totalDuration || 0,
+          lastOnlineTime: statsMap[user._id]?.lastOnlineTime || 0
         }))
 
         console.log('用户数据:', users)
