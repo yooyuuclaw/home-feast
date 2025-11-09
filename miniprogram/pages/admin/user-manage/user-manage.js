@@ -151,11 +151,24 @@ Page({
           if (result.result.success) {
             wx.showToast({ title: '更新成功', icon: 'success' })
             this.loadUsers()
+          } else {
+            // 显示服务端返回的具体错误信息
+            wx.showModal({
+              title: '操作失败',
+              content: result.result.message || '更新角色失败',
+              showCancel: false,
+              confirmText: '知道了'
+            })
           }
         } catch (err) {
           console.error('更新角色失败', err)
           wx.hideLoading()
-          wx.showToast({ title: '更新失败', icon: 'none' })
+          wx.showModal({
+            title: '操作失败',
+            content: '网络错误，请重试',
+            showCancel: false,
+            confirmText: '知道了'
+          })
         }
       }
     })
