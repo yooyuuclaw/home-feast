@@ -36,27 +36,30 @@
 
   <!-- 日志列表 -->
   <view class="logs-list" wx:if="{{!loading}}">
-    <view class="log-item {{log.levelClass}}"
+    <view class="log-item {{item.levelClass}}"
           wx:for="{{logs}}"
+          wx:for-item="item"
+          wx:for-index="idx"
           wx:key="_id"
           bindtap="viewDetail"
-          data-log="{{log}}">
+          data-log="{{item}}">
       <view class="log-header">
         <view class="log-action">
-          <text class="success-icon {{log.success ? 'success' : 'failed'}}">{{log.successIcon}}</text>
-          <text class="action-name">{{log.actionName}}</text>
+          <text class="success-icon {{item.success ? 'success' : 'failed'}}">{{item.successIcon}}</text>
+          <text class="action-name">{{item.actionName}}</text>
         </view>
-        <text class="log-time">{{log.timeStr}}</text>
+        <text class="log-time">{{item.timeStr}}</text>
       </view>
 
       <view class="log-content">
-        <text class="log-message">{{log.message}}</text>
+        <text class="log-message">{{item.message}}</text>
       </view>
 
       <view class="log-meta">
-        <text class="meta-item">用户: {{log.userId}}</text>
-        <text class="meta-item">角色: {{log.userRole}}</text>
-        <text class="meta-item level-badge {{log.levelClass}}">{{log.levelName}}</text>
+        <text class="meta-item">用户ID: {{item.userId}}</text>
+        <text class="meta-item">角色: {{item.userRole}}</text>
+        <text class="meta-item">目标: {{item.targetType}}</text>
+        <text class="meta-item level-badge {{item.levelClass}}">{{item.levelName}}</text>
       </view>
     </view>
 

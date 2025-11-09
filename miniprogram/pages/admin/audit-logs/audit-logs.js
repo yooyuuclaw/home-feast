@@ -55,14 +55,27 @@ Page({
       })
 
       if (res.result.success) {
-        const logs = res.result.data.map(log => ({
-          ...log,
-          actionName: ACTION_NAMES[log.action] || log.action,
-          levelName: LEVEL_NAMES[log.level] || log.level,
-          timeStr: this.formatTime(log.timestamp),
-          levelClass: this.getLevelClass(log.level),
-          successIcon: log.success ? '✓' : '✗'
-        }))
+        const logs = res.result.data.map(log => {
+          // 创建一个纯净的对象，只包含需要的字段
+          return {
+            _id: log._id || '',
+            action: log.action || '',
+            actionName: ACTION_NAMES[log.action] || log.action || '',
+            level: log.level || '',
+            levelName: LEVEL_NAMES[log.level] || log.level || '',
+            levelClass: this.getLevelClass(log.level),
+            userId: log.userId || '',
+            userRole: log.userRole || '',
+            targetType: log.targetType || '',
+            targetId: log.targetId || '',
+            message: log.message || '',
+            success: log.success === true,
+            successIcon: log.success ? '✓' : '✗',
+            timestamp: log.timestamp || '',
+            timeStr: this.formatTime(log.timestamp),
+            details: log.details || {}
+          }
+        })
 
         this.setData({
           logs: logs,
@@ -113,15 +126,16 @@ Page({
   viewDetail(e) {
     const log = e.currentTarget.dataset.log
 
-    // 格式化详细信息
-    let detailText = `操作: ${log.actionName}\n`
+    // 格式化详细信息 - 显示所有字段
+    let detailText = `操作: ${log.actionName || log.action}\n`
     detailText += `时间: ${log.timeStr}\n`
-    detailText += `操作用户: ${log.userId}\n`
-    detailText += `用户角色: ${log.userRole}\n`
-    detailText += `目标类型: ${log.targetType}\n`
-    detailText += `目标ID: ${log.targetId}\n`
-    detailText += `状态: ${log.success ? '成功' : '失败'}\n`
-    detailText += `说明: ${log.message}\n`
+    detailText += `操作用户ID: ${log.userId || '(未记录)'}\n`
+    detailText += `用户角色: ${log.userRole || '(未记录)'}\n`
+    detailText += `目标类型: ${log.targetType || '(未记录)'}\n`
+    detailText += `目标ID: ${log.targetId || '(未记录)'}\n`
+    detailText += `操作级别: ${log.levelName || log.level}\n`
+    detailText += `状态: ${log.success ? '✅ 成功' : '❌ 失败'}\n`
+    detailText += `说明: ${log.message || '(无)'}\n`
 
     if (log.details && Object.keys(log.details).length > 0) {
       detailText += `\n详细信息:\n${JSON.stringify(log.details, null, 2)}`
