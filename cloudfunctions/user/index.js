@@ -1,6 +1,7 @@
 // cloudfunctions/user/index.js
 const cloud = require('wx-server-sdk')
 const { isValidRole } = require('./constants.js')
+const { logUserRoleUpdate, logPermissionDenied } = require('./auditLogger.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -123,6 +124,15 @@ async function getUserInfo(openid) {
 async function updateUserRole(event, openid) {
   const isAdmin = await checkAdmin(openid)
   if (!isAdmin) {
+    // 审计日志：记录权限被拒绝
+    await logPermissionDenied(
+      openid,
+      'non-admin',
+      'updateUserRole',
+      'user',
+      event.userId || '',
+      '非管理员尝试修改用户角色'
+    )
     return {
       success: false,
       message: '无权限操作'
@@ -160,15 +170,7 @@ async function updateUserRole(event, openid) {
 
   const currentUser = currentUserRes.data[0]
 
-  // 安全检查2: 禁止管理员修改自己的角色
-  if (currentUser._id === userId) {
-    return {
-      success: false,
-      message: '不能修改自己的角色'
-    }
-  }
-
-  // 安全检查3: 如果要将某人从管理员降权，确保至少还有一个管理员
+  // 安全检查3: 获取目标用户信息
   const targetUserRes = await db.collection('users').doc(userId).get()
 
   if (!targetUserRes.data) {
@@ -180,7 +182,25 @@ async function updateUserRole(event, openid) {
 
   const targetUser = targetUserRes.data
 
-  // 如果目标用户当前是管理员，且要改为非管理员角色
+  // 安全检查2: 禁止管理员修改自己的角色
+  if (currentUser._id === userId) {
+    // 审计日志：记录管理员尝试修改自己的角色
+    await logUserRoleUpdate(
+      currentUser._id,
+      currentUser.role,
+      userId,
+      targetUser.role,
+      role,
+      false,
+      '管理员尝试修改自己的角色（被拒绝）'
+    )
+    return {
+      success: false,
+      message: '不能修改自己的角色'
+    }
+  }
+
+  // 安全检查4: 如果要将某人从管理员降权，确保至少还有一个管理员
   if (targetUser.role === 'admin' && role !== 'admin') {
     // 查询系统中所有管理员
     const allAdminsRes = await db.collection('users').where({
@@ -201,6 +221,17 @@ async function updateUserRole(event, openid) {
       role: role
     }
   })
+
+  // 审计日志：记录成功的角色修改
+  await logUserRoleUpdate(
+    currentUser._id,
+    currentUser.role,
+    userId,
+    targetUser.role,
+    role,
+    true,
+    `成功将用户 ${targetUser.nickname || targetUser._id} 的角色从 ${targetUser.role} 修改为 ${role}`
+  )
 
   return {
     success: true,

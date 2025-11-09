@@ -1,6 +1,7 @@
 // cloudfunctions/order/index.js
 const cloud = require('wx-server-sdk')
 const { isValidOrderStatus } = require('./constants.js')
+const { logOrderDelete, logPermissionDenied } = require('./auditLogger.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -322,8 +323,20 @@ async function deleteOrder(event, openid) {
  * 安全修复：在执行删除前二次验证权限，防止竞态条件
  */
 async function adminDeleteOrder(event, openid) {
+  // 首先获取管理员信息用于审计日志
+  const adminInfo = await getUserInfo(openid)
+
   const isAdmin = await checkAdmin(openid)
   if (!isAdmin) {
+    // 审计日志：记录未授权的删除尝试
+    await logPermissionDenied(
+      adminInfo?._id || openid,
+      adminInfo?.role || 'unknown',
+      'adminDeleteOrder',
+      'order',
+      event.id || '',
+      '非管理员尝试删除订单'
+    )
     return {
       success: false,
       message: '无权限操作'
@@ -349,10 +362,25 @@ async function adminDeleteOrder(event, openid) {
     }
   }
 
+  const orderInfo = orderRes.data
+
   // 安全修复：在执行关键操作前再次验证权限
   // 防止在第一次验证后、删除操作前，用户角色被修改
   const isStillAdmin = await checkAdmin(openid)
   if (!isStillAdmin) {
+    // 审计日志：记录权限变更导致的操作取消
+    await logOrderDelete(
+      adminInfo._id,
+      'admin-revoked',
+      id,
+      {
+        userName: orderInfo.userName,
+        dishCount: orderInfo.dishes?.length || 0,
+        gatheringDay: orderInfo.gatheringDayTheme || orderInfo.gatheringDayDate
+      },
+      false,
+      '权限在操作过程中被撤销'
+    )
     return {
       success: false,
       message: '权限已变更，操作取消'
@@ -361,6 +389,22 @@ async function adminDeleteOrder(event, openid) {
 
   // 管理员可以删除任何订单
   await db.collection('orders').doc(id).remove()
+
+  // 审计日志：记录成功的订单删除
+  await logOrderDelete(
+    adminInfo._id,
+    adminInfo.role,
+    id,
+    {
+      userName: orderInfo.userName,
+      userId: orderInfo.userId,
+      dishCount: orderInfo.dishes?.length || 0,
+      gatheringDay: orderInfo.gatheringDayTheme || orderInfo.gatheringDayDate,
+      status: orderInfo.status
+    },
+    true,
+    `管理员删除了 ${orderInfo.userName} 的订单（${orderInfo.dishes?.length || 0}道菜）`
+  )
 
   return {
     success: true,
