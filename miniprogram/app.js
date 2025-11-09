@@ -33,7 +33,9 @@ App({
     userInfo: null,
     isAdmin: false,
     cart: [], // 购物车数据
-    selectedGathering: null // 当前选中的聚餐日
+    selectedGathering: null, // 当前选中的聚餐日
+    lastInitTime: null, // 上次初始化用户信息的时间
+    INIT_CACHE_DURATION: 30 * 60 * 1000 // 30分钟缓存时间
   },
 
   /**
@@ -62,9 +64,26 @@ App({
   },
 
   // 检查登录状态
+  // 安全修复 #10: 添加客户端缓存，减少云函数调用频率
   async checkLoginStatus() {
     try {
-      // 先获取微信用户信息
+      // 检查缓存是否有效
+      const now = Date.now()
+      const cachedUserInfo = wx.getStorageSync('userInfo')
+      const lastInitTime = wx.getStorageSync('lastInitTime')
+
+      if (cachedUserInfo && lastInitTime &&
+          (now - lastInitTime < this.globalData.INIT_CACHE_DURATION)) {
+        // 使用缓存
+        this.globalData.userInfo = cachedUserInfo
+        this.globalData.isAdmin = cachedUserInfo.role === 'admin'
+        this.globalData.lastInitTime = lastInitTime
+        console.log('使用缓存的用户信息，有效期至:', new Date(lastInitTime + this.globalData.INIT_CACHE_DURATION))
+        return
+      }
+
+      // 缓存过期或不存在，调用云函数
+      console.log('缓存过期或不存在，重新获取用户信息')
       const userProfile = await this.getUserProfile()
 
       // 调用云函数初始化用户，传入昵称和头像
@@ -79,6 +98,12 @@ App({
       if (res.result.success) {
         this.globalData.userInfo = res.result.data
         this.globalData.isAdmin = res.result.data.role === 'admin'
+        this.globalData.lastInitTime = now
+
+        // 更新缓存
+        wx.setStorageSync('userInfo', res.result.data)
+        wx.setStorageSync('lastInitTime', now)
+        console.log('用户信息已更新并缓存')
       }
     } catch (err) {
       console.error('检查登录状态失败', err)

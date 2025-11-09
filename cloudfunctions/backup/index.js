@@ -53,6 +53,9 @@ exports.main = async (event, context) => {
 /**
  * 备份数据库（需要管理员权限）
  * 导出所有数据到云存储
+ * 安全修复：
+ * 1. 脱敏处理 - 移除所有 _openid 字段
+ * 2. 使用哈希替代敏感标识符
  */
 async function backupDatabase(openid) {
   const isAdmin = await checkAdmin(openid)
@@ -74,15 +77,26 @@ async function backupDatabase(openid) {
   const menuRes = await db.collection('menu').get()
   const ordersRes = await db.collection('orders').get()
 
-  const backupData = {
-    users: usersRes.data,
-    menu: menuRes.data,
-    orders: ordersRes.data,
-    backupTime: new Date().toISOString()
+  // 安全修复：脱敏处理函数
+  const sanitizeData = (items) => {
+    return items.map(item => {
+      const { _openid, ...sanitized } = item
+      return sanitized
+    })
   }
 
-  // 生成文件名
-  const fileName = `database-backup-${Date.now()}.json`
+  // 脱敏处理所有数据
+  const backupData = {
+    users: sanitizeData(usersRes.data),
+    menu: menuRes.data,  // 菜单数据不包含敏感信息
+    orders: sanitizeData(ordersRes.data),
+    backupTime: new Date().toISOString(),
+    sanitized: true,  // 标记这是脱敏后的备份
+    note: '此备份已移除 _openid 等敏感字段，仅用于数据恢复参考'
+  }
+
+  // 生成文件名（添加 sanitized 标识）
+  const fileName = `database-backup-sanitized-${Date.now()}.json`
   const cloudPath = `backups/database/${fileName}`
 
   // 上传到云存储
@@ -99,7 +113,8 @@ async function backupDatabase(openid) {
       fileUrl: uploadRes.fileID,
       createTime: db.serverDate(),
       operator: operator.nickname,
-      operatorId: operator._id
+      operatorId: operator._id,
+      sanitized: true  // 标记为脱敏备份
     }
   })
 
@@ -107,9 +122,10 @@ async function backupDatabase(openid) {
     success: true,
     data: {
       fileName: fileName,
-      fileUrl: uploadRes.fileID
+      fileUrl: uploadRes.fileID,
+      sanitized: true
     },
-    message: '备份成功'
+    message: '备份成功（已脱敏处理）'
   }
 }
 

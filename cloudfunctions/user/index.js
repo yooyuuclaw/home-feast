@@ -1,5 +1,6 @@
 // cloudfunctions/user/index.js
 const cloud = require('wx-server-sdk')
+const { isValidRole } = require('../common/constants.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -46,10 +47,11 @@ exports.main = async (event, context) => {
     }
   } catch (err) {
     console.error('用户操作失败', err)
+    // 安全修复 #12: 不返回详细错误信息，避免泄露系统信息
     return {
       success: false,
-      message: '操作失败',
-      error: err
+      message: '操作失败，请稍后重试',
+      errorCode: err.code || err.errCode || 'UNKNOWN_ERROR'
     }
   }
 }
@@ -136,9 +138,8 @@ async function updateUserRole(event, openid) {
     }
   }
 
-  // 验证角色是否有效（支持五种角色）
-  const validRoles = ['uninvited_guest', 'invited_guest', 'regular', 'chef', 'admin']
-  if (!validRoles.includes(role)) {
+  // 验证角色是否有效（使用统一的常量配置）
+  if (!isValidRole(role)) {
     return {
       success: false,
       message: '无效的角色'

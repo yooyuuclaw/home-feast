@@ -195,6 +195,7 @@ async function getUserOrders(event, openid) {
 /**
  * 获取所有订单（需要管理员权限）
  * 参数：status（可选）- 按状态筛选
+ * 安全修复：即使对管理员也移除 _openid 字段
  */
 async function getAllOrders(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -217,9 +218,15 @@ async function getAllOrders(event, openid) {
 
   const res = await query.orderBy('createTime', 'desc').get()
 
+  // 安全修复：移除订单数据中的 _openid 字段（即使对管理员）
+  const safeOrders = res.data.map(order => {
+    const { _openid, ...safeOrder } = order
+    return safeOrder
+  })
+
   return {
     success: true,
-    data: res.data,
+    data: safeOrders,
     message: '获取成功'
   }
 }
