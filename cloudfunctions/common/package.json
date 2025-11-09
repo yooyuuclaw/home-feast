@@ -1,0 +1,9 @@
+{
+  "name": "common",
+  "version": "1.0.0",
+  "description": "公共模块 - 统一常量和错误处理",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

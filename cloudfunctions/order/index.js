@@ -1,5 +1,6 @@
 // cloudfunctions/order/index.js
 const cloud = require('wx-server-sdk')
+const { isValidOrderStatus } = require('./constants.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -253,9 +254,8 @@ async function updateOrderStatus(event, openid) {
     }
   }
 
-  // 验证状态是否有效
-  const validStatus = ['pending', 'confirmed', 'completed']
-  if (!validStatus.includes(status)) {
+  // 验证状态是否有效（使用统一的常量配置）
+  if (!isValidOrderStatus(status)) {
     return {
       success: false,
       message: '无效的状态'

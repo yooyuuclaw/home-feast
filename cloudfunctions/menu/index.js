@@ -1,5 +1,7 @@
 // cloudfunctions/menu/index.js
 const cloud = require('wx-server-sdk')
+const { isValidCategory } = require('./constants.js')
+const { handleErrorWithType } = require('./errorHandler.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -47,10 +49,11 @@ exports.main = async (event, context) => {
     }
   } catch (err) {
     console.error('菜单操作失败', err)
+    // 安全修复 #12: 不返回详细错误信息，避免泄露系统信息
     return {
       success: false,
-      message: '操作失败',
-      error: err
+      message: '操作失败，请稍后重试',
+      errorCode: err.code || err.errCode || 'UNKNOWN_ERROR'
     }
   }
 }
@@ -119,9 +122,8 @@ async function addDish(event, openid) {
     }
   }
 
-  // 验证分类是否有效
-  const validCategories = ['cold_dish', 'main_dish', 'stir_fry', 'soup', 'staple', 'dessert', 'breakfast']
-  if (!validCategories.includes(category)) {
+  // 验证分类是否有效（使用统一的常量配置）
+  if (!isValidCategory(category)) {
     return {
       success: false,
       message: '无效的分类'
@@ -175,9 +177,8 @@ async function updateDish(event, openid) {
   if (name !== undefined) updateData.name = name
   if (image !== undefined) updateData.image = image
   if (category !== undefined) {
-    // 验证分类是否有效
-    const validCategories = ['cold_dish', 'main_dish', 'stir_fry', 'soup', 'staple', 'dessert', 'breakfast']
-    if (!validCategories.includes(category)) {
+    // 验证分类是否有效（使用统一的常量配置）
+    if (!isValidCategory(category)) {
       return {
         success: false,
         message: '无效的分类'

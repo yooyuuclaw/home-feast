@@ -1,5 +1,6 @@
 // cloudfunctions/statistics/index.js
 const cloud = require('wx-server-sdk')
+const { DISH_CATEGORIES, CATEGORY_NAMES } = require('./constants.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -160,16 +161,11 @@ async function getCategoryStatistics(openid) {
   const ordersRes = await db.collection('orders').get()
   const orders = ordersRes.data
 
-  // 定义分类
-  const categories = [
-    { id: 'cold_dish', name: '凉菜' },
-    { id: 'main_dish', name: '主菜' },
-    { id: 'stir_fry', name: '小炒' },
-    { id: 'soup', name: '汤' },
-    { id: 'staple', name: '主食' },
-    { id: 'dessert', name: '甜品' },
-    { id: 'breakfast', name: '早餐' }
-  ]
+  // 安全修复 #11: 使用统一的常量配置，不再硬编码分类列表
+  const categories = Object.values(DISH_CATEGORIES).map(categoryId => ({
+    id: categoryId,
+    name: CATEGORY_NAMES[categoryId]
+  }))
 
   // 统计每个分类的菜品数量
   const statistics = {}

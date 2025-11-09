@@ -1,6 +1,6 @@
 // cloudfunctions/user/index.js
 const cloud = require('wx-server-sdk')
-const { isValidRole } = require('../common/constants.js')
+const { isValidRole } = require('./constants.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
