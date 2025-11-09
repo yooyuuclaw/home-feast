@@ -1,5 +1,6 @@
 // cloudfunctions/backup/index.js
 const cloud = require('wx-server-sdk')
+const { logBackupCreate, logPermissionDenied } = require('./auditLogger.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -58,74 +59,112 @@ exports.main = async (event, context) => {
  * 2. 使用哈希替代敏感标识符
  */
 async function backupDatabase(openid) {
+  // 获取用户信息用于审计日志
+  const userRes = await db.collection('users').where({
+    _openid: openid
+  }).get()
+
+  if (userRes.data.length === 0) {
+    return {
+      success: false,
+      message: '用户不存在'
+    }
+  }
+
+  const operator = userRes.data[0]
+
   const isAdmin = await checkAdmin(openid)
   if (!isAdmin) {
+    // 审计日志：记录未授权的备份尝试
+    await logPermissionDenied(
+      operator._id,
+      operator.role,
+      'backupDatabase',
+      'backup',
+      '',
+      '非管理员尝试创建数据备份'
+    )
     return {
       success: false,
       message: '无权限操作'
     }
   }
 
-  // 获取用户信息
-  const userRes = await db.collection('users').where({
-    _openid: openid
-  }).get()
-  const operator = userRes.data[0]
+  try {
+    // 获取所有集合的数据
+    const usersRes = await db.collection('users').get()
+    const menuRes = await db.collection('menu').get()
+    const ordersRes = await db.collection('orders').get()
 
-  // 获取所有集合的数据
-  const usersRes = await db.collection('users').get()
-  const menuRes = await db.collection('menu').get()
-  const ordersRes = await db.collection('orders').get()
-
-  // 安全修复：脱敏处理函数
-  const sanitizeData = (items) => {
-    return items.map(item => {
-      const { _openid, ...sanitized } = item
-      return sanitized
-    })
-  }
-
-  // 脱敏处理所有数据
-  const backupData = {
-    users: sanitizeData(usersRes.data),
-    menu: menuRes.data,  // 菜单数据不包含敏感信息
-    orders: sanitizeData(ordersRes.data),
-    backupTime: new Date().toISOString(),
-    sanitized: true,  // 标记这是脱敏后的备份
-    note: '此备份已移除 _openid 等敏感字段，仅用于数据恢复参考'
-  }
-
-  // 生成文件名（添加 sanitized 标识）
-  const fileName = `database-backup-sanitized-${Date.now()}.json`
-  const cloudPath = `backups/database/${fileName}`
-
-  // 上传到云存储
-  const uploadRes = await cloud.uploadFile({
-    cloudPath: cloudPath,
-    fileContent: JSON.stringify(backupData, null, 2)
-  })
-
-  // 记录备份历史
-  await db.collection('backups').add({
-    data: {
-      type: 'database',
-      fileName: fileName,
-      fileUrl: uploadRes.fileID,
-      createTime: db.serverDate(),
-      operator: operator.nickname,
-      operatorId: operator._id,
-      sanitized: true  // 标记为脱敏备份
+    // 安全修复：脱敏处理函数
+    const sanitizeData = (items) => {
+      return items.map(item => {
+        const { _openid, ...sanitized } = item
+        return sanitized
+      })
     }
-  })
 
-  return {
-    success: true,
-    data: {
-      fileName: fileName,
-      fileUrl: uploadRes.fileID,
-      sanitized: true
-    },
-    message: '备份成功（已脱敏处理）'
+    // 脱敏处理所有数据
+    const backupData = {
+      users: sanitizeData(usersRes.data),
+      menu: menuRes.data,  // 菜单数据不包含敏感信息
+      orders: sanitizeData(ordersRes.data),
+      backupTime: new Date().toISOString(),
+      sanitized: true,  // 标记这是脱敏后的备份
+      note: '此备份已移除 _openid 等敏感字段，仅用于数据恢复参考'
+    }
+
+    // 生成文件名（添加 sanitized 标识）
+    const fileName = `database-backup-sanitized-${Date.now()}.json`
+    const cloudPath = `backups/database/${fileName}`
+
+    // 上传到云存储
+    const uploadRes = await cloud.uploadFile({
+      cloudPath: cloudPath,
+      fileContent: JSON.stringify(backupData, null, 2)
+    })
+
+    // 记录备份历史
+    await db.collection('backups').add({
+      data: {
+        type: 'database',
+        fileName: fileName,
+        fileUrl: uploadRes.fileID,
+        createTime: db.serverDate(),
+        operator: operator.nickname,
+        operatorId: operator._id,
+        sanitized: true  // 标记为脱敏备份
+      }
+    })
+
+    // 审计日志：记录成功的备份操作
+    await logBackupCreate(
+      operator._id,
+      operator.role,
+      fileName,
+      true,
+      `成功创建数据备份: ${fileName} (已脱敏)`
+    )
+
+    return {
+      success: true,
+      data: {
+        fileName: fileName,
+        fileUrl: uploadRes.fileID,
+        sanitized: true
+      },
+      message: '备份成功（已脱敏处理）'
+    }
+  } catch (err) {
+    // 审计日志：记录失败的备份操作
+    await logBackupCreate(
+      operator._id,
+      operator.role,
+      '',
+      false,
+      `备份失败: ${err.message}`
+    )
+    throw err
   }
 }
 

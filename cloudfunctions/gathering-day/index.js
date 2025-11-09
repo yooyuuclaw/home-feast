@@ -1,5 +1,6 @@
 // cloudfunctions/gathering-day/index.js
 const cloud = require('wx-server-sdk')
+const { logGatheringDelete, logPermissionDenied, logAudit, ACTION_TYPES, ACTION_LEVELS } = require('./auditLogger.js')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -234,8 +235,21 @@ async function updateGatheringDay(event, openid) {
  * 安全修复：在执行删除前二次验证权限，防止竞态条件
  */
 async function deleteGatheringDay(event, openid) {
+  // 获取管理员信息用于审计日志
+  const adminRes = await db.collection('users').where({ _openid: openid }).get()
+  const adminInfo = adminRes.data.length > 0 ? adminRes.data[0] : { _id: openid, role: 'unknown' }
+
   const isAdmin = await checkAdmin(openid)
   if (!isAdmin) {
+    // 审计日志：记录未授权的删除尝试
+    await logPermissionDenied(
+      adminInfo._id,
+      adminInfo.role,
+      'deleteGatheringDay',
+      'gathering',
+      event.id || '',
+      '非管理员尝试删除聚餐日'
+    )
     return {
       success: false,
       message: '无权限操作'
@@ -251,10 +265,29 @@ async function deleteGatheringDay(event, openid) {
     }
   }
 
+  // 获取聚餐日信息用于审计日志
+  const gatheringRes = await db.collection('gathering_days').doc(id).get()
+  if (!gatheringRes.data) {
+    return {
+      success: false,
+      message: '聚餐日不存在'
+    }
+  }
+  const gatheringInfo = gatheringRes.data
+
   // 安全修复：在执行关键操作前再次验证权限
   // 防止在第一次验证后、删除操作前，用户角色被修改
   const isStillAdmin = await checkAdmin(openid)
   if (!isStillAdmin) {
+    // 审计日志：记录权限变更导致的操作取消
+    await logGatheringDelete(
+      adminInfo._id,
+      'admin-revoked',
+      id,
+      gatheringInfo.date,
+      false,
+      '权限在操作过程中被撤销'
+    )
     return {
       success: false,
       message: '权限已变更，操作取消'
@@ -262,6 +295,16 @@ async function deleteGatheringDay(event, openid) {
   }
 
   await db.collection('gathering_days').doc(id).remove()
+
+  // 审计日志：记录成功的聚餐日删除
+  await logGatheringDelete(
+    adminInfo._id,
+    adminInfo.role,
+    id,
+    gatheringInfo.date,
+    true,
+    `成功删除聚餐日: ${gatheringInfo.theme} (${gatheringInfo.date})`
+  )
 
   return {
     success: true,

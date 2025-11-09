@@ -61,5 +61,14 @@
       </view>
       <view class="menu-arrow">›</view>
     </view>
+
+    <view class="menu-item" bindtap="goToAuditLogs">
+      <view class="menu-icon">📝</view>
+      <view class="menu-info">
+        <view class="menu-title">审计日志</view>
+        <view class="menu-desc">查看系统操作记录</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
   </view>
 </view>

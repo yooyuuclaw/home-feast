@@ -124,5 +124,14 @@ Page({
     wx.navigateTo({
       url: '/pages/admin/backup-manage/backup-manage'
     })
+  },
+
+  /**
+   * 跳转到审计日志
+   */
+  goToAuditLogs() {
+    wx.navigateTo({
+      url: '/pages/admin/audit-logs/audit-logs'
+    })
   }
 })

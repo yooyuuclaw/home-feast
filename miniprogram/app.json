@@ -13,7 +13,8 @@
     "pages/admin/menu-edit/menu-edit",
     "pages/admin/user-manage/user-manage",
     "pages/admin/backup-manage/backup-manage",
-    "pages/admin/statistics/statistics"
+    "pages/admin/statistics/statistics",
+    "pages/admin/audit-logs/audit-logs"
   ],
   "window": {
     "backgroundTextStyle": "light",

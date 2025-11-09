@@ -1,0 +1,71 @@
+<!--pages/admin/audit-logs/audit-logs.wxml-->
+<view class="container">
+  <!-- 统计卡片 -->
+  <view class="stats-card" wx:if="{{stats}}">
+    <view class="stats-title">最近7天统计</view>
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-value">{{stats.total}}</text>
+        <text class="stat-label">总日志数</text>
+      </view>
+      <view class="stat-item critical">
+        <text class="stat-value">{{stats.critical}}</text>
+        <text class="stat-label">关键操作</text>
+      </view>
+      <view class="stat-item warning">
+        <text class="stat-value">{{stats.warning}}</text>
+        <text class="stat-label">警告</text>
+      </view>
+      <view class="stat-item failed">
+        <text class="stat-value">{{stats.failedOperations}}</text>
+        <text class="stat-label">失败操作</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-btn" bindtap="selectFilter">
+      <text>筛选: {{filterOptions[currentFilterIndex]}}</text>
+      <text class="arrow">▼</text>
+    </view>
+    <view class="refresh-btn" bindtap="onRefresh">
+      <text>刷新</text>
+    </view>
+  </view>
+
+  <!-- 日志列表 -->
+  <view class="logs-list" wx:if="{{!loading}}">
+    <view class="log-item {{log.levelClass}}"
+          wx:for="{{logs}}"
+          wx:key="_id"
+          bindtap="viewDetail"
+          data-log="{{log}}">
+      <view class="log-header">
+        <view class="log-action">
+          <text class="success-icon {{log.success ? 'success' : 'failed'}}">{{log.successIcon}}</text>
+          <text class="action-name">{{log.actionName}}</text>
+        </view>
+        <text class="log-time">{{log.timeStr}}</text>
+      </view>
+
+      <view class="log-content">
+        <text class="log-message">{{log.message}}</text>
+      </view>
+
+      <view class="log-meta">
+        <text class="meta-item">用户: {{log.userId}}</text>
+        <text class="meta-item">角色: {{log.userRole}}</text>
+        <text class="meta-item level-badge {{log.levelClass}}">{{log.levelName}}</text>
+      </view>
+    </view>
+
+    <view class="empty-tip" wx:if="{{logs.length === 0}}">
+      <text>暂无审计日志</text>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>
