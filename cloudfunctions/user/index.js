@@ -114,6 +114,9 @@ async function getUserInfo(openid) {
 /**
  * 更新用户角色（需要管理员权限）
  * 参数：userId, role
+ * 安全限制：
+ * 1. 管理员不能修改自己的角色
+ * 2. 不能移除最后一个管理员
  */
 async function updateUserRole(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -142,6 +145,56 @@ async function updateUserRole(event, openid) {
     }
   }
 
+  // 安全检查1: 获取当前管理员信息
+  const currentUserRes = await db.collection('users').where({
+    _openid: openid
+  }).get()
+
+  if (currentUserRes.data.length === 0) {
+    return {
+      success: false,
+      message: '当前用户不存在'
+    }
+  }
+
+  const currentUser = currentUserRes.data[0]
+
+  // 安全检查2: 禁止管理员修改自己的角色
+  if (currentUser._id === userId) {
+    return {
+      success: false,
+      message: '不能修改自己的角色'
+    }
+  }
+
+  // 安全检查3: 如果要将某人从管理员降权，确保至少还有一个管理员
+  const targetUserRes = await db.collection('users').doc(userId).get()
+
+  if (!targetUserRes.data) {
+    return {
+      success: false,
+      message: '目标用户不存在'
+    }
+  }
+
+  const targetUser = targetUserRes.data
+
+  // 如果目标用户当前是管理员，且要改为非管理员角色
+  if (targetUser.role === 'admin' && role !== 'admin') {
+    // 查询系统中所有管理员
+    const allAdminsRes = await db.collection('users').where({
+      role: 'admin'
+    }).get()
+
+    if (allAdminsRes.data.length <= 1) {
+      return {
+        success: false,
+        message: '不能移除最后一个管理员，请先指定其他管理员'
+      }
+    }
+  }
+
+  // 执行角色更新
   await db.collection('users').doc(userId).update({
     data: {
       role: role

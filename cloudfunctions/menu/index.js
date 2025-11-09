@@ -200,6 +200,7 @@ async function updateDish(event, openid) {
 /**
  * 删除菜品（需要管理员权限）
  * 参数：id
+ * 安全修复：在执行删除前二次验证权限，防止竞态条件
  */
 async function deleteDish(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -216,6 +217,16 @@ async function deleteDish(event, openid) {
     return {
       success: false,
       message: '缺少菜品ID'
+    }
+  }
+
+  // 安全修复：在执行关键操作前再次验证权限
+  // 防止在第一次验证后、删除操作前，用户角色被修改
+  const isStillAdmin = await checkAdmin(openid)
+  if (!isStillAdmin) {
+    return {
+      success: false,
+      message: '权限已变更，操作取消'
     }
   }
 

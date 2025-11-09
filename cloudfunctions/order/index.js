@@ -123,6 +123,10 @@ async function createOrder(event, openid) {
  * 根据用户角色过滤：
  * - 受邀访客：只能看到自己被邀请的聚餐日的订单
  * - 常客及以上：可以看到所有订单
+ *
+ * 安全修复：完善受邀访客过滤逻辑
+ * - 处理没有 gatheringDayId 的旧订单
+ * - 处理快速聚餐日（通过日期匹配）
  */
 async function getUserOrders(event, openid) {
   // 获取用户信息
@@ -151,13 +155,25 @@ async function getUserOrders(event, openid) {
       .filter(day => day.invitedGuests && day.invitedGuests.includes(openid))
       .map(day => day._id)
 
+    // 找出用户被邀请的聚餐日期列表（用于匹配快速聚餐日）
+    const invitedDates = gatheringDaysRes.data
+      .filter(day => day.invitedGuests && day.invitedGuests.includes(openid))
+      .map(day => day.date)
+
     // 只保留被邀请的聚餐日的订单
     filteredOrders = res.data.filter(order => {
-      // 如果订单有聚餐日ID，检查是否在被邀请列表中
-      if (order.gatheringDayId) {
+      // 情况1: 订单有正式的聚餐日ID（非快速选项）
+      if (order.gatheringDayId && !order.gatheringDayId.startsWith('quick-')) {
         return invitedGatheringDayIds.includes(order.gatheringDayId)
       }
-      // 没有聚餐日ID的订单不显示给受邀访客
+
+      // 情况2: 快速聚餐日或有日期信息的订单（根据日期匹配）
+      if (order.gatheringDayDate) {
+        return invitedDates.includes(order.gatheringDayDate)
+      }
+
+      // 情况3: 旧订单没有聚餐日信息
+      // 出于安全考虑，不显示给受邀访客（避免泄露不相关的订单）
       return false
     })
   }
@@ -296,6 +312,7 @@ async function deleteOrder(event, openid) {
 /**
  * 管理员删除订单（需要管理员权限，可以删除任何订单）
  * 参数：id
+ * 安全修复：在执行删除前二次验证权限，防止竞态条件
  */
 async function adminDeleteOrder(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -322,6 +339,16 @@ async function adminDeleteOrder(event, openid) {
     return {
       success: false,
       message: '订单不存在'
+    }
+  }
+
+  // 安全修复：在执行关键操作前再次验证权限
+  // 防止在第一次验证后、删除操作前，用户角色被修改
+  const isStillAdmin = await checkAdmin(openid)
+  if (!isStillAdmin) {
+    return {
+      success: false,
+      message: '权限已变更，操作取消'
     }
   }
 
