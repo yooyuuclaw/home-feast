@@ -25,8 +25,8 @@ Page({
       const res = await wx.cloud.callFunction({
         name: 'menu',
         data: {
-          action: 'getList'
-          // 不传status参数，获取所有菜品
+          action: 'getList',
+          status: null // 传 null 表示获取所有状态的菜品
         }
       })
 

@@ -108,15 +108,62 @@ async function createGatheringDay(event, openid) {
 
 /**
  * 获取聚餐日列表
+ * 根据用户角色返回不同数据：
+ * - 管理员：看到所有聚餐日和完整受邀访客列表
+ * - 常客/厨师：看到所有聚餐日，但不显示具体受邀访客（只显示人数和自己是否被邀请）
+ * - 受邀访客：只看到自己被邀请的聚餐日
+ * - 未受邀访客：看不到任何聚餐日
  */
 async function listGatheringDays(event, openid) {
+  // 1. 获取用户信息
+  const userRes = await db.collection('users').where({
+    _openid: openid
+  }).get()
+
+  if (userRes.data.length === 0) {
+    return {
+      success: false,
+      message: '用户不存在'
+    }
+  }
+
+  const user = userRes.data[0]
+  const userRole = user.role
+
+  // 2. 获取所有聚餐日
   const res = await db.collection('gathering_days')
     .orderBy('date', 'desc')
     .get()
 
+  let filteredData = res.data
+
+  // 3. 根据角色过滤数据
+  if (userRole === 'invited_guest') {
+    // 受邀访客：只能看到自己被邀请的聚餐日
+    filteredData = res.data.filter(day =>
+      day.invitedGuests && day.invitedGuests.includes(openid)
+    )
+  } else if (userRole === 'uninvited_guest') {
+    // 未受邀访客：不能看到任何聚餐日
+    filteredData = []
+  }
+  // admin, chef, regular: 可以看到所有聚餐日
+
+  // 4. 脱敏处理：移除敏感字段（对非管理员）
+  if (userRole !== 'admin') {
+    filteredData = filteredData.map(day => {
+      const { invitedGuests, ...safeData } = day
+      return {
+        ...safeData,
+        invitedGuestsCount: invitedGuests ? invitedGuests.length : 0,  // 只返回人数
+        isInvited: invitedGuests ? invitedGuests.includes(openid) : false  // 只告知当前用户是否被邀请
+      }
+    })
+  }
+
   return {
     success: true,
-    data: res.data,
+    data: filteredData,
     message: '获取成功'
   }
 }

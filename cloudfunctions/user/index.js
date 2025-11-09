@@ -70,9 +70,21 @@ async function getAllUsers(openid) {
     .orderBy('createTime', 'desc')
     .get()
 
+  // 安全修复：移除敏感字段 _openid（但管理员需要它来设置受邀访客）
+  // 注意：虽然管理员可以看到 openid，但这比之前所有人都能看到要安全得多
+  const safeData = res.data.map(user => ({
+    _id: user._id,
+    _openid: user._openid,  // 管理员需要此字段来设置聚餐日的受邀访客列表
+    nickname: user.nickname,
+    avatar: user.avatar,
+    role: user.role,
+    createTime: user.createTime,
+    lastOnlineTime: user.lastOnlineTime
+  }))
+
   return {
     success: true,
-    data: res.data,
+    data: safeData,
     message: '获取成功'
   }
 }

@@ -134,7 +134,7 @@ async function getStatistics(event, openid) {
 
     return {
       _id: user._id,
-      _openid: user._openid,
+      // _openid 已移除 - 安全修复：不应暴露用户的 openid
       nickname: user.nickname || '微信用户',
       avatar: user.avatar || '',
       role: user.role,

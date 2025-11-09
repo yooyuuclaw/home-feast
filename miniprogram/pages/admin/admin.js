@@ -7,7 +7,58 @@ Page({
   },
 
   onLoad() {
-    this.loadUserInfo()
+    this.verifyAdminPermission()
+  },
+
+  /**
+   * 验证管理员权限（服务端验证）
+   */
+  async verifyAdminPermission() {
+    try {
+      // 调用云函数获取真实的用户信息（服务端验证）
+      const res = await wx.cloud.callFunction({
+        name: 'user',
+        data: { action: 'getUserInfo' }
+      })
+
+      if (res.result.success && res.result.data.role === 'admin') {
+        // 确认是管理员，加载页面数据
+        this.loadUserInfo()
+      } else {
+        // 不是管理员，返回上一页
+        wx.showModal({
+          title: '权限不足',
+          content: '您没有管理员权限',
+          showCancel: false,
+          success: () => {
+            wx.navigateBack({
+              fail: () => {
+                // 如果返回失败（可能是直接进入的），跳转到首页
+                wx.switchTab({
+                  url: '/pages/index/index'
+                })
+              }
+            })
+          }
+        })
+      }
+    } catch (err) {
+      console.error('验证管理员权限失败', err)
+      wx.showModal({
+        title: '验证失败',
+        content: '无法验证权限，请重试',
+        showCancel: false,
+        success: () => {
+          wx.navigateBack({
+            fail: () => {
+              wx.switchTab({
+                url: '/pages/index/index'
+              })
+            }
+          })
+        }
+      })
+    }
   },
 
   /**
@@ -15,19 +66,6 @@ Page({
    */
   loadUserInfo() {
     const userInfo = app.globalData.userInfo
-    const isAdmin = app.globalData.isAdmin
-
-    if (!isAdmin) {
-      wx.showModal({
-        title: '提示',
-        content: '您没有管理员权限',
-        showCancel: false,
-        success: () => {
-          wx.navigateBack()
-        }
-      })
-      return
-    }
 
     this.setData({
       userInfo: userInfo

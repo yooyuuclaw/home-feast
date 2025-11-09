@@ -117,7 +117,6 @@ Page({
       // 获取用户角色和权限
       const userRole = this.data.userInfo.role
       const canAccessAllDays = hasPermission(userRole, 'canAccessAllGatheringDays')
-      const userOpenid = this.data.userInfo._openid
 
       // 构建最终的选项列表
       const allDays = []
@@ -125,18 +124,17 @@ Page({
       // 今天
       const todayGathering = dateMap.get(todayStr)
       if (todayGathering) {
-        if (canAccessAllDays || !todayGathering.invitedGuests || todayGathering.invitedGuests.length === 0 || todayGathering.invitedGuests.includes(userOpenid)) {
-          const mealLabels = []
-          if (todayGathering.meals.includes('breakfast')) mealLabels.push('早餐')
-          if (todayGathering.meals.includes('lunch')) mealLabels.push('午餐')
-          if (todayGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+        // 云函数已经根据用户角色过滤了聚餐日，前端不需要再判断权限
+        const mealLabels = []
+        if (todayGathering.meals.includes('breakfast')) mealLabels.push('早餐')
+        if (todayGathering.meals.includes('lunch')) mealLabels.push('午餐')
+        if (todayGathering.meals.includes('dinner')) mealLabels.push('晚餐')
 
-          allDays.push({
-            ...todayGathering,
-            displayText: `${todayGathering.theme} - 今天 (${todayStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
-            dateLabel: '今天'
-          })
-        }
+        allDays.push({
+          ...todayGathering,
+          displayText: `${todayGathering.theme} - 今天 (${todayStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          dateLabel: '今天'
+        })
       } else if (canAccessAllDays) {
         allDays.push({
           _id: 'quick-today',
@@ -152,18 +150,16 @@ Page({
       // 明天
       const tomorrowGathering = dateMap.get(tomorrowStr)
       if (tomorrowGathering) {
-        if (canAccessAllDays || !tomorrowGathering.invitedGuests || tomorrowGathering.invitedGuests.length === 0 || tomorrowGathering.invitedGuests.includes(userOpenid)) {
-          const mealLabels = []
-          if (tomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
-          if (tomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
-          if (tomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+        const mealLabels = []
+        if (tomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
+        if (tomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
+        if (tomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
 
-          allDays.push({
-            ...tomorrowGathering,
-            displayText: `${tomorrowGathering.theme} - 明天 (${tomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
-            dateLabel: '明天'
-          })
-        }
+        allDays.push({
+          ...tomorrowGathering,
+          displayText: `${tomorrowGathering.theme} - 明天 (${tomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          dateLabel: '明天'
+        })
       } else if (canAccessAllDays) {
         allDays.push({
           _id: 'quick-tomorrow',
@@ -179,18 +175,16 @@ Page({
       // 后天
       const dayAfterTomorrowGathering = dateMap.get(dayAfterTomorrowStr)
       if (dayAfterTomorrowGathering) {
-        if (canAccessAllDays || !dayAfterTomorrowGathering.invitedGuests || dayAfterTomorrowGathering.invitedGuests.length === 0 || dayAfterTomorrowGathering.invitedGuests.includes(userOpenid)) {
-          const mealLabels = []
-          if (dayAfterTomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
-          if (dayAfterTomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
-          if (dayAfterTomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+        const mealLabels = []
+        if (dayAfterTomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
+        if (dayAfterTomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
+        if (dayAfterTomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
 
-          allDays.push({
-            ...dayAfterTomorrowGathering,
-            displayText: `${dayAfterTomorrowGathering.theme} - 后天 (${dayAfterTomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
-            dateLabel: '后天'
-          })
-        }
+        allDays.push({
+          ...dayAfterTomorrowGathering,
+          displayText: `${dayAfterTomorrowGathering.theme} - 后天 (${dayAfterTomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          dateLabel: '后天'
+        })
       } else if (canAccessAllDays) {
         allDays.push({
           _id: 'quick-day-after-tomorrow',
@@ -207,18 +201,16 @@ Page({
       if (res.result.success) {
         res.result.data.forEach(day => {
           if (day.date > dayAfterTomorrowStr) {
-            if (canAccessAllDays || !day.invitedGuests || day.invitedGuests.length === 0 || day.invitedGuests.includes(userOpenid)) {
-              const mealLabels = []
-              if (day.meals.includes('breakfast')) mealLabels.push('早餐')
-              if (day.meals.includes('lunch')) mealLabels.push('午餐')
-              if (day.meals.includes('dinner')) mealLabels.push('晚餐')
+            const mealLabels = []
+            if (day.meals.includes('breakfast')) mealLabels.push('早餐')
+            if (day.meals.includes('lunch')) mealLabels.push('午餐')
+            if (day.meals.includes('dinner')) mealLabels.push('晚餐')
 
-              allDays.push({
-                ...day,
-                displayText: `${day.theme} - ${day.date} (${mealLabels.join('、')})`,
-                dateLabel: day.date
-              })
-            }
+            allDays.push({
+              ...day,
+              displayText: `${day.theme} - ${day.date} (${mealLabels.join('、')})`,
+              dateLabel: day.date
+            })
           }
         })
       }
@@ -327,7 +319,7 @@ Page({
       })
 
       if (res.result.success) {
-        const currentOpenid = res.result.currentOpenid
+        const currentUserId = res.result.currentUserId  // 改用 userId
         const selectedGatheringId = this.data.selectedGathering._id
 
         // 筛选出该聚餐日的所有已提交订单
@@ -347,7 +339,7 @@ Page({
         const cart = app.getCart()
 
         // 4. 构建菜品 -> 订单人列表的映射
-        // dishId -> [{openid, nickname, avatar, count, isMe, isPending}, ...]
+        // dishId -> [{userId, nickname, avatar, count, isMe, isPending}, ...]
         const dishOrdersMap = {}
 
         // 处理已提交的订单
@@ -358,18 +350,18 @@ Page({
             }
 
             const existingOrder = dishOrdersMap[dish.dishId].find(
-              item => item.openid === order._openid && !item.isPending
+              item => item.userId === order.userId && !item.isPending
             )
 
             if (existingOrder) {
               existingOrder.count += dish.count
             } else {
               dishOrdersMap[dish.dishId].push({
-                openid: order._openid,
-                nickname: order.userNickname || '微信用户',
+                userId: order.userId,  // 改用 userId
+                nickname: order.userName || '微信用户',  // userName 而不是 userNickname
                 avatar: order.userAvatar || '',
                 count: dish.count,
-                isMe: order._openid === currentOpenid,
+                isMe: order.userId === currentUserId,  // 改用 userId 比较
                 isPending: false // 已提交的订单
               })
             }
@@ -384,14 +376,14 @@ Page({
 
           // 查找是否已有当前用户的待提交订单
           const existingPending = dishOrdersMap[item._id].find(
-            order => order.openid === currentOpenid && order.isPending
+            order => order.userId === currentUserId && order.isPending
           )
 
           if (existingPending) {
             existingPending.count = item.count
           } else {
             dishOrdersMap[item._id].push({
-              openid: currentOpenid,
+              userId: currentUserId,  // 改用 userId
               nickname: userInfo.nickname || '微信用户',
               avatar: userInfo.avatar || '',
               count: item.count,

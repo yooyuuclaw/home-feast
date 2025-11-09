@@ -162,10 +162,16 @@ async function getUserOrders(event, openid) {
     })
   }
 
+  // 安全修复：移除订单数据中的 _openid 字段
+  const safeOrders = filteredOrders.map(order => {
+    const { _openid, ...safeOrder } = order
+    return safeOrder
+  })
+
   return {
     success: true,
-    data: filteredOrders,
-    currentOpenid: openid, // 返回当前用户的 openid
+    data: safeOrders,
+    currentUserId: userInfo._id, // 返回当前用户的 _id（用于前端判断是否是自己的订单）
     message: '获取成功'
   }
 }

@@ -58,7 +58,7 @@ exports.main = async (event, context) => {
 /**
  * 获取菜单列表
  * 参数：category（可选）- 按分类筛选
- *      status（可选）- 按状态筛选
+ *      status（可选）- 按状态筛选，传 null 获取所有状态
  */
 async function getMenuList(event) {
   const { category, status } = event
@@ -71,11 +71,16 @@ async function getMenuList(event) {
     where.category = category
   }
 
-  // 添加状态筛选（访客只能看到上架的菜品）
-  if (status !== undefined) {
+  // 添加状态筛选
+  // status === null 表示获取所有状态
+  // status === undefined 表示默认只获取上架的
+  // status === 'online' 或 'offline' 表示获取特定状态
+  if (status === null) {
+    // 不添加状态筛选，获取所有状态的菜品
+  } else if (status !== undefined) {
     where.status = status
   } else {
-    // 默认只显示上架的菜品
+    // 默认只显示上架的菜品（用于普通用户）
     where.status = 'online'
   }
 

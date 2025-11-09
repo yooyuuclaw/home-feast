@@ -22,7 +22,7 @@
   </view>
 
   <view wx:else class="dish-grid">
-    <view wx:for="{{dishes}}" wx:key="_id" class="dish-card">
+    <view wx:for="{{dishes}}" wx:key="_id" class="dish-card {{item.status === 'offline' ? 'offline' : ''}}">
       <!-- 菜品图片 -->
       <view class="dish-image-wrapper">
         <image class="dish-image" src="{{item.image || '/images/default-dish.png'}}" mode="aspectFill"></image>

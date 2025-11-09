@@ -8,7 +8,7 @@ Page({
     orders: [],
     groupedOrders: [], // 按聚餐日分组的订单
     loading: true,
-    currentOpenid: '', // 当前用户的 openid
+    currentUserId: '', // 当前用户的 userId（改用 userId 而不是 openid）
     userRole: '', // 用户角色
     canViewOrders: false // 是否有查看订单权限
   },
@@ -63,15 +63,15 @@ Page({
       })
 
       if (res.result.success) {
-        // 获取当前用户的 openid
-        const currentOpenid = res.result.currentOpenid || ''
+        // 获取当前用户的 userId（改用 userId）
+        const currentUserId = res.result.currentUserId || ''
 
         // 格式化订单数据
         const orders = res.result.data.map(order => ({
           ...order,
           createTimeFormatted: this.formatTime(order.createTime),
           statusText: this.getStatusText(order.status),
-          isMyOrder: order._openid === currentOpenid // 标记是否是自己的订单
+          isMyOrder: order.userId === currentUserId // 改用 userId 比较
         }))
 
         // 按聚餐日分组
@@ -80,7 +80,7 @@ Page({
         this.setData({
           orders: orders,
           groupedOrders: groupedOrders,
-          currentOpenid: currentOpenid,
+          currentUserId: currentUserId,  // 改用 userId
           loading: false
         })
       } else {

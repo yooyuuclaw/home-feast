@@ -107,6 +107,20 @@
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
+/* 下架菜品的样式 */
+.dish-card.offline {
+  opacity: 0.6;
+}
+
+.dish-card.offline .dish-image {
+  filter: grayscale(50%);
+}
+
+.dish-card.offline .dish-name,
+.dish-card.offline .dish-category {
+  color: #999;
+}
+
 /* 菜品图片 */
 .dish-image-wrapper {
   position: relative;
