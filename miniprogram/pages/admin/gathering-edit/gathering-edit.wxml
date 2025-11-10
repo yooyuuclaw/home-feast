@@ -61,20 +61,20 @@
     <!-- 餐次选择 -->
     <view class="form-item">
       <view class="form-label">餐次选择</view>
-      <view class="meal-checkboxes">
+      <checkbox-group bindchange="onMealCheckboxChange" class="meal-checkboxes">
         <label class="meal-checkbox">
-          <checkbox value="breakfast" checked="{{formData.hasBreakfast}}" bindtap="onMealChange" data-meal="breakfast"/>
+          <checkbox value="breakfast" checked="{{formData.hasBreakfast}}"/>
           <text class="meal-label">早餐</text>
         </label>
         <label class="meal-checkbox">
-          <checkbox value="lunch" checked="{{formData.hasLunch}}" bindtap="onMealChange" data-meal="lunch"/>
+          <checkbox value="lunch" checked="{{formData.hasLunch}}"/>
           <text class="meal-label">午餐</text>
         </label>
         <label class="meal-checkbox">
-          <checkbox value="dinner" checked="{{formData.hasDinner}}" bindtap="onMealChange" data-meal="dinner"/>
+          <checkbox value="dinner" checked="{{formData.hasDinner}}"/>
           <text class="meal-label">晚餐</text>
         </label>
-      </view>
+      </checkbox-group>
     </view>
 
     <!-- 受邀访客选择 -->

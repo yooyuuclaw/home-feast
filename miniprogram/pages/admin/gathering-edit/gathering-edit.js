@@ -128,12 +128,15 @@ Page({
 
   /**
    * 餐次选择
+   * 修复：使用 checkbox-group 的 change 事件，确保状态同步正确
    */
-  onMealChange(e) {
-    const meal = e.currentTarget.dataset.meal
-    const key = `formData.has${meal.charAt(0).toUpperCase() + meal.slice(1)}`
+  onMealCheckboxChange(e) {
+    const selectedMeals = e.detail.value // ['breakfast', 'lunch', 'dinner'] 数组
+
     this.setData({
-      [key]: !this.data.formData[`has${meal.charAt(0).toUpperCase() + meal.slice(1)}`]
+      'formData.hasBreakfast': selectedMeals.includes('breakfast'),
+      'formData.hasLunch': selectedMeals.includes('lunch'),
+      'formData.hasDinner': selectedMeals.includes('dinner')
     })
   },
 
