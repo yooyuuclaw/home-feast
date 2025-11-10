@@ -98,13 +98,17 @@ Page({
 
   /**
    * 按聚餐日分组订单
+   * 修复：使用 gatheringDayDate 作为分组键，而不是 gatheringDayId
+   * 原因：快速聚餐日（今天/明天/后天）使用固定ID（quick-today等），
+   *       会导致不同日期的订单被错误分到同一组
    */
   groupOrdersByGatheringDay(orders) {
     // 创建一个 Map 来存储分组
     const groupMap = new Map()
 
     orders.forEach(order => {
-      const key = order.gatheringDayId || 'no-gathering-day'
+      // 使用日期作为分组键，确保不同日期的订单分到不同组
+      const key = order.gatheringDayDate || 'no-gathering-day'
 
       if (!groupMap.has(key)) {
         groupMap.set(key, {

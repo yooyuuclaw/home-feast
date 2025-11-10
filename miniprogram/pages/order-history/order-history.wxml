@@ -16,7 +16,7 @@
 
   <view wx:else class="order-list">
     <!-- 按聚餐日分组显示 -->
-    <view wx:for="{{groupedOrders}}" wx:key="gatheringDayId" wx:for-item="group" class="gathering-group">
+    <view wx:for="{{groupedOrders}}" wx:key="gatheringDayDate" wx:for-item="group" class="gathering-group">
       <!-- 聚餐日横幅 -->
       <view class="gathering-banner">
         <view class="gathering-banner-left">
