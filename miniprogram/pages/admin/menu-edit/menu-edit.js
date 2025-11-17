@@ -10,7 +10,8 @@ Page({
       name: '',
       image: '',
       category: 'cold_dish',
-      status: 'online'
+      status: 'online',
+      ingredients: []  // 主要食材列表
     },
     categories: CATEGORIES,
     categoryIndex: 0
@@ -52,7 +53,8 @@ Page({
               name: dish.name,
               image: dish.image,
               category: dish.category,
-              status: dish.status
+              status: dish.status,
+              ingredients: dish.ingredients || []  // 加载食材列表
             },
             categoryIndex: categoryIndex >= 0 ? categoryIndex : 0
           })
@@ -116,6 +118,42 @@ Page({
   },
 
   /**
+   * 添加食材
+   */
+  addIngredient() {
+    const ingredients = this.data.formData.ingredients || []
+    ingredients.push('')
+    this.setData({
+      'formData.ingredients': ingredients
+    })
+  },
+
+  /**
+   * 食材输入
+   */
+  onIngredientInput(e) {
+    const index = e.currentTarget.dataset.index
+    const value = e.detail.value
+    const ingredients = this.data.formData.ingredients
+    ingredients[index] = value
+    this.setData({
+      'formData.ingredients': ingredients
+    })
+  },
+
+  /**
+   * 删除食材
+   */
+  deleteIngredient(e) {
+    const index = e.currentTarget.dataset.index
+    const ingredients = this.data.formData.ingredients
+    ingredients.splice(index, 1)
+    this.setData({
+      'formData.ingredients': ingredients
+    })
+  },
+
+  /**
    * 提交表单
    */
   async submitForm() {
@@ -133,11 +171,15 @@ Page({
     try {
       wx.showLoading({ title: isEdit ? '保存中...' : '添加中...' })
 
+      // 过滤掉空的食材
+      const filteredIngredients = (formData.ingredients || []).filter(ing => ing.trim() !== '')
+
       const data = {
         action: isEdit ? 'update' : 'add',
         name: formData.name,
         category: formData.category,
-        status: formData.status
+        status: formData.status,
+        ingredients: filteredIngredients  // 添加食材列表
       }
 
       if (formData.image) {

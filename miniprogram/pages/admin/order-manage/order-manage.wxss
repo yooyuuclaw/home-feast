@@ -165,19 +165,26 @@
   border: 1rpx solid #81C784;
 }
 
+/* 订单内容：左右布局 */
+.order-content {
+  display: flex;
+  gap: 15rpx;
+  margin-bottom: 15rpx;
+}
+
 /* 菜品列表 */
 .order-dishes {
+  flex: 1;
   background: #FAFAFA;
   border-radius: 12rpx;
   padding: 20rpx;
-  margin-bottom: 15rpx;
 }
 
 .dishes-title {
   font-size: 24rpx;
-  color: #999;
+  color: #666;
   margin-bottom: 15rpx;
-  font-weight: 500;
+  font-weight: bold;
 }
 
 .dish-item {
@@ -217,6 +224,51 @@
   padding: 4rpx 12rpx;
   background: #FFF3E0;
   border-radius: 12rpx;
+}
+
+/* 食材统计 */
+.ingredients-summary {
+  flex: 1;
+  background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  border: 2rpx solid #AED581;
+}
+
+.ingredients-title {
+  font-size: 24rpx;
+  color: #558B2F;
+  margin-bottom: 15rpx;
+  font-weight: bold;
+}
+
+.ingredients-summary .ingredient-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 0;
+  border-bottom: 1rpx dashed #C5E1A5;
+}
+
+.ingredients-summary .ingredient-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ingredient-name {
+  font-size: 26rpx;
+  color: #2E7D32;
+  font-weight: 500;
+}
+
+.ingredient-count {
+  font-size: 24rpx;
+  color: #558B2F;
+  font-weight: bold;
+  padding: 4rpx 12rpx;
+  background: #FFFFFF;
+  border-radius: 12rpx;
+  border: 1rpx solid #AED581;
 }
 
 /* 备注 */

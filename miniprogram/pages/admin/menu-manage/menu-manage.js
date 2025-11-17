@@ -4,6 +4,8 @@ const { CATEGORIES } = require('../../../utils/constants.js')
 Page({
   data: {
     dishes: [],
+    filteredDishes: [],  // 过滤后的菜品列表
+    searchKeyword: '',   // 搜索关键字
     loading: true
   },
 
@@ -33,6 +35,7 @@ Page({
       if (res.result.success) {
         this.setData({
           dishes: res.result.data,
+          filteredDishes: res.result.data,  // 初始化过滤列表
           loading: false
         })
       } else {
@@ -62,6 +65,66 @@ Page({
   getCategoryIcon(categoryId) {
     const category = CATEGORIES.find(cat => cat.id === categoryId)
     return category ? category.icon : '🍽️'
+  },
+
+  /**
+   * 搜索输入
+   */
+  onSearchInput(e) {
+    const keyword = e.detail.value
+    this.setData({
+      searchKeyword: keyword
+    })
+    this.filterDishes()
+  },
+
+  /**
+   * 清空搜索
+   */
+  clearSearch() {
+    this.setData({
+      searchKeyword: ''
+    })
+    this.filterDishes()
+  },
+
+  /**
+   * 过滤菜品
+   */
+  filterDishes() {
+    const { dishes, searchKeyword } = this.data
+
+    if (!searchKeyword.trim()) {
+      // 没有搜索关键字，显示所有菜品
+      this.setData({
+        filteredDishes: dishes
+      })
+      return
+    }
+
+    const keyword = searchKeyword.trim().toLowerCase()
+    const filtered = dishes.filter(dish => {
+      // 搜索菜品名称
+      const nameMatch = dish.name.toLowerCase().includes(keyword)
+
+      // 搜索食材
+      let ingredientsMatch = false
+      if (dish.ingredients && dish.ingredients.length > 0) {
+        ingredientsMatch = dish.ingredients.some(ingredient =>
+          ingredient.toLowerCase().includes(keyword)
+        )
+      }
+
+      // 搜索分类名称
+      const categoryName = this.getCategoryName(dish.category).toLowerCase()
+      const categoryMatch = categoryName.includes(keyword)
+
+      return nameMatch || ingredientsMatch || categoryMatch
+    })
+
+    this.setData({
+      filteredDishes: filtered
+    })
   },
 
   /**

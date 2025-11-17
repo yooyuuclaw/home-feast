@@ -6,9 +6,19 @@ Page({
     orderStats: { total: 0, pending: 0, confirmed: 0, completed: 0 },
     dishStats: [],
     userStats: [],
+    originalUserStats: [], // 保存原始用户数据用于排序
     loading: true,
     currentTab: 0, // 当前选中的标签：0-订单统计，1-用户活动，2-热门菜品
-    tabs: ['订单统计', '用户活动', '热门菜品']
+    tabs: ['订单统计', '用户活动', '热门菜品'],
+    sortBy: 'sessionCount', // 当前排序字段
+    sortIndex: 2, // 当前排序索引（默认是访问次数）
+    sortOptions: [
+      { value: 'createTime', label: '首次上线' },
+      { value: 'lastOnlineTime', label: '最后上线' },
+      { value: 'sessionCount', label: '访问次数' },
+      { value: 'totalDuration', label: '总在线时长' },
+      { value: 'avgDuration', label: '平均时长' }
+    ]
   },
 
   onLoad() {
@@ -58,13 +68,46 @@ Page({
         orderStats: orderRes.result.data,
         dishStats: dishRes.result.data.slice(0, 10),
         userStats: processedUserStats,
+        originalUserStats: processedUserStats, // 保存原始数据
         loading: false
       })
+
+      // 应用默认排序
+      this.sortUserStats()
     } catch (err) {
       console.error('加载统计失败', err)
       this.setData({ loading: false })
       wx.showToast({ title: '加载失败', icon: 'none' })
     }
+  },
+
+  /**
+   * 排序用户统计
+   */
+  sortUserStats() {
+    const { originalUserStats, sortBy } = this.data
+
+    const sorted = [...originalUserStats].sort((a, b) => {
+      const aVal = a[sortBy] || 0
+      const bVal = b[sortBy] || 0
+      return bVal - aVal // 降序排列
+    })
+
+    this.setData({ userStats: sorted })
+  },
+
+  /**
+   * 切换排序方式
+   */
+  onSortChange(e) {
+    const sortIndex = e.detail.value
+    const selectedOption = this.data.sortOptions[sortIndex]
+
+    this.setData({
+      sortIndex: sortIndex,
+      sortBy: selectedOption.value
+    })
+    this.sortUserStats()
   },
 
   /**

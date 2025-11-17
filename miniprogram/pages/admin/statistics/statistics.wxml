@@ -1,5 +1,10 @@
 <!-- pages/admin/statistics/statistics.wxml -->
 <view class="container statistics-container">
+  <!-- 顶部标题栏 -->
+  <view class="header-bar">
+    <view class="header-title">📊 数据统计</view>
+  </view>
+
   <view wx:if="{{loading}}" class="loading">加载中...</view>
 
   <view wx:else>
@@ -21,20 +26,24 @@
       <view wx:if="{{currentTab === 0}}" class="tab-panel">
         <view class="stat-card card">
           <view class="stat-grid">
-            <view class="stat-item">
+            <view class="stat-item total">
+              <view class="stat-icon">📋</view>
               <view class="stat-value">{{orderStats.total}}</view>
               <view class="stat-label">总订单</view>
             </view>
-            <view class="stat-item">
-              <view class="stat-value" style="color: #faad14">{{orderStats.pending}}</view>
+            <view class="stat-item pending">
+              <view class="stat-icon">⏳</view>
+              <view class="stat-value">{{orderStats.pending}}</view>
               <view class="stat-label">待处理</view>
             </view>
-            <view class="stat-item">
-              <view class="stat-value" style="color: #1890ff">{{orderStats.confirmed}}</view>
+            <view class="stat-item confirmed">
+              <view class="stat-icon">✓</view>
+              <view class="stat-value">{{orderStats.confirmed}}</view>
               <view class="stat-label">已确认</view>
             </view>
-            <view class="stat-item">
-              <view class="stat-value" style="color: #52c41a">{{orderStats.completed}}</view>
+            <view class="stat-item completed">
+              <view class="stat-icon">✔</view>
+              <view class="stat-value">{{orderStats.completed}}</view>
               <view class="stat-label">已完成</view>
             </view>
           </view>
@@ -43,8 +52,27 @@
 
       <!-- 用户活动统计 -->
       <view wx:if="{{currentTab === 1}}" class="tab-panel">
+        <!-- 排序选择器 -->
+        <view class="sort-section">
+          <view class="sort-label">📊 排序方式</view>
+          <picker
+            mode="selector"
+            range="{{sortOptions}}"
+            range-key="label"
+            value="{{sortIndex}}"
+            bindchange="onSortChange">
+            <view class="sort-picker">
+              <text>{{sortOptions[sortIndex].label}}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+
         <view class="stat-card card">
-          <view wx:if="{{userStats.length === 0}}" class="empty-tip">暂无用户数据</view>
+          <view wx:if="{{userStats.length === 0}}" class="empty-state">
+            <text class="empty-icon">👥</text>
+            <text class="empty-text">暂无用户数据</text>
+          </view>
           <view wx:else class="user-stat-list">
             <view wx:for="{{userStats}}" wx:key="_id" class="user-stat-item">
               <!-- 用户信息 -->
@@ -60,23 +88,23 @@
               <!-- 活动数据 -->
               <view class="user-stat-data">
                 <view class="user-stat-row">
-                  <view class="user-stat-label">首次上线：</view>
+                  <view class="user-stat-label">🎯 首次上线</view>
                   <view class="user-stat-value">{{item.createTimeFormatted}}</view>
                 </view>
                 <view class="user-stat-row">
-                  <view class="user-stat-label">最后上线：</view>
+                  <view class="user-stat-label">⏰ 最后上线</view>
                   <view class="user-stat-value">{{item.lastOnlineTimeFormatted}}</view>
                 </view>
                 <view class="user-stat-row">
-                  <view class="user-stat-label">访问次数：</view>
+                  <view class="user-stat-label">🔢 访问次数</view>
                   <view class="user-stat-value">{{item.sessionCount}} 次</view>
                 </view>
                 <view class="user-stat-row">
-                  <view class="user-stat-label">总在线时长：</view>
+                  <view class="user-stat-label">⌛ 总在线时长</view>
                   <view class="user-stat-value">{{item.totalDurationFormatted}}</view>
                 </view>
                 <view class="user-stat-row">
-                  <view class="user-stat-label">平均时长：</view>
+                  <view class="user-stat-label">📈 平均时长</view>
                   <view class="user-stat-value">{{item.avgDurationFormatted}}</view>
                 </view>
               </view>
@@ -90,10 +118,10 @@
         <view class="stat-card card">
           <view class="dish-stat-list">
             <view wx:for="{{dishStats}}" wx:key="dishId" class="dish-stat-item">
-              <view class="dish-rank">{{index + 1}}</view>
+              <view class="dish-rank rank-{{index < 3 ? index + 1 : 'other'}}">{{index + 1}}</view>
               <view class="dish-stat-info">
                 <view class="dish-stat-name">{{item.name}}</view>
-                <view class="dish-stat-count">被点 {{item.totalQuantity}} 次</view>
+                <view class="dish-stat-count">🔥 被点 {{item.totalQuantity}} 次</view>
               </view>
             </view>
           </view>

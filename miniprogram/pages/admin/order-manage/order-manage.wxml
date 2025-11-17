@@ -57,15 +57,27 @@
         <view class="order-status {{item.status}}">{{item.statusText}}</view>
       </view>
 
-      <!-- 菜品列表 -->
-      <view class="order-dishes">
-        <view class="dishes-title">订单详情</view>
-        <view wx:for="{{item.dishes}}" wx:key="dishId" wx:for-item="dish" class="dish-item">
-          <view class="dish-info">
-            <text class="dish-icon">🍽️</text>
-            <text class="dish-name">{{dish.name}}</text>
+      <!-- 订单内容：左侧菜品列表，右侧食材统计 -->
+      <view class="order-content">
+        <!-- 左侧：菜品列表 -->
+        <view class="order-dishes">
+          <view class="dishes-title">📋 订单详情</view>
+          <view wx:for="{{item.dishes}}" wx:key="dishId" wx:for-item="dish" class="dish-item">
+            <view class="dish-info">
+              <text class="dish-icon">🍽️</text>
+              <text class="dish-name">{{dish.name}}</text>
+            </view>
+            <view class="dish-count">×{{dish.count}}</view>
           </view>
-          <view class="dish-count">×{{dish.count}}</view>
+        </view>
+
+        <!-- 右侧：食材统计 -->
+        <view class="ingredients-summary" wx:if="{{item.ingredientsList && item.ingredientsList.length > 0}}">
+          <view class="ingredients-title">🥬 需采购食材</view>
+          <view wx:for="{{item.ingredientsList}}" wx:key="name" wx:for-item="ingredient" class="ingredient-item">
+            <text class="ingredient-name">{{ingredient.name}}</text>
+            <text class="ingredient-count">×{{ingredient.count}}</text>
+          </view>
         </view>
       </view>
 

@@ -1,63 +1,123 @@
 /* pages/admin/menu-edit/menu-edit.wxss */
 .menu-edit-container {
-  padding: 20rpx;
+  min-height: 100vh;
+  background: #F9F9F9;
+}
+
+/* 顶部标题栏 */
+.header-bar {
+  background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  padding: 25rpx 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(255, 152, 0, 0.2);
+}
+
+.header-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
 }
 
 .form-section {
+  background: white;
+  border-radius: 16rpx;
   padding: 30rpx;
+  margin: 15rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 
 .form-item {
-  margin-bottom: 30rpx;
+  margin-bottom: 35rpx;
+  position: relative;
 }
 
 .form-label {
   font-size: 28rpx;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 15rpx;
+  color: #FF9800;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  letter-spacing: 1rpx;
 }
 
 .form-input {
   width: 100%;
-  height: 80rpx;
-  line-height: 80rpx;
-  padding: 0 24rpx;
-  background: #f5f5f5;
-  border-radius: 8rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  padding: 0 28rpx;
+  background: #FAFAFA;
+  border: 2rpx solid #FFE0B2;
+  border-radius: 12rpx;
   font-size: 28rpx;
   box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  background: #FFFFFF;
+  border-color: #FF9800;
+  box-shadow: 0 0 0 4rpx rgba(255, 152, 0, 0.1);
 }
 
 .form-picker {
-  padding: 24rpx;
-  background: #f5f5f5;
-  border-radius: 8rpx;
+  padding: 26rpx 28rpx;
+  background: #FAFAFA;
+  border: 2rpx solid #FFE0B2;
+  border-radius: 12rpx;
   font-size: 28rpx;
+  color: #333;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.form-picker::after {
+  content: '▼';
+  position: absolute;
+  right: 28rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #FF9800;
+  font-size: 20rpx;
 }
 
 /* 图片上传 */
 .image-upload {
   width: 100%;
   height: 400rpx;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   overflow: hidden;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #FFE0B2 0%, #FFCC80 100%);
+  border: 3rpx dashed #FF9800;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.image-upload:active {
+  transform: scale(0.98);
 }
 
 .dish-image-preview {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .upload-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: #F57C00;
   font-size: 28rpx;
+  gap: 16rpx;
+}
+
+.upload-placeholder::before {
+  content: '📸';
+  font-size: 80rpx;
 }
 
 /* 状态切换 */
@@ -65,31 +125,144 @@
   margin-left: 20rpx;
   font-size: 28rpx;
   color: #666;
+  font-weight: 500;
+}
+
+/* 主要食材 */
+.ingredients-container {
+  background: linear-gradient(135deg, #F1F8E9 0%, #DCEDC8 100%);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  border: 2rpx solid #AED581;
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+  background: #FFFFFF;
+  border-radius: 12rpx;
+  padding: 10rpx;
+  box-shadow: 0 2rpx 6rpx rgba(139, 195, 74, 0.1);
+  transition: all 0.3s ease;
+}
+
+.ingredient-input {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  border: 2rpx solid #C5E1A5;
+  border-radius: 10rpx;
+  background: #FAFAFA;
+  transition: all 0.3s ease;
+}
+
+.ingredient-input:focus {
+  background: #FFFFFF;
+  border-color: #8BC34A;
+  box-shadow: 0 0 0 4rpx rgba(139, 195, 74, 0.1);
+}
+
+.ingredient-delete {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FF5252, #F44336);
+  color: white;
+  border-radius: 10rpx;
+  font-size: 40rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 12rpx rgba(244, 67, 54, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ingredient-delete:active {
+  transform: scale(0.9);
+  box-shadow: 0 2rpx 6rpx rgba(244, 67, 54, 0.3);
+}
+
+.add-ingredient-btn {
+  width: 100%;
+  background: #FFFFFF;
+  color: #558B2F;
+  border: 2rpx dashed #8BC34A;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  padding: 20rpx;
+  margin-top: 8rpx;
+  box-shadow: 0 2rpx 6rpx rgba(139, 195, 74, 0.1);
+  transition: all 0.3s ease;
+}
+
+.add-ingredient-btn::before {
+  content: '+ ';
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.add-ingredient-btn::after {
+  border: none;
+}
+
+.add-ingredient-btn:active {
+  background: #F1F8E9;
+  transform: scale(0.98);
 }
 
 /* 操作按钮 */
 .form-actions {
   display: flex;
-  gap: 20rpx;
+  gap: 15rpx;
   margin-top: 50rpx;
+  padding-top: 30rpx;
+  border-top: 2rpx dashed #FFE0B2;
 }
 
 .submit-btn {
   flex: 1;
-  background: #07c160;
+  background: linear-gradient(135deg, #66BB6A, #43A047);
   color: white;
-  border-radius: 8rpx;
-  font-size: 32rpx;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  font-weight: bold;
   padding: 28rpx;
   border: none;
+  box-shadow: 0 6rpx 16rpx rgba(67, 160, 71, 0.4);
+  transition: all 0.3s ease;
+}
+
+.submit-btn::after {
+  border: none;
+}
+
+.submit-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 3rpx 10rpx rgba(67, 160, 71, 0.4);
 }
 
 .cancel-btn {
   flex: 1;
-  background: #f5f5f5;
-  color: #666;
-  border-radius: 8rpx;
-  font-size: 32rpx;
+  background: #FFFFFF;
+  color: #757575;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  font-weight: 500;
   padding: 28rpx;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn::after {
   border: none;
+}
+
+.cancel-btn:active {
+  background: #F5F5F5;
+  transform: translateY(2rpx);
 }

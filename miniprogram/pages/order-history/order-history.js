@@ -145,6 +145,9 @@ Page({
         group.dateWithWeekday = dateInfo.dateWithWeekday // 日期 + 周几
         group.displayTitle = dateInfo.displayTitle      // 最终显示标题
         group.displaySubtitle = dateInfo.displaySubtitle // 最终显示副标题
+
+        // 添加时间状态用于样式控制
+        group.timeStatus = this.getTimeStatus(group.gatheringDayDate)
       }
     })
 
@@ -250,7 +253,39 @@ Page({
   },
 
   /**
-   * 删除订单
+   * 获取时间状态（用于样式控制）
+   * @param {string} dateStr - 日期字符串 YYYY-MM-DD
+   * @returns {string} - 'today' | 'upcoming' | 'past' | ''
+   */
+  getTimeStatus(dateStr) {
+    if (!dateStr) return ''
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayStr = this.formatDate(today)
+
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const tomorrowStr = this.formatDate(tomorrow)
+
+    const dayAfterTomorrow = new Date(today)
+    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2)
+    const dayAfterTomorrowStr = this.formatDate(dayAfterTomorrow)
+
+    // 判断是今天、即将到来还是已过去
+    if (dateStr === todayStr) {
+      return 'today'
+    } else if (dateStr === tomorrowStr || dateStr === dayAfterTomorrowStr) {
+      return 'upcoming'
+    } else if (dateStr > todayStr) {
+      return 'upcoming' // 未来的日期
+    } else {
+      return 'past' // 过去的日期
+    }
+  },
+
+  /**
+   * 删除投喂任务
    */
   async deleteOrder(e) {
     const { id } = e.currentTarget.dataset
@@ -259,7 +294,7 @@ Page({
       // 确认删除
       await wx.showModal({
         title: '确认删除',
-        content: '确定要删除这个订单吗？',
+        content: '确定要删除这个投喂任务吗？',
         confirmText: '删除',
         confirmColor: '#fa5151'
       })
@@ -281,7 +316,7 @@ Page({
           title: '删除成功',
           icon: 'success'
         })
-        // 重新加载订单列表
+        // 重新加载任务列表
         this.loadOrders()
       } else {
         throw new Error(res.result.message)
@@ -291,7 +326,7 @@ Page({
         // 用户取消删除
         return
       }
-      console.error('删除订单失败', err)
+      console.error('删除投喂任务失败', err)
       wx.hideLoading()
       wx.showToast({
         title: err.message || '删除失败',

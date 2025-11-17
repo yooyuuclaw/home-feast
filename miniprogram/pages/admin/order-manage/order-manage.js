@@ -34,12 +34,55 @@ Page({
       })
 
       if (res.result.success) {
-        // 格式化订单数据
-        const orders = res.result.data.map(order => ({
-          ...order,
-          createTimeFormatted: this.formatTime(order.createTime),
-          statusText: this.getStatusText(order.status)
-        }))
+        // 获取所有菜品信息（包含食材）
+        const menuRes = await wx.cloud.callFunction({
+          name: 'menu',
+          data: {
+            action: 'getList',
+            status: null  // 获取所有状态的菜品
+          }
+        })
+
+        const menuMap = {}
+        if (menuRes.result.success) {
+          menuRes.result.data.forEach(dish => {
+            menuMap[dish._id] = dish
+          })
+        }
+
+        // 格式化订单数据并计算食材
+        const orders = res.result.data.map(order => {
+          const ingredientsMap = {}
+
+          // 统计每个订单的食材
+          order.dishes.forEach(dishOrder => {
+            const dish = menuMap[dishOrder.dishId]
+            if (dish && dish.ingredients && dish.ingredients.length > 0) {
+              dish.ingredients.forEach(ingredient => {
+                if (ingredient.trim()) {
+                  if (ingredientsMap[ingredient]) {
+                    ingredientsMap[ingredient] += dishOrder.count
+                  } else {
+                    ingredientsMap[ingredient] = dishOrder.count
+                  }
+                }
+              })
+            }
+          })
+
+          // 转换为数组格式
+          const ingredientsList = Object.keys(ingredientsMap).map(name => ({
+            name,
+            count: ingredientsMap[name]
+          }))
+
+          return {
+            ...order,
+            createTimeFormatted: this.formatTime(order.createTime),
+            statusText: this.getStatusText(order.status),
+            ingredientsList: ingredientsList  // 添加食材列表
+          }
+        })
 
         this.setData({
           orders: orders,

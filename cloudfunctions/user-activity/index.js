@@ -88,9 +88,32 @@ async function getStatistics(event, openid) {
   const usersRes = await db.collection('users').get()
   const users = usersRes.data
 
-  // 获取所有会话记录
-  const sessionsRes = await db.collection('user_sessions').get()
-  const sessions = sessionsRes.data
+  // 获取所有会话记录（分批获取，因为单次 get() 最多返回100条）
+  let sessions = []
+  const MAX_LIMIT = 100
+  let hasMore = true
+  let lastId = null
+
+  while (hasMore) {
+    let query = db.collection('user_sessions').limit(MAX_LIMIT).orderBy('_id', 'asc')
+
+    if (lastId) {
+      query = query.where({
+        _id: db.command.gt(lastId)
+      })
+    }
+
+    const sessionsRes = await query.get()
+    sessions = sessions.concat(sessionsRes.data)
+
+    if (sessionsRes.data.length < MAX_LIMIT) {
+      hasMore = false
+    } else {
+      lastId = sessionsRes.data[sessionsRes.data.length - 1]._id
+    }
+  }
+
+  console.log('获取到的会话记录总数:', sessions.length)
 
   // 为每个用户计算统计数据
   const statistics = users.map(user => {

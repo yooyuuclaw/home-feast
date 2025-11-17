@@ -1,8 +1,60 @@
 /* pages/menu/menu.wxss */
 .menu-container {
-  padding-bottom: 120rpx;
-  background: #F9F9F9;
+  padding-bottom: 180rpx;
+  background: var(--color-bg);
   min-height: 100vh;
+}
+
+/* 搜索框 */
+.search-bar {
+  background: var(--color-bg-light);
+  padding: 20rpx 30rpx;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-gray);
+  border-radius: 40rpx;
+  padding: 16rpx 24rpx;
+  gap: 12rpx;
+  transition: all var(--transition-normal);
+}
+
+.search-input-wrapper:focus-within {
+  background: var(--color-bg-light);
+  box-shadow: 0 0 0 2rpx var(--color-primary);
+}
+
+.search-icon {
+  font-size: 32rpx;
+  opacity: 0.5;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--color-text-primary);
+}
+
+.clear-icon {
+  font-size: 32rpx;
+  color: var(--color-text-gray);
+  padding: 4rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  width: 40rpx;
+  height: 40rpx;
+  transition: all var(--transition-fast);
+}
+
+.clear-icon:active {
+  background: #D0D0D0;
+  transform: scale(0.9);
 }
 
 /* 分类导航 */
@@ -10,9 +62,9 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #FFFFFF;
+  background: var(--color-bg-light);
   padding: 20rpx 0;
-  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
+  box-shadow: var(--shadow-sm);
 }
 
 .category-scroll {
@@ -30,18 +82,19 @@
   margin-right: 20rpx;
   border-radius: 40rpx;
   font-size: 28rpx;
-  color: #8B6E4E;
-  background: #F9F9F9;
-  border: 1rpx solid #E0E0E0;
-  transition: all 0.2s ease;
+  color: var(--color-primary-darker);
+  background: var(--color-bg);
+  border: 1rpx solid var(--color-border);
+  transition: all var(--transition-fast);
 }
 
 .category-item.active {
-  background: #E6C8A0;
-  color: #8B6E4E;
+  background: var(--color-primary);
+  color: var(--color-primary-darker);
   font-weight: bold;
-  border: 1rpx solid #D4B080;
-  box-shadow: 0 2rpx 4rpx rgba(212, 176, 128, 0.3);
+  border: 1rpx solid var(--color-primary-dark);
+  box-shadow: var(--shadow-primary);
+  transform: scale(1.05);
 }
 
 /* 菜品列表 */
@@ -55,35 +108,59 @@
   gap: 20rpx;
 }
 
+/* 菜品卡片 - 升级版 */
 .dish-card {
-  background: #FFFFFF;
-  border-radius: 16rpx;
+  background: var(--color-bg-light);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  animation: fadeIn var(--transition-normal);
 }
 
-/* 已点过的菜品 - 只让图片变暗,文字和按钮不变 */
+.dish-card:active {
+  transform: translateY(-8rpx);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 已点过的菜品 */
 .ordered-dish .dish-card {
-  background: #F5F5F5;
+  background: var(--color-bg-gray);
 }
 
 .ordered-dish .dish-image {
-  opacity: 0.5;
+  opacity: 0.6;
   filter: grayscale(30%);
 }
 
 .dish-image-wrapper {
   width: 100%;
-  height: 280rpx;
-  background: #F9F9F9;
+  height: 300rpx;
+  background: var(--color-bg);
   position: relative;
+  overflow: hidden;
+}
+
+/* 图片增强效果 */
+.dish-image-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80rpx;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.15), transparent);
+  pointer-events: none;
 }
 
 .dish-image {
   width: 100%;
   height: 100%;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
+}
+
+.dish-card:active .dish-image {
+  transform: scale(1.05);
 }
 
 /* 订单人列表 */
@@ -160,22 +237,35 @@
 }
 
 .dish-info {
-  padding: 20rpx;
+  padding: 22rpx 20rpx;
 }
 
 .dish-name {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: bold;
-  color: #8B6E4E;
-  margin-bottom: 8rpx;
+  color: var(--color-primary-darker);
+  margin-bottom: 10rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  position: relative;
+}
+
+/* 菜品名下划线装饰 */
+.dish-name::after {
+  content: '';
+  position: absolute;
+  bottom: -4rpx;
+  left: 0;
+  width: 60rpx;
+  height: 3rpx;
+  background: linear-gradient(90deg, var(--color-accent), transparent);
+  border-radius: 2rpx;
 }
 
 .dish-category {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-gray);
 }
 
 .dish-action {
@@ -184,26 +274,38 @@
   justify-content: center;
 }
 
+/* 加入按钮 - 渐变升级 */
 .add-btn {
   width: auto;
-  min-width: 140rpx;
-  background: #E6C8A0;
-  color: #8B6E4E;
+  min-width: 150rpx;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-primary-darker);
   border-radius: 40rpx;
-  font-size: 26rpx;
+  font-size: 28rpx;
   font-weight: bold;
-  padding: 12rpx 32rpx;
-  border: 1rpx solid #D4B080;
-  box-shadow: 0 2rpx 4rpx rgba(212, 176, 128, 0.3);
-  transition: all 0.2s ease;
+  padding: 14rpx 36rpx;
+  border: 2rpx solid var(--color-primary-dark);
+  box-shadow: var(--shadow-primary);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 按钮光泽效果 */
+.add-btn::before {
+  content: '✨';
+  position: absolute;
+  left: 12rpx;
+  font-size: 20rpx;
+  opacity: 0.8;
 }
 
 .add-btn:active {
-  transform: translateY(1rpx);
-  box-shadow: 0 1rpx 2rpx rgba(212, 176, 128, 0.4);
+  transform: translateY(2rpx) scale(0.95);
+  box-shadow: var(--shadow-sm);
 }
 
-/* 确认菜单按钮 */
+/* 确认菜单按钮 - 增强版 */
 .confirm-btn-container {
   position: fixed;
   bottom: 0;
@@ -214,56 +316,86 @@
   background: linear-gradient(to top, rgba(249, 249, 249, 0.98) 0%, rgba(249, 249, 249, 0.95) 70%, transparent 100%);
   z-index: 1000;
   backdrop-filter: blur(10rpx);
+  animation: slideUp var(--transition-normal);
 }
 
 .confirm-btn {
-  background: linear-gradient(135deg, #E6C8A0 0%, #D4B080 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 50%, var(--color-accent) 100%);
   border-radius: 50rpx;
-  padding: 24rpx 40rpx;
+  padding: 28rpx 40rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20rpx;
-  box-shadow: 0 8rpx 24rpx rgba(139, 110, 78, 0.3);
-  transition: all 0.3s ease;
+  gap: 24rpx;
+  box-shadow: var(--shadow-primary);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* 按钮渐变流动效果 */
+.confirm-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
 }
 
 .confirm-btn:active {
-  transform: translateY(2rpx);
-  box-shadow: 0 4rpx 16rpx rgba(139, 110, 78, 0.4);
+  transform: translateY(4rpx) scale(0.98);
+  box-shadow: var(--shadow-sm);
 }
 
 .confirm-btn-icon {
-  width: 60rpx;
-  height: 60rpx;
-  border-radius: 50%;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--radius-full);
   background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40rpx;
+  font-size: 44rpx;
   font-weight: bold;
-  color: #52c41a;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  color: var(--color-success);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 1;
 }
 
 .confirm-btn-text {
   display: flex;
   flex-direction: column;
   gap: 4rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .confirm-btn-title {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: bold;
-  color: #8B6E4E;
+  color: var(--color-primary-darker);
   letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 4rpx rgba(255, 255, 255, 0.5);
 }
 
 .confirm-btn-count {
-  font-size: 24rpx;
-  color: #8B6E4E;
-  opacity: 0.8;
+  font-size: 26rpx;
+  color: var(--color-primary-darker);
+  opacity: 0.9;
 }
 
 /* 聚餐日选择横幅 */

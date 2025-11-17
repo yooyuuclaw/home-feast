@@ -103,7 +103,7 @@ async function getMenuList(event) {
 
 /**
  * 添加菜品（需要管理员权限）
- * 参数：name, image, category
+ * 参数：name, image, category, ingredients
  */
 async function addDish(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -114,7 +114,7 @@ async function addDish(event, openid) {
     }
   }
 
-  const { name, image, category } = event
+  const { name, image, category, ingredients } = event
 
   if (!name || !category) {
     return {
@@ -137,6 +137,7 @@ async function addDish(event, openid) {
       image: image || '',
       category,
       status: 'online',
+      ingredients: ingredients || [],  // 添加食材字段
       createTime: db.serverDate(),
       updateTime: db.serverDate()
     }
@@ -151,7 +152,7 @@ async function addDish(event, openid) {
 
 /**
  * 更新菜品（需要管理员权限）
- * 参数：id, name, image, category, status
+ * 参数：id, name, image, category, status, ingredients
  */
 async function updateDish(event, openid) {
   const isAdmin = await checkAdmin(openid)
@@ -162,7 +163,7 @@ async function updateDish(event, openid) {
     }
   }
 
-  const { id, name, image, category, status } = event
+  const { id, name, image, category, status, ingredients } = event
 
   if (!id) {
     return {
@@ -188,6 +189,7 @@ async function updateDish(event, openid) {
     updateData.category = category
   }
   if (status !== undefined) updateData.status = status
+  if (ingredients !== undefined) updateData.ingredients = ingredients  // 添加食材更新
 
   await db.collection('menu').doc(id).update({
     data: updateData

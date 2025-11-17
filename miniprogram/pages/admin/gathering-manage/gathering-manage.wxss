@@ -1,158 +1,229 @@
 /* pages/admin/gathering-manage/gathering-manage.wxss */
 .gathering-manage-container {
-  padding: 20rpx;
-  background: #F9F9F9;
   min-height: 100vh;
+  background: #F9F9F9;
 }
 
-/* 页面头部 */
-.page-header {
+/* 顶部标题栏 */
+.header-bar {
+  background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  padding: 25rpx 30rpx;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 30rpx;
-  background: #FFFFFF;
-  padding: 30rpx;
-  border-radius: 16rpx;
-  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
+  justify-content: space-between;
+  box-shadow: 0 4rpx 12rpx rgba(255, 152, 0, 0.2);
 }
 
-.page-title {
-  font-size: 36rpx;
+.header-title {
+  font-size: 32rpx;
   font-weight: bold;
-  color: #8B6E4E;
+  color: #FFFFFF;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
 }
 
 .add-btn {
-  background: #E6C8A0;
-  color: #8B6E4E;
+  background: rgba(255, 255, 255, 0.95);
+  color: #FF9800;
+  border-radius: 30rpx;
+  padding: 16rpx 28rpx;
   font-size: 28rpx;
   font-weight: bold;
-  padding: 16rpx 32rpx;
-  border-radius: 40rpx;
-  border: 1rpx solid #D4B080;
-  box-shadow: 0 2rpx 4rpx rgba(212, 176, 128, 0.3);
-  line-height: normal;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+.add-btn::after {
+  border: none;
 }
 
 .add-btn:active {
   transform: translateY(1rpx);
-  box-shadow: 0 1rpx 2rpx rgba(212, 176, 128, 0.4);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.add-icon {
+  font-size: 32rpx;
+  font-weight: bold;
+  line-height: 1;
 }
 
 /* 聚餐日列表 */
 .gathering-list {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 15rpx;
+  padding: 15rpx;
 }
 
 .gathering-card {
-  background: #FFFFFF;
+  background: white;
   border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 2rpx rgba(238, 238, 238, 0.5);
+  padding: 25rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
 }
 
-/* 聚餐日信息 */
+.gathering-card:active {
+  transform: scale(0.99);
+}
+
+/* 聚餐日头部 */
 .gathering-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20rpx;
-  padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  padding-bottom: 15rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.theme-section {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex: 1;
+}
+
+.theme-icon {
+  font-size: 36rpx;
+  line-height: 1;
 }
 
 .gathering-theme {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: bold;
-  color: #8B6E4E;
+  color: #333;
 }
 
-.gathering-date {
-  font-size: 28rpx;
-  color: #666;
-}
-
-/* 餐次标签 */
-.meal-tags {
-  display: flex;
-  gap: 15rpx;
-  margin-bottom: 20rpx;
-}
-
-.meal-tag {
+.date-badge {
   padding: 8rpx 20rpx;
   border-radius: 20rpx;
   font-size: 24rpx;
   font-weight: bold;
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+  color: #F57C00;
+  border: 1rpx solid #FFB74D;
+  flex-shrink: 0;
+}
+
+/* 餐次信息 */
+.meal-section {
+  margin-bottom: 20rpx;
+}
+
+.meal-title {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 15rpx;
+  font-weight: 500;
+}
+
+.meal-tags {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.meal-tag {
+  padding: 10rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  transition: all 0.2s ease;
 }
 
 .meal-tag.breakfast {
-  background: #fff7e6;
-  color: #faad14;
+  background: linear-gradient(135deg, #FFF9E6, #FFF3D9);
+  color: #FFA000;
+  border: 1rpx solid #FFE082;
 }
 
 .meal-tag.lunch {
-  background: #e6f7ff;
-  color: #1890ff;
+  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  color: #1976D2;
+  border: 1rpx solid #64B5F6;
 }
 
 .meal-tag.dinner {
-  background: #f6ffed;
-  color: #52c41a;
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  color: #388E3C;
+  border: 1rpx solid #81C784;
 }
 
 /* 操作按钮 */
 .gathering-actions {
   display: flex;
-  gap: 20rpx;
+  gap: 15rpx;
   padding-top: 20rpx;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid #F0F0F0;
 }
 
 .action-btn {
   flex: 1;
-  border-radius: 8rpx;
-  font-size: 28rpx;
-  padding: 20rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  padding: 20rpx 20rpx;
   border: none;
-  line-height: normal;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
 }
 
 .edit-btn {
-  background: #E6C8A0;
-  color: #8B6E4E;
-  border: 1rpx solid #D4B080 !important;
-}
-
-.edit-btn:active {
-  background: #d4b080;
+  background: linear-gradient(135deg, #42A5F5, #1976D2);
+  color: white;
 }
 
 .delete-btn {
-  background: #fff;
-  color: #fa5151;
-  border: 1rpx solid #fa5151 !important;
+  background: #FFFFFF;
+  color: #F44336;
+  border: 1rpx solid #F44336 !important;
+  box-shadow: 0 2rpx 6rpx rgba(244, 67, 54, 0.15);
 }
 
 .delete-btn:active {
-  background: #fff5f5;
+  background: #FFEBEE;
 }
 
-/* 空状态 */
-.empty-state {
-  text-align: center;
-  padding: 100rpx 0;
-  color: #999;
-  font-size: 28rpx;
-}
-
-/* 加载中 */
+/* 加载状态 */
 .loading {
   text-align: center;
   padding: 100rpx 0;
   color: #999;
   font-size: 28rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 150rpx 0;
+  gap: 20rpx;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #BBB;
 }

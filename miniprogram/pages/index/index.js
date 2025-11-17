@@ -6,7 +6,14 @@ Page({
   data: {
     userInfo: null,
     isAdmin: false,
-    roleName: ''
+    roleName: '',
+    // 云存储照片路径
+    photos: [
+      'cloud://cloudbase-1gdysknn57ce9b9f.636c-cloudbase-1gdysknn57ce9b9f-1378814901/photos/photo1.jpg',
+      'cloud://cloudbase-1gdysknn57ce9b9f.636c-cloudbase-1gdysknn57ce9b9f-1378814901/photos/photo2.jpg',
+      'cloud://cloudbase-1gdysknn57ce9b9f.636c-cloudbase-1gdysknn57ce9b9f-1378814901/photos/photo3.jpg',
+      'cloud://cloudbase-1gdysknn57ce9b9f.636c-cloudbase-1gdysknn57ce9b9f-1378814901/photos/photo4.jpg'
+    ]
   },
 
   onLoad() {
@@ -191,5 +198,27 @@ Page({
     wx.navigateTo({
       url: '/pages/admin/admin'
     })
+  },
+
+  /**
+   * 转发给朋友
+   */
+  onShareAppMessage() {
+    return {
+      title: '璐璐和曼丽家的聚餐菜单',
+      path: '/pages/index/index',
+      imageUrl: '/images/share-cover.jpg'
+    }
+  },
+
+  /**
+   * 分享到朋友圈
+   */
+  onShareTimeline() {
+    return {
+      title: '璐璐和曼丽家的聚餐菜单',
+      query: '',
+      imageUrl: '/images/share-cover.jpg'
+    }
   }
 })

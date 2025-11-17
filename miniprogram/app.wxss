@@ -1,7 +1,247 @@
 /**app.wxss**/
+
+/* ============================================
+   全局 CSS 变量 - 设计系统
+   ============================================ */
 page {
-  background-color: #f5f5f5;
+  /* 主色调 - 温暖棕色系 */
+  --color-primary: #E6C8A0;
+  --color-primary-dark: #D4B080;
+  --color-primary-darker: #8B6E4E;
+  --color-primary-light: #F5E5D0;
+  --color-primary-lighter: #FFF9F0;
+
+  /* 辅助色 - 橙色活力 */
+  --color-accent: #FFB74D;
+  --color-accent-dark: #FFA726;
+  --color-accent-light: #FFE0B2;
+
+  /* 功能色 */
+  --color-success: #52c41a;
+  --color-warning: #faad14;
+  --color-error: #fa5151;
+  --color-info: #1890ff;
+
+  /* 中性色 */
+  --color-bg: #F9F9F9;
+  --color-bg-light: #FFFFFF;
+  --color-bg-gray: #F5F5F5;
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-gray: #999999;
+  --color-border: #E0E0E0;
+
+  /* 阴影 */
+  --shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+  --shadow-primary: 0 4rpx 16rpx rgba(139, 110, 78, 0.2);
+  --shadow-accent: 0 6rpx 16rpx rgba(255, 152, 0, 0.3);
+
+  /* 圆角 */
+  --radius-sm: 8rpx;
+  --radius-md: 12rpx;
+  --radius-lg: 16rpx;
+  --radius-xl: 20rpx;
+  --radius-full: 50%;
+
+  /* 过渡 */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  background-color: var(--color-bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ============================================
+   全局动画库
+   ============================================ */
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-normal);
+}
+
+/* 从下滑入 */
+@keyframes slideUp {
+  from {
+    transform: translateY(30rpx);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-up {
+  animation: slideUp var(--transition-normal);
+}
+
+/* 从上滑入 */
+@keyframes slideDown {
+  from {
+    transform: translateY(-30rpx);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-down {
+  animation: slideDown var(--transition-normal);
+}
+
+/* 缩放进入 */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.scale-in {
+  animation: scaleIn var(--transition-normal);
+}
+
+/* 呼吸动画 */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.breathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 温和脉冲（已有，保持一致） */
+@keyframes gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: var(--shadow-sm);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.gentle-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* 摇晃动画 */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10rpx);
+  }
+  75% {
+    transform: translateX(10rpx);
+  }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* 旋转动画 */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate {
+  animation: rotate 1s linear infinite;
+}
+
+/* 渐变移动动画（用于按钮等） */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* ============================================
+   通用交互类
+   ============================================ */
+
+/* 悬浮上浮效果 */
+.hover-lift {
+  transition: all var(--transition-fast);
+}
+
+.hover-lift:active {
+  transform: translateY(-4rpx);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 按压缩小效果 */
+.press-scale {
+  transition: all var(--transition-fast);
+}
+
+.press-scale:active {
+  transform: scale(0.95);
+}
+
+/* 水波纹效果容器 */
+.ripple {
+  position: relative;
+  overflow: hidden;
 }
 
 .container {

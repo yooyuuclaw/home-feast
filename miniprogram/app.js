@@ -1,6 +1,8 @@
 // app.js
 App({
   onLaunch() {
+    console.log('[App] onLaunch - 小程序启动')
+
     // 初始化云开发环境
     if (!wx.cloud) {
       console.error('请使用 2.2.3 或以上的基础库以使用云能力')
@@ -16,15 +18,41 @@ App({
 
     // 记录开始时间
     this.sessionStartTime = Date.now()
+    console.log('[App] 会话开始时间已记录:', new Date(this.sessionStartTime))
+
+    // 启动会话定期记录
+    this.startSessionRecording()
   },
 
   onShow() {
+    console.log('[App] onShow - 小程序进入前台')
+
     // 小程序从后台进入前台
     this.sessionStartTime = Date.now()
+    console.log('[App] 会话开始时间已更新:', new Date(this.sessionStartTime))
+
+    // 重新启动会话定期记录
+    this.startSessionRecording()
   },
 
   onHide() {
+    console.log('[App] onHide - 小程序进入后台')
+
     // 小程序从前台进入后台，记录本次会话时长
+    this.recordSession()
+
+    // 停止会话定期记录
+    this.stopSessionRecording()
+  },
+
+  onUnload() {
+    // 小程序被销毁时也记录会话
+    this.recordSession()
+  },
+
+  onError(error) {
+    // 发生错误时也尝试记录会话
+    console.error('小程序错误:', error)
     this.recordSession()
   },
 
@@ -40,26 +68,79 @@ App({
 
   /**
    * 记录会话时长
+   * 改进：确保会话能够被记录，即使用户不切换应用
    */
   async recordSession() {
-    if (!this.sessionStartTime) return
+    console.log('[App] recordSession 被调用')
+
+    if (!this.sessionStartTime) {
+      console.log('[App] 会话开始时间未设置，跳过记录')
+      return
+    }
 
     const duration = Math.floor((Date.now() - this.sessionStartTime) / 1000) // 秒
+    console.log('[App] 计算会话时长:', duration, '秒')
 
-    // 只记录超过5秒的会话
-    if (duration < 5) return
+    // 只记录超过3秒的会话（降低阈值，提高记录频率）
+    if (duration < 3) {
+      console.log('[App] 会话时长不足3秒，跳过记录')
+      return
+    }
 
     try {
-      await wx.cloud.callFunction({
+      console.log('[App] 准备调用 user-activity 云函数记录会话...')
+      const res = await wx.cloud.callFunction({
         name: 'user-activity',
         data: {
           action: 'recordSession',
           duration: duration
         }
       })
-      console.log('会话记录成功，时长：', duration, '秒')
+      console.log('[App] 会话记录成功，时长：', duration, '秒', res)
+
+      // 重置会话开始时间，避免重复记录
+      this.sessionStartTime = Date.now()
     } catch (err) {
-      console.error('记录会话失败', err)
+      console.error('[App] 记录会话失败:', err)
+    }
+  },
+
+  /**
+   * 定期记录会话（每5分钟自动记录一次）
+   * 这样可以捕获长时间停留但不切换应用的用户
+   */
+  startSessionRecording() {
+    // 如果已有定时器，先清除
+    if (this.sessionTimer) {
+      console.log('[App] 清除旧的会话记录定时器')
+      clearInterval(this.sessionTimer)
+      this.sessionTimer = null
+    }
+
+    console.log('[App] 启动会话定期记录定时器（每5分钟）')
+
+    // 每5分钟记录一次会话
+    this.sessionTimer = setInterval(() => {
+      console.log('[App] 定时器触发 - 检查是否需要记录会话')
+      if (this.sessionStartTime) {
+        const duration = Math.floor((Date.now() - this.sessionStartTime) / 1000)
+        console.log('[App] 当前会话时长:', duration, '秒')
+        if (duration >= 30) { // 如果已经超过30秒，记录会话
+          console.log('[App] 会话时长超过30秒，触发自动记录')
+          this.recordSession()
+        }
+      }
+    }, 5 * 60 * 1000) // 5分钟
+  },
+
+  /**
+   * 停止会话记录定时器
+   */
+  stopSessionRecording() {
+    if (this.sessionTimer) {
+      console.log('[App] 停止会话定期记录定时器')
+      clearInterval(this.sessionTimer)
+      this.sessionTimer = null
     }
   },
 
@@ -67,6 +148,8 @@ App({
   // 安全修复 #10: 添加客户端缓存，减少云函数调用频率
   async checkLoginStatus() {
     try {
+      console.log('[App] checkLoginStatus - 开始检查登录状态')
+
       // 检查缓存是否有效
       const now = Date.now()
       const cachedUserInfo = wx.getStorageSync('userInfo')
@@ -78,12 +161,15 @@ App({
         this.globalData.userInfo = cachedUserInfo
         this.globalData.isAdmin = cachedUserInfo.role === 'admin'
         this.globalData.lastInitTime = lastInitTime
-        console.log('使用缓存的用户信息，有效期至:', new Date(lastInitTime + this.globalData.INIT_CACHE_DURATION))
+        console.log('[App] 使用缓存的用户信息，有效期至:', new Date(lastInitTime + this.globalData.INIT_CACHE_DURATION))
+
+        // 即使使用缓存，也要记录启动会话
+        await this.recordLaunchSession()
         return
       }
 
       // 缓存过期或不存在，调用云函数
-      console.log('缓存过期或不存在，重新获取用户信息')
+      console.log('[App] 缓存过期或不存在，重新获取用户信息')
       const userProfile = await this.getUserProfile()
 
       // 调用云函数初始化用户，传入昵称和头像
@@ -103,10 +189,29 @@ App({
         // 更新缓存
         wx.setStorageSync('userInfo', res.result.data)
         wx.setStorageSync('lastInitTime', now)
-        console.log('用户信息已更新并缓存')
+        console.log('[App] 用户信息已更新并缓存')
       }
     } catch (err) {
-      console.error('检查登录状态失败', err)
+      console.error('[App] 检查登录状态失败', err)
+    }
+  },
+
+  /**
+   * 记录启动会话（每次打开小程序时调用）
+   */
+  async recordLaunchSession() {
+    try {
+      console.log('[App] 记录启动会话...')
+      const res = await wx.cloud.callFunction({
+        name: 'user-activity',
+        data: {
+          action: 'recordSession',
+          duration: 1 // 记录1秒，表示这是启动记录
+        }
+      })
+      console.log('[App] 启动会话记录成功', res)
+    } catch (err) {
+      console.error('[App] 记录启动会话失败', err)
     }
   },
 

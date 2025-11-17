@@ -64,6 +64,23 @@ exports.main = async (event, context) => {
       // 重新获取用户数据以包含最新的 lastOnlineTime
       const updatedUserRes = await db.collection('users').doc(userData._id).get()
       userData = updatedUserRes.data
+
+      // 用户每次打开小程序时，记录一次短会话（用于统计访问次数）
+      // 这样即使用户很快关闭小程序，也能被统计到
+      try {
+        await db.collection('user_sessions').add({
+          data: {
+            _openid: openid,
+            duration: 1, // 记录1秒，表示这是一次启动记录
+            sessionTime: db.serverDate(),
+            createTime: db.serverDate(),
+            type: 'launch' // 标记为启动类型会话
+          }
+        })
+      } catch (sessionErr) {
+        console.error('记录启动会话失败', sessionErr)
+        // 不影响主流程，继续执行
+      }
     }
 
     return {

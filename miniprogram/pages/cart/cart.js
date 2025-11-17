@@ -51,21 +51,10 @@ Page({
   loadSelectedGathering() {
     const selectedGathering = app.getSelectedGathering()
 
-    if (selectedGathering) {
-      this.setData({
-        selectedGathering: selectedGathering
-      })
-    } else {
-      // 如果没有选择聚餐日,提示用户返回点菜页面选择
-      wx.showModal({
-        title: '提示',
-        content: '请先在点菜页面选择聚餐日',
-        showCancel: false,
-        success: () => {
-          wx.navigateBack()
-        }
-      })
-    }
+    // 设置选中的聚餐日（可能为 null/undefined）
+    this.setData({
+      selectedGathering: selectedGathering || null
+    })
   },
 
   /**
@@ -160,7 +149,7 @@ Page({
     // 检查是否选择了聚餐日
     if (!selectedGathering) {
       wx.showToast({
-        title: '请选择聚餐日',
+        title: '暂无可选聚餐日',
         icon: 'none'
       })
       return
@@ -196,11 +185,11 @@ Page({
         app.clearCart()
 
         wx.showToast({
-          title: '订单提交成功',
+          title: '投喂任务已接收',
           icon: 'success'
         })
 
-        // 跳转到订单历史页面
+        // 跳转到任务历史页面
         setTimeout(() => {
           wx.redirectTo({
             url: '/pages/order-history/order-history'
@@ -210,7 +199,7 @@ Page({
         throw new Error(res.result.message)
       }
     } catch (err) {
-      console.error('提交订单失败', err)
+      console.error('提交投喂任务失败', err)
       wx.hideLoading()
       wx.showToast({
         title: '提交失败',

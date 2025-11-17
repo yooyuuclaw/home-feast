@@ -10,11 +10,11 @@
       <view wx:elif="{{selectedGathering}}" class="gathering-selected">
         <text class="calendar-icon">📅</text>
         <view class="gathering-info">
-          <text class="gathering-title">{{selectedGathering.theme || selectedGathering.displayText}}</text>
-          <text class="gathering-subtitle">{{selectedGathering.dateLabel}}</text>
+          <text class="gathering-title">{{selectedGathering.displayTitle || selectedGathering.theme}}</text>
+          <text class="gathering-subtitle">{{selectedGathering.displaySubtitle || selectedGathering.dateLabel}}</text>
         </view>
         <view class="switch-hint">
-          <text class="switch-text">点击切换</text>
+          <text class="switch-text">点击切换聚餐日</text>
           <text class="arrow-icon">›</text>
         </view>
       </view>
@@ -22,6 +22,22 @@
         <text class="warning-icon">⚠️</text>
         <text class="empty-text">暂无可选聚餐日</text>
       </view>
+    </view>
+  </view>
+
+  <!-- 搜索框 -->
+  <view class="search-bar">
+    <view class="search-input-wrapper">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="搜索菜品..."
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+      />
+      <text wx:if="{{searchKeyword}}" class="clear-icon" bindtap="clearSearch">✕</text>
     </view>
   </view>
 
@@ -52,7 +68,7 @@
     <view wx:if="{{loading}}" class="loading">加载中...</view>
 
     <view wx:elif="{{filteredDishes.length === 0}}" class="empty-state">
-      <text>暂无菜品</text>
+      <text>我做的菜那么难吃么？</text>
     </view>
 
     <view wx:else class="dish-grid">
@@ -108,7 +124,7 @@
     <view class="confirm-btn">
       <view class="confirm-btn-icon">✓</view>
       <view class="confirm-btn-text">
-        <view class="confirm-btn-title">确认菜单</view>
+        <view class="confirm-btn-title">干饭召唤令</view>
         <view class="confirm-btn-count">已选 {{cartCount}} 道菜</view>
       </view>
     </view>

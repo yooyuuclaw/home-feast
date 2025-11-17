@@ -1,9 +1,32 @@
 <!-- pages/index/index.wxml -->
 <view class="container index-container">
-  <!-- 顶部欢迎区域 -->
+  <!-- 顶部欢迎区域 - 拼贴相册风格 -->
   <view class="welcome-section">
-    <view class="welcome-title">璐璐和曼丽家聚餐点餐站</view>
-    <view class="welcome-desc">亲爱的，来我家前先选好菜～我好提前准备，等你开吃！</view>
+    <!-- 照片拼贴层 -->
+    <view class="photo-collage">
+      <!-- 照片1 - 左上角 -->
+      <view class="photo-frame photo-1">
+        <image class="photo-img" src="{{photos[0]}}" mode="aspectFill"></image>
+      </view>
+      <!-- 照片2 - 右上角 -->
+      <view class="photo-frame photo-2">
+        <image class="photo-img" src="{{photos[1]}}" mode="aspectFill"></image>
+      </view>
+      <!-- 照片3 - 左下角 -->
+      <view class="photo-frame photo-3">
+        <image class="photo-img" src="{{photos[2]}}" mode="aspectFill"></image>
+      </view>
+      <!-- 照片4 - 右下角 -->
+      <view class="photo-frame photo-4">
+        <image class="photo-img" src="{{photos[3]}}" mode="aspectFill"></image>
+      </view>
+    </view>
+
+    <!-- 文字内容层 -->
+    <view class="welcome-content">
+      <view class="welcome-title">璐璐和曼丽家聚餐站</view>
+      <view class="welcome-desc">亲爱的，来我家前先选好菜～我好提前准备，等你开吃！</view>
+    </view>
   </view>
 
   <!-- 功能卡片 -->
@@ -15,11 +38,11 @@
       <view class="card-desc">浏览菜单，选择您喜欢的菜品</view>
     </view>
 
-    <!-- 我的订单卡片 -->
+    <!-- 我的任务卡片 -->
     <view class="feature-card" bindtap="goToOrderHistory">
       <view class="card-icon">📋</view>
-      <view class="card-title">我点的菜</view>
-      <view class="card-desc">查看历史订单记录</view>
+      <view class="card-title">再看看合不合我的胃口</view>
+      <view class="card-desc">查看投喂任务记录</view>
     </view>
 
     <!-- 管理后台卡片（仅管理员可见） -->

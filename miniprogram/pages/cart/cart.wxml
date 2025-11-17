@@ -1,10 +1,28 @@
 <!-- pages/cart/cart.wxml -->
 <view class="container cart-container">
+  <!-- 进度指示器 -->
+  <view class="progress-indicator">
+    <view class="progress-step completed">
+      <view class="step-circle">1</view>
+      <view class="step-label">选菜</view>
+    </view>
+    <view class="progress-line completed"></view>
+    <view class="progress-step active">
+      <view class="step-circle">2</view>
+      <view class="step-label">确认</view>
+    </view>
+    <view class="progress-line"></view>
+    <view class="progress-step">
+      <view class="step-circle">3</view>
+      <view class="step-label">完成</view>
+    </view>
+  </view>
+
   <!-- 购物车列表 -->
   <view wx:if="{{cart.length === 0}}" class="empty-cart">
-    <view class="empty-icon">🛒</view>
-    <view class="empty-text">购物车是空的</view>
-    <button class="go-menu-btn" bindtap="goToMenu">去点餐</button>
+    <view class="empty-icon">🍽️</view>
+    <view class="empty-text">亲爱的，来我家不想吃点啥么？</view>
+    <button class="go-menu-btn" bindtap="goToMenu">填饱你的肚子吧！</button>
   </view>
 
   <view wx:else>
@@ -41,13 +59,13 @@
       <view wx:if="{{selectedGathering}}" class="gathering-display">
         <text class="calendar-icon">📅</text>
         <view class="gathering-text">
-          <view class="gathering-name">{{selectedGathering.theme || selectedGathering.displayText}}</view>
-          <view class="gathering-date">{{selectedGathering.dateLabel}}</view>
+          <view class="gathering-name">{{selectedGathering.displayTitle || selectedGathering.theme}}</view>
+          <view class="gathering-date">{{selectedGathering.displaySubtitle || selectedGathering.dateLabel}}</view>
         </view>
       </view>
       <view wx:else class="gathering-empty">
         <text class="warning-icon">⚠️</text>
-        <text>未选择聚餐日</text>
+        <text>暂无可选聚餐日</text>
       </view>
     </view>
 
@@ -68,7 +86,9 @@
       <view class="footer-info">
         <view class="total-label">共 {{totalCount}} 道菜</view>
       </view>
-      <button class="submit-btn" bindtap="submitOrder">提交订单</button>
+      <button class="submit-btn" bindtap="submitOrder" disabled="{{!selectedGathering}}">
+        {{selectedGathering ? '猪头三来了！' : '你点不动我！'}}
+      </button>
     </view>
   </view>
 </view>

@@ -11,6 +11,7 @@ Page({
     filteredDishes: [], // 筛选后的菜品
     loading: true,
     cartCount: 0,
+    searchKeyword: '', // 搜索关键字
 
     // 用户信息和权限
     userInfo: null,
@@ -124,7 +125,8 @@ Page({
       // 今天
       const todayGathering = dateMap.get(todayStr)
       if (todayGathering) {
-        // 云函数已经根据用户角色过滤了聚餐日，前端不需要再判断权限
+        // 如果今天有自定义聚餐日，使用聚餐日主题作为标题
+        const dateLabels = this.getDateLabels(todayStr, todayStr)
         const mealLabels = []
         if (todayGathering.meals.includes('breakfast')) mealLabels.push('早餐')
         if (todayGathering.meals.includes('lunch')) mealLabels.push('午餐')
@@ -133,23 +135,30 @@ Page({
         allDays.push({
           ...todayGathering,
           displayText: `${todayGathering.theme} - 今天 (${todayStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
-          dateLabel: '今天'
+          displayTitle: todayGathering.theme, // 主标题：聚餐日主题
+          displaySubtitle: dateLabels.fullDate, // 副标题：完整日期
+          dateLabel: dateLabels.relativeLabel // 相对日期标签
         })
       } else if (canAccessAllDays) {
+        // 快速选项：今天
+        const dateLabels = this.getDateLabels(todayStr, todayStr)
         allDays.push({
           _id: 'quick-today',
           theme: '今天',
           date: todayStr,
           meals: [],
           displayText: `今天 (${todayStr})`,
+          displayTitle: '今天', // 主标题：今天
+          displaySubtitle: dateLabels.fullDate, // 副标题：完整日期
           isQuickOption: true,
-          dateLabel: '今天'
+          dateLabel: dateLabels.relativeLabel
         })
       }
 
       // 明天
       const tomorrowGathering = dateMap.get(tomorrowStr)
       if (tomorrowGathering) {
+        const dateLabels = this.getDateLabels(tomorrowStr, todayStr)
         const mealLabels = []
         if (tomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
         if (tomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
@@ -158,23 +167,29 @@ Page({
         allDays.push({
           ...tomorrowGathering,
           displayText: `${tomorrowGathering.theme} - 明天 (${tomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
-          dateLabel: '明天'
+          displayTitle: tomorrowGathering.theme,
+          displaySubtitle: dateLabels.fullDate,
+          dateLabel: dateLabels.relativeLabel
         })
       } else if (canAccessAllDays) {
+        const dateLabels = this.getDateLabels(tomorrowStr, todayStr)
         allDays.push({
           _id: 'quick-tomorrow',
           theme: '明天',
           date: tomorrowStr,
           meals: [],
           displayText: `明天 (${tomorrowStr})`,
+          displayTitle: '明天',
+          displaySubtitle: dateLabels.fullDate,
           isQuickOption: true,
-          dateLabel: '明天'
+          dateLabel: dateLabels.relativeLabel
         })
       }
 
       // 后天
       const dayAfterTomorrowGathering = dateMap.get(dayAfterTomorrowStr)
       if (dayAfterTomorrowGathering) {
+        const dateLabels = this.getDateLabels(dayAfterTomorrowStr, todayStr)
         const mealLabels = []
         if (dayAfterTomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
         if (dayAfterTomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
@@ -183,17 +198,22 @@ Page({
         allDays.push({
           ...dayAfterTomorrowGathering,
           displayText: `${dayAfterTomorrowGathering.theme} - 后天 (${dayAfterTomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
-          dateLabel: '后天'
+          displayTitle: dayAfterTomorrowGathering.theme,
+          displaySubtitle: dateLabels.fullDate,
+          dateLabel: dateLabels.relativeLabel
         })
       } else if (canAccessAllDays) {
+        const dateLabels = this.getDateLabels(dayAfterTomorrowStr, todayStr)
         allDays.push({
           _id: 'quick-day-after-tomorrow',
           theme: '后天',
           date: dayAfterTomorrowStr,
           meals: [],
           displayText: `后天 (${dayAfterTomorrowStr})`,
+          displayTitle: '后天',
+          displaySubtitle: dateLabels.fullDate,
           isQuickOption: true,
-          dateLabel: '后天'
+          dateLabel: dateLabels.relativeLabel
         })
       }
 
@@ -201,6 +221,7 @@ Page({
       if (res.result.success) {
         res.result.data.forEach(day => {
           if (day.date > dayAfterTomorrowStr) {
+            const dateLabels = this.getDateLabels(day.date, todayStr)
             const mealLabels = []
             if (day.meals.includes('breakfast')) mealLabels.push('早餐')
             if (day.meals.includes('lunch')) mealLabels.push('午餐')
@@ -209,7 +230,9 @@ Page({
             allDays.push({
               ...day,
               displayText: `${day.theme} - ${day.date} (${mealLabels.join('、')})`,
-              dateLabel: day.date
+              displayTitle: day.theme,
+              displaySubtitle: dateLabels.fullDate,
+              dateLabel: dateLabels.relativeLabel
             })
           }
         })
@@ -229,6 +252,9 @@ Page({
       if (selectedGathering) {
         app.setSelectedGathering(selectedGathering)
         this.loadOthersOrders()
+      } else {
+        // 如果没有可选聚餐日，清除旧的缓存
+        app.clearSelectedGathering()
       }
     } catch (err) {
       console.error('加载聚餐日失败', err)
@@ -243,6 +269,48 @@ Page({
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
+  },
+
+  /**
+   * 获取周几
+   */
+  getWeekday(dateStr) {
+    const date = new Date(dateStr)
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    return weekdays[date.getDay()]
+  },
+
+  /**
+   * 计算相对日期显示文字和完整日期
+   * 返回 { relativeLabel: '今天'/'明天'/'3天后', fullDate: '2025-11-10 周日' }
+   */
+  getDateLabels(dateStr, todayStr) {
+    const targetDate = new Date(dateStr)
+    const today = new Date(todayStr)
+
+    // 计算天数差异
+    const diffTime = targetDate.getTime() - today.getTime()
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+
+    let relativeLabel = ''
+    if (diffDays === -1) {
+      relativeLabel = '昨天'
+    } else if (diffDays === 0) {
+      relativeLabel = '今天'
+    } else if (diffDays === 1) {
+      relativeLabel = '明天'
+    } else if (diffDays === 2) {
+      relativeLabel = '后天'
+    } else if (diffDays < 0) {
+      relativeLabel = `${Math.abs(diffDays)}天前`
+    } else {
+      relativeLabel = `${diffDays}天后`
+    }
+
+    const weekday = this.getWeekday(dateStr)
+    const fullDate = `${dateStr} ${weekday}`
+
+    return { relativeLabel, fullDate }
   },
 
   /**
@@ -455,6 +523,27 @@ Page({
   },
 
   /**
+   * 搜索菜品
+   */
+  onSearchInput(e) {
+    const keyword = e.detail.value
+    this.setData({
+      searchKeyword: keyword
+    })
+    this.filterDishes()
+  },
+
+  /**
+   * 清空搜索
+   */
+  clearSearch() {
+    this.setData({
+      searchKeyword: ''
+    })
+    this.filterDishes()
+  },
+
+  /**
    * 选择分类
    */
   selectCategory(e) {
@@ -468,23 +557,35 @@ Page({
   },
 
   /**
-   * 筛选菜品
+   * 筛选菜品（支持分类和搜索关键字）
    */
   filterDishes() {
-    const { dishes, currentCategory } = this.data
+    const { dishes, currentCategory, searchKeyword } = this.data
 
-    if (currentCategory === '') {
-      // 显示所有菜品
-      this.setData({
-        filteredDishes: dishes
-      })
-    } else {
-      // 按分类筛选
-      const filtered = dishes.filter(dish => dish.category === currentCategory)
-      this.setData({
-        filteredDishes: filtered
+    let filtered = dishes
+
+    // 先按分类筛选
+    if (currentCategory !== '') {
+      filtered = filtered.filter(dish => dish.category === currentCategory)
+    }
+
+    // 再按搜索关键字筛选
+    if (searchKeyword.trim() !== '') {
+      const keyword = searchKeyword.trim().toLowerCase()
+      filtered = filtered.filter(dish => {
+        // 搜索菜品名称
+        const nameMatch = dish.name.toLowerCase().includes(keyword)
+        // 搜索分类名称
+        const categoryName = this.getCategoryName(dish.category).toLowerCase()
+        const categoryMatch = categoryName.includes(keyword)
+
+        return nameMatch || categoryMatch
       })
     }
+
+    this.setData({
+      filteredDishes: filtered
+    })
   },
 
   /**
@@ -540,5 +641,27 @@ Page({
     wx.navigateTo({
       url: '/pages/cart/cart'
     })
+  },
+
+  /**
+   * 转发给朋友
+   */
+  onShareAppMessage() {
+    return {
+      title: '璐璐和曼丽家的聚餐菜单',
+      path: '/pages/menu/menu',
+      imageUrl: '/images/share-cover.jpg'
+    }
+  },
+
+  /**
+   * 分享到朋友圈
+   */
+  onShareTimeline() {
+    return {
+      title: '璐璐和曼丽家的聚餐菜单',
+      query: '',
+      imageUrl: '/images/share-cover.jpg'
+    }
   }
 })
