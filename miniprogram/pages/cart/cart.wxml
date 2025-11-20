@@ -2,7 +2,7 @@
 <view class="container cart-container">
   <!-- 进度指示器 -->
   <view class="progress-indicator">
-    <view class="progress-step completed">
+    <view class="progress-step completed" bindtap="goToMenu">
       <view class="step-circle">1</view>
       <view class="step-label">选菜</view>
     </view>
@@ -83,7 +83,7 @@
 
     <!-- 底部操作栏 -->
     <view class="cart-footer">
-      <view class="footer-info">
+      <view class="footer-info" bindtap="goToMenu">
         <view class="total-label">共 {{totalCount}} 道菜</view>
       </view>
       <button class="submit-btn" bindtap="submitOrder" disabled="{{!selectedGathering}}">

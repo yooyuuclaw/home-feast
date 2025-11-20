@@ -364,6 +364,24 @@
   border-top: 2rpx solid var(--color-bg);
   display: flex;
   justify-content: flex-end;
+  gap: 16rpx;
+}
+
+.edit-btn {
+  padding: 14rpx 36rpx;
+  font-size: 26rpx;
+  color: var(--color-primary);
+  background: white;
+  border: 2rpx solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  line-height: normal;
+  transition: all var(--transition-fast);
+  font-weight: bold;
+}
+
+.edit-btn:active {
+  background: var(--color-primary-lighter);
+  transform: scale(0.96);
 }
 
 .delete-btn {

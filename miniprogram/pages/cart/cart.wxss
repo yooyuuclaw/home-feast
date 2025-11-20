@@ -22,6 +22,17 @@
   flex-direction: column;
   align-items: center;
   gap: 12rpx;
+  transition: all var(--transition-fast);
+}
+
+/* 第一步可点击样式 */
+.progress-step.completed {
+  cursor: pointer;
+}
+
+.progress-step.completed:active {
+  transform: scale(0.95);
+  opacity: 0.8;
 }
 
 .step-circle {
@@ -354,6 +365,13 @@
 
 .footer-info {
   flex: 1;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.footer-info:active {
+  transform: scale(0.96);
+  opacity: 0.8;
 }
 
 .total-label {

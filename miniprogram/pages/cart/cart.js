@@ -16,11 +16,38 @@ Page({
     this.loadUserInfo()
     this.loadCart()
     this.loadSelectedGathering()
+    this.loadNotes()
   },
 
   onShow() {
     this.loadCart()
     this.loadSelectedGathering()
+    this.loadNotes()
+  },
+
+  /**
+   * 加载备注信息（从缓存或编辑模式）
+   */
+  loadNotes() {
+    // 优先加载编辑模式的备注
+    const editingOrderNotes = wx.getStorageSync('editingOrderNotes')
+    if (editingOrderNotes) {
+      this.setData({
+        notes: editingOrderNotes
+      })
+      // 清除编辑模式缓存，并保存到普通备注缓存
+      wx.removeStorageSync('editingOrderNotes')
+      wx.setStorageSync('cartNotes', editingOrderNotes)
+      return
+    }
+
+    // 加载普通缓存的备注
+    const cachedNotes = wx.getStorageSync('cartNotes')
+    if (cachedNotes) {
+      this.setData({
+        notes: cachedNotes
+      })
+    }
   },
 
   /**
@@ -127,9 +154,12 @@ Page({
    * 备注输入
    */
   onNotesInput(e) {
+    const notes = e.detail.value
     this.setData({
-      notes: e.detail.value
+      notes: notes
     })
+    // 实时保存到本地存储
+    wx.setStorageSync('cartNotes', notes)
   },
 
   /**
@@ -166,6 +196,7 @@ Page({
         count: item.count
       }))
 
+      // 创建新订单
       const res = await wx.cloud.callFunction({
         name: 'order',
         data: {
@@ -183,6 +214,9 @@ Page({
       if (res.result.success) {
         // 清空购物车
         app.clearCart()
+
+        // 清空备注缓存
+        wx.removeStorageSync('cartNotes')
 
         wx.showToast({
           title: '投喂任务已接收',
@@ -212,6 +246,32 @@ Page({
    * 返回菜单页面
    */
   goToMenu() {
-    wx.navigateBack()
+    // 获取当前页面栈
+    const pages = getCurrentPages()
+
+    // 检查页面栈中是否有菜单页面
+    let hasMenuPage = false
+    let menuPageIndex = -1
+
+    for (let i = pages.length - 1; i >= 0; i--) {
+      if (pages[i].route === 'pages/menu/menu') {
+        hasMenuPage = true
+        menuPageIndex = i
+        break
+      }
+    }
+
+    if (hasMenuPage) {
+      // 如果页面栈中有菜单页面，计算需要返回的层数
+      const delta = pages.length - 1 - menuPageIndex
+      wx.navigateBack({
+        delta: delta
+      })
+    } else {
+      // 如果页面栈中没有菜单页面，跳转到菜单页面
+      wx.redirectTo({
+        url: '/pages/menu/menu'
+      })
+    }
   }
 })

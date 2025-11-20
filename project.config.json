@@ -46,7 +46,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.19.4",
+  "libVersion": "3.10.2",
   "appid": "wxc160ec9e624c3194",
   "projectname": "family-order",
   "isGameTourist": false,

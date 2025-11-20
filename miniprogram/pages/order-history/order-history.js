@@ -66,12 +66,18 @@ Page({
         // 获取当前用户的 userId（改用 userId）
         const currentUserId = res.result.currentUserId || ''
 
+        // 获取今天的日期，用于判断订单是否为过去
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const todayStr = this.formatDate(today)
+
         // 格式化订单数据
         const orders = res.result.data.map(order => ({
           ...order,
           createTimeFormatted: this.formatTime(order.createTime),
           statusText: this.getStatusText(order.status),
-          isMyOrder: order.userId === currentUserId // 改用 userId 比较
+          isMyOrder: order.userId === currentUserId, // 改用 userId 比较
+          isPastOrder: order.gatheringDayDate && order.gatheringDayDate < todayStr // 判断是否为过去的订单
         }))
 
         // 按聚餐日分组
@@ -155,13 +161,20 @@ Page({
   },
 
   /**
-   * 获取日期显示信息
+   * 获取日期显示信息（优化版）
+   * 主标题：前天/昨天/今天/明天/后天 或 N天前/N天后，如果有聚餐日主题则追加显示
+   * 副标题：日期 + 星期
    */
   getDateDisplayInfo(dateStr, theme) {
     // 获取今天的日期
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const todayStr = this.formatDate(today)
+
+    // 前天
+    const dayBeforeYesterday = new Date(today)
+    dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2)
+    const dayBeforeYesterdayStr = this.formatDate(dayBeforeYesterday)
 
     // 昨天
     const yesterday = new Date(today)
@@ -180,38 +193,47 @@ Page({
 
     // 获取周几
     const weekday = this.getWeekday(dateStr)
-    const dateWithWeekday = `${dateStr} ${weekday}`
+    const displaySubtitle = `${dateStr} ${weekday}`
 
-    let dateLabel = '' // 昨天/今天/明天/后天
     let displayTitle = ''
-    let displaySubtitle = dateWithWeekday
 
-    // 判断是否为快捷选项（今天/明天/后天等）
-    const isQuickOption = theme === '今天' || theme === '明天' || theme === '后天' || theme === '昨天' || theme === '未指定聚餐日'
+    // 判断是否为快捷选项（不需要显示聚餐日主题）
+    const isQuickOption = theme === '今天' || theme === '明天' || theme === '后天' ||
+                          theme === '昨天' || theme === '前天' || theme === '未指定聚餐日'
 
-    // 判断是昨天、今天、明天还是后天
-    if (dateStr === yesterdayStr) {
-      dateLabel = '昨天'
-      // 如果是快捷选项，不显示主题；否则显示"昨天 · 主题"
-      displayTitle = isQuickOption ? '昨天' : `昨天 · ${theme}`
+    // 第一步：判断日期，生成时间描述
+    if (dateStr === dayBeforeYesterdayStr) {
+      displayTitle = '前天'
+    } else if (dateStr === yesterdayStr) {
+      displayTitle = '昨天'
     } else if (dateStr === todayStr) {
-      dateLabel = '今天'
-      displayTitle = isQuickOption ? '今天' : `今天 · ${theme}`
+      displayTitle = '今天'
     } else if (dateStr === tomorrowStr) {
-      dateLabel = '明天'
-      displayTitle = isQuickOption ? '明天' : `明天 · ${theme}`
+      displayTitle = '明天'
     } else if (dateStr === dayAfterTomorrowStr) {
-      dateLabel = '后天'
-      displayTitle = isQuickOption ? '后天' : `后天 · ${theme}`
+      displayTitle = '后天'
     } else {
-      // 不是昨天、今天、明天、后天，只显示聚餐日信息
-      dateLabel = ''
-      displayTitle = isQuickOption ? dateWithWeekday : theme
+      // 计算距离今天的天数
+      const orderDate = new Date(dateStr)
+      orderDate.setHours(0, 0, 0, 0)
+      const diffTime = orderDate - today
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+
+      if (diffDays < 0) {
+        // 过去的日期：N天前
+        displayTitle = `${Math.abs(diffDays)}天前`
+      } else {
+        // 未来的日期：N天后
+        displayTitle = `${diffDays}天后`
+      }
+    }
+
+    // 第二步：如果有聚餐日主题且不是快捷选项，则在右侧追加显示
+    if (theme && !isQuickOption) {
+      displayTitle = `${displayTitle} · ${theme}`
     }
 
     return {
-      dateLabel,
-      dateWithWeekday,
       displayTitle,
       displaySubtitle
     }
@@ -331,6 +353,137 @@ Page({
       wx.showToast({
         title: err.message || '删除失败',
         icon: 'none'
+      })
+    }
+  },
+
+  /**
+   * 编辑投喂任务
+   */
+  async editOrder(e) {
+    const { order } = e.currentTarget.dataset
+
+    try {
+      // 先提示用户
+      const confirmRes = await wx.showModal({
+        title: '要改主意啦？',
+        content: '改菜单的话，我得把原来的投喂任务撤了，你重新点完菜再提交哦～不然我可不知道你到底想吃啥！😋',
+        confirmText: '要改',
+        cancelText: '算了',
+        confirmColor: '#FF9800'
+      })
+
+      if (!confirmRes.confirm) {
+        // 用户取消
+        return
+      }
+
+      wx.showLoading({ title: '正在准备...' })
+
+      // 获取 app 实例
+      const app = getApp()
+
+      // 先删除原订单
+      console.log('开始删除订单:', order._id)
+      const deleteRes = await wx.cloud.callFunction({
+        name: 'order',
+        data: {
+          action: 'deleteOrder',
+          id: order._id
+        }
+      })
+
+      console.log('删除订单结果:', deleteRes)
+
+      if (!deleteRes.result.success) {
+        throw new Error(deleteRes.result.message || '删除原订单失败')
+      }
+
+      // 清空当前购物车
+      app.clearCart()
+
+      // 从数据库加载完整的菜品信息（包括图片）
+      console.log('开始加载菜品信息')
+      const dishesRes = await wx.cloud.callFunction({
+        name: 'menu',
+        data: {
+          action: 'getList'
+        }
+      })
+
+      console.log('菜品信息加载结果:', dishesRes)
+
+      if (!dishesRes.result.success) {
+        throw new Error(dishesRes.result.message || '加载菜品信息失败')
+      }
+
+      // 创建菜品ID到完整菜品信息的映射
+      const dishMap = {}
+      dishesRes.result.data.forEach(dish => {
+        dishMap[dish._id] = dish
+      })
+
+      console.log('开始加载菜品到购物车，订单菜品数量:', order.dishes.length)
+
+      // 将订单的菜品加载到购物车，使用完整的菜品信息
+      order.dishes.forEach(dish => {
+        const fullDish = dishMap[dish.dishId]
+        if (fullDish) {
+          app.addToCart({
+            _id: fullDish._id,
+            name: fullDish.name,
+            category: fullDish.category,
+            image: fullDish.image, // 包含图片信息
+            description: fullDish.description,
+            count: dish.count
+          })
+        } else {
+          // 如果找不到菜品（可能已被删除），使用订单中保存的基本信息
+          console.log('菜品未找到，使用订单数据:', dish)
+          app.addToCart({
+            _id: dish.dishId,
+            name: dish.name,
+            category: dish.category,
+            count: dish.count
+          })
+        }
+      })
+
+      // 设置聚餐日信息
+      if (order.gatheringDayId) {
+        app.setSelectedGathering({
+          _id: order.gatheringDayId,
+          theme: order.gatheringDayTheme,
+          date: order.gatheringDayDate
+        })
+      }
+
+      // 将备注保存到页面的缓存中，供购物车页面使用
+      wx.setStorageSync('editingOrderNotes', order.notes || '')
+
+      wx.hideLoading()
+
+      wx.showToast({
+        title: '原任务已撤销',
+        icon: 'success',
+        duration: 1500
+      })
+
+      console.log('准备跳转到购物车页面')
+
+      // 短暂延迟后跳转到购物车页面
+      setTimeout(() => {
+        wx.navigateTo({
+          url: '/pages/cart/cart'
+        })
+      }, 1500)
+    } catch (err) {
+      console.error('编辑投喂任务失败', err)
+      wx.hideLoading()
+      wx.showToast({
+        title: err.message || '操作失败',
+        icon: 'none',
+        duration: 3000
       })
     }
   }

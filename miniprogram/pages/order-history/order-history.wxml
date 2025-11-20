@@ -59,8 +59,12 @@
             <view class="notes-text">{{item.notes}}</view>
           </view>
 
-          <!-- 删除按钮（仅自己的任务显示） -->
+          <!-- 操作按钮（仅自己的任务显示） -->
           <view wx:if="{{item.isMyOrder}}" class="order-actions">
+            <!-- 只有今天及以后的任务才显示编辑按钮 -->
+            <button wx:if="{{!item.isPastOrder}}" class="edit-btn" bindtap="editOrder" data-order="{{item}}">
+              编辑投喂任务
+            </button>
             <button class="delete-btn" bindtap="deleteOrder" data-id="{{item._id}}">
               删除投喂任务
             </button>

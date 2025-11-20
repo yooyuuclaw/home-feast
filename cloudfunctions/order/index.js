@@ -36,7 +36,7 @@ async function getUserInfo(openid) {
 
 /**
  * 订单管理云函数
- * 支持操作：create, getUserOrders, getAllOrders, updateStatus, deleteOrder, adminDeleteOrder
+ * 支持操作：create, getUserOrders, getAllOrders, updateStatus, deleteOrder, adminDeleteOrder, updateOrder
  */
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
@@ -57,6 +57,8 @@ exports.main = async (event, context) => {
         return await deleteOrder(event, openid)
       case 'adminDeleteOrder':
         return await adminDeleteOrder(event, openid)
+      case 'updateOrder':
+        return await updateOrder(event, openid)
       default:
         return {
           success: false,
@@ -409,5 +411,62 @@ async function adminDeleteOrder(event, openid) {
   return {
     success: true,
     message: '订单删除成功'
+  }
+}
+
+/**
+ * 更新订单（用户只能更新自己的订单）
+ * 参数：id, dishes, notes, gatheringDayId, gatheringDayTheme, gatheringDayDate
+ */
+async function updateOrder(event, openid) {
+  const { id, dishes, notes, gatheringDayId, gatheringDayTheme, gatheringDayDate } = event
+
+  if (!id) {
+    return {
+      success: false,
+      message: '订单ID不能为空'
+    }
+  }
+
+  if (!dishes || dishes.length === 0) {
+    return {
+      success: false,
+      message: '订单不能为空'
+    }
+  }
+
+  // 先查询订单，确认是否属于当前用户
+  const orderRes = await db.collection('orders').doc(id).get()
+
+  if (!orderRes.data) {
+    return {
+      success: false,
+      message: '订单不存在'
+    }
+  }
+
+  // 检查订单是否属于当前用户
+  if (orderRes.data._openid !== openid) {
+    return {
+      success: false,
+      message: '无权修改他人订单'
+    }
+  }
+
+  // 更新订单
+  await db.collection('orders').doc(id).update({
+    data: {
+      dishes: dishes,
+      notes: notes || '',
+      gatheringDayId: gatheringDayId || '',
+      gatheringDayTheme: gatheringDayTheme || '',
+      gatheringDayDate: gatheringDayDate || '',
+      updateTime: db.serverDate()
+    }
+  })
+
+  return {
+    success: true,
+    message: '订单更新成功'
   }
 }

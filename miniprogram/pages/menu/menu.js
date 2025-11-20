@@ -127,14 +127,12 @@ Page({
       if (todayGathering) {
         // 如果今天有自定义聚餐日，使用聚餐日主题作为标题
         const dateLabels = this.getDateLabels(todayStr, todayStr)
-        const mealLabels = []
-        if (todayGathering.meals.includes('breakfast')) mealLabels.push('早餐')
-        if (todayGathering.meals.includes('lunch')) mealLabels.push('午餐')
-        if (todayGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+        const weekday = this.getWeekday(todayStr)
+        const displayText = this.formatGatheringDisplay(todayGathering, dateLabels.relativeLabel, weekday, todayStr)
 
         allDays.push({
           ...todayGathering,
-          displayText: `${todayGathering.theme} - 今天 (${todayStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          displayText: displayText,
           displayTitle: todayGathering.theme, // 主标题：聚餐日主题
           displaySubtitle: dateLabels.fullDate, // 副标题：完整日期
           dateLabel: dateLabels.relativeLabel // 相对日期标签
@@ -142,15 +140,21 @@ Page({
       } else if (canAccessAllDays) {
         // 快速选项：今天
         const dateLabels = this.getDateLabels(todayStr, todayStr)
-        allDays.push({
+        const weekday = this.getWeekday(todayStr)
+        const quickGathering = {
           _id: 'quick-today',
           theme: '今天',
           date: todayStr,
           meals: [],
-          displayText: `今天 (${todayStr})`,
+          isQuickOption: true
+        }
+        const displayText = this.formatGatheringDisplay(quickGathering, dateLabels.relativeLabel, weekday, todayStr)
+
+        allDays.push({
+          ...quickGathering,
+          displayText: displayText,
           displayTitle: '今天', // 主标题：今天
           displaySubtitle: dateLabels.fullDate, // 副标题：完整日期
-          isQuickOption: true,
           dateLabel: dateLabels.relativeLabel
         })
       }
@@ -159,29 +163,33 @@ Page({
       const tomorrowGathering = dateMap.get(tomorrowStr)
       if (tomorrowGathering) {
         const dateLabels = this.getDateLabels(tomorrowStr, todayStr)
-        const mealLabels = []
-        if (tomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
-        if (tomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
-        if (tomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+        const weekday = this.getWeekday(tomorrowStr)
+        const displayText = this.formatGatheringDisplay(tomorrowGathering, dateLabels.relativeLabel, weekday, tomorrowStr)
 
         allDays.push({
           ...tomorrowGathering,
-          displayText: `${tomorrowGathering.theme} - 明天 (${tomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          displayText: displayText,
           displayTitle: tomorrowGathering.theme,
           displaySubtitle: dateLabels.fullDate,
           dateLabel: dateLabels.relativeLabel
         })
       } else if (canAccessAllDays) {
         const dateLabels = this.getDateLabels(tomorrowStr, todayStr)
-        allDays.push({
+        const weekday = this.getWeekday(tomorrowStr)
+        const quickGathering = {
           _id: 'quick-tomorrow',
           theme: '明天',
           date: tomorrowStr,
           meals: [],
-          displayText: `明天 (${tomorrowStr})`,
+          isQuickOption: true
+        }
+        const displayText = this.formatGatheringDisplay(quickGathering, dateLabels.relativeLabel, weekday, tomorrowStr)
+
+        allDays.push({
+          ...quickGathering,
+          displayText: displayText,
           displayTitle: '明天',
           displaySubtitle: dateLabels.fullDate,
-          isQuickOption: true,
           dateLabel: dateLabels.relativeLabel
         })
       }
@@ -190,29 +198,33 @@ Page({
       const dayAfterTomorrowGathering = dateMap.get(dayAfterTomorrowStr)
       if (dayAfterTomorrowGathering) {
         const dateLabels = this.getDateLabels(dayAfterTomorrowStr, todayStr)
-        const mealLabels = []
-        if (dayAfterTomorrowGathering.meals.includes('breakfast')) mealLabels.push('早餐')
-        if (dayAfterTomorrowGathering.meals.includes('lunch')) mealLabels.push('午餐')
-        if (dayAfterTomorrowGathering.meals.includes('dinner')) mealLabels.push('晚餐')
+        const weekday = this.getWeekday(dayAfterTomorrowStr)
+        const displayText = this.formatGatheringDisplay(dayAfterTomorrowGathering, dateLabels.relativeLabel, weekday, dayAfterTomorrowStr)
 
         allDays.push({
           ...dayAfterTomorrowGathering,
-          displayText: `${dayAfterTomorrowGathering.theme} - 后天 (${dayAfterTomorrowStr}${mealLabels.length > 0 ? '，' + mealLabels.join('、') : ''})`,
+          displayText: displayText,
           displayTitle: dayAfterTomorrowGathering.theme,
           displaySubtitle: dateLabels.fullDate,
           dateLabel: dateLabels.relativeLabel
         })
       } else if (canAccessAllDays) {
         const dateLabels = this.getDateLabels(dayAfterTomorrowStr, todayStr)
-        allDays.push({
+        const weekday = this.getWeekday(dayAfterTomorrowStr)
+        const quickGathering = {
           _id: 'quick-day-after-tomorrow',
           theme: '后天',
           date: dayAfterTomorrowStr,
           meals: [],
-          displayText: `后天 (${dayAfterTomorrowStr})`,
+          isQuickOption: true
+        }
+        const displayText = this.formatGatheringDisplay(quickGathering, dateLabels.relativeLabel, weekday, dayAfterTomorrowStr)
+
+        allDays.push({
+          ...quickGathering,
+          displayText: displayText,
           displayTitle: '后天',
           displaySubtitle: dateLabels.fullDate,
-          isQuickOption: true,
           dateLabel: dateLabels.relativeLabel
         })
       }
@@ -222,14 +234,12 @@ Page({
         res.result.data.forEach(day => {
           if (day.date > dayAfterTomorrowStr) {
             const dateLabels = this.getDateLabels(day.date, todayStr)
-            const mealLabels = []
-            if (day.meals.includes('breakfast')) mealLabels.push('早餐')
-            if (day.meals.includes('lunch')) mealLabels.push('午餐')
-            if (day.meals.includes('dinner')) mealLabels.push('晚餐')
+            const weekday = this.getWeekday(day.date)
+            const displayText = this.formatGatheringDisplay(day, dateLabels.relativeLabel, weekday, day.date)
 
             allDays.push({
               ...day,
-              displayText: `${day.theme} - ${day.date} (${mealLabels.join('、')})`,
+              displayText: displayText,
               displayTitle: day.theme,
               displaySubtitle: dateLabels.fullDate,
               dateLabel: dateLabels.relativeLabel
@@ -311,6 +321,50 @@ Page({
     const fullDate = `${dateStr} ${weekday}`
 
     return { relativeLabel, fullDate }
+  },
+
+  /**
+   * 格式化聚餐日显示文本
+   * 格式：[聚餐日主题] + 今天/明天/后天/N天后 + 周几 + 日期 + [早餐/午餐/晚餐]
+   * @param {Object} gathering - 聚餐日对象
+   * @param {string} relativeLabel - 相对日期标签（今天、明天等）
+   * @param {string} weekday - 星期几
+   * @param {string} dateStr - 日期字符串
+   * @returns {string} 格式化后的显示文本
+   */
+  formatGatheringDisplay(gathering, relativeLabel, weekday, dateStr) {
+    const parts = []
+
+    // 判断是否为快捷选项
+    const isQuickOption = gathering.theme === '今天' || gathering.theme === '明天' ||
+                          gathering.theme === '后天' || gathering.isQuickOption
+
+    // 第一部分：聚餐日主题（如果不是快捷选项）
+    if (!isQuickOption && gathering.theme) {
+      parts.push(gathering.theme)
+    }
+
+    // 第二部分：相对日期（今天、明天、后天、N天后）
+    parts.push(relativeLabel)
+
+    // 第三部分：星期几
+    parts.push(weekday)
+
+    // 第四部分：具体日期
+    parts.push(dateStr)
+
+    // 第五部分：早餐/午餐/晚餐（如果有）
+    if (gathering.meals && gathering.meals.length > 0) {
+      const mealLabels = []
+      if (gathering.meals.includes('breakfast')) mealLabels.push('早餐')
+      if (gathering.meals.includes('lunch')) mealLabels.push('午餐')
+      if (gathering.meals.includes('dinner')) mealLabels.push('晚餐')
+      if (mealLabels.length > 0) {
+        parts.push(mealLabels.join('/'))
+      }
+    }
+
+    return parts.join(' ')
   },
 
   /**
