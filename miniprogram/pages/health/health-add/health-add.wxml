@@ -1,0 +1,166 @@
+<!-- pages/health/health-add/health-add.wxml -->
+<view class="container add-container">
+  <!-- 选择指标类型 -->
+  <view class="section-card">
+    <view class="section-title">选择健康指标</view>
+    <view class="type-selector">
+      <view
+        wx:for="{{healthTypes}}"
+        wx:key="value"
+        class="type-item {{selectedType === item.value ? 'active' : ''}}"
+        bindtap="selectType"
+        data-type="{{item.value}}">
+        <view class="type-icon">{{item.icon}}</view>
+        <view class="type-name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 选择日期时间 -->
+  <view class="section-card">
+    <view class="section-title">记录时间</view>
+    <view class="datetime-picker">
+      <picker mode="date" value="{{recordDate}}" bindchange="onDateChange">
+        <view class="picker-item">
+          <text class="picker-label">日期</text>
+          <view class="picker-value">
+            <text>{{recordDate}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </view>
+      </picker>
+      <picker mode="time" value="{{recordTime}}" bindchange="onTimeChange">
+        <view class="picker-item">
+          <text class="picker-label">时间</text>
+          <view class="picker-value">
+            <text>{{recordTime}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 输入数值 -->
+  <view class="section-card">
+    <view class="section-title">输入数值</view>
+
+    <!-- 体重 -->
+    <view wx:if="{{selectedType === 'weight'}}" class="input-group">
+      <view class="input-label">体重 (kg)</view>
+      <input
+        class="input-field"
+        type="digit"
+        placeholder="请输入体重"
+        value="{{inputValues.weight}}"
+        bindinput="onInput"
+        data-field="weight"
+      />
+      <view class="input-tip">正常范围因人而异，建议保持稳定</view>
+    </view>
+
+    <!-- 身高 -->
+    <view wx:if="{{selectedType === 'height'}}" class="input-group">
+      <view class="input-label">身高 (cm)</view>
+      <input
+        class="input-field"
+        type="digit"
+        placeholder="请输入身高"
+        value="{{inputValues.height}}"
+        bindinput="onInput"
+        data-field="height"
+      />
+    </view>
+
+    <!-- 血压 -->
+    <view wx:if="{{selectedType === 'bloodPressure'}}" class="input-group">
+      <view class="input-label">收缩压 (mmHg)</view>
+      <input
+        class="input-field"
+        type="number"
+        placeholder="请输入收缩压"
+        value="{{inputValues.systolic}}"
+        bindinput="onInput"
+        data-field="systolic"
+      />
+      <view class="input-label" style="margin-top: 30rpx;">舒张压 (mmHg)</view>
+      <input
+        class="input-field"
+        type="number"
+        placeholder="请输入舒张压"
+        value="{{inputValues.diastolic}}"
+        bindinput="onInput"
+        data-field="diastolic"
+      />
+      <view class="input-tip">正常范围：收缩压 90-140，舒张压 60-90</view>
+    </view>
+
+    <!-- 血氧 -->
+    <view wx:if="{{selectedType === 'bloodOxygen'}}" class="input-group">
+      <view class="input-label">血氧饱和度 (%)</view>
+      <input
+        class="input-field"
+        type="digit"
+        placeholder="请输入血氧饱和度"
+        value="{{inputValues.bloodOxygen}}"
+        bindinput="onInput"
+        data-field="bloodOxygen"
+      />
+      <view class="input-tip">正常范围：95%-100%</view>
+    </view>
+
+    <!-- 血糖 -->
+    <view wx:if="{{selectedType === 'bloodSugar'}}" class="input-group">
+      <view class="input-label">血糖 (mmol/L)</view>
+      <input
+        class="input-field"
+        type="digit"
+        placeholder="请输入血糖值"
+        value="{{inputValues.bloodSugar}}"
+        bindinput="onInput"
+        data-field="bloodSugar"
+      />
+      <view class="input-label" style="margin-top: 30rpx;">测量时机</view>
+      <picker mode="selector" range="{{bloodSugarTimes}}" value="{{bloodSugarTimeIndex}}" bindchange="onBloodSugarTimeChange">
+        <view class="picker-item bordered">
+          <text>{{bloodSugarTimes[bloodSugarTimeIndex]}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+      <view class="input-tip">空腹正常范围：3.9-6.1 mmol/L</view>
+    </view>
+
+    <!-- 尿酸 -->
+    <view wx:if="{{selectedType === 'uricAcid'}}" class="input-group">
+      <view class="input-label">尿酸 (μmol/L)</view>
+      <input
+        class="input-field"
+        type="number"
+        placeholder="请输入尿酸值"
+        value="{{inputValues.uricAcid}}"
+        bindinput="onInput"
+        data-field="uricAcid"
+      />
+      <view class="input-tip">正常范围：男性 208-428，女性 155-357</view>
+    </view>
+  </view>
+
+  <!-- 备注 -->
+  <view class="section-card">
+    <view class="section-title">备注（可选）</view>
+    <textarea
+      class="textarea-field"
+      placeholder="记录当时的身体状况、心情等..."
+      value="{{note}}"
+      bindinput="onNoteInput"
+      maxlength="200"
+    ></textarea>
+    <view class="char-count">{{note.length}}/200</view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="action-buttons">
+    <button class="btn-cancel" bindtap="cancel">取消</button>
+    <button class="btn-save" bindtap="save">保存</button>
+  </view>
+</view>

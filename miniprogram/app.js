@@ -13,6 +13,9 @@ App({
       })
     }
 
+    // 加载购物车数据
+    this.loadCart()
+
     // 检查登录状态
     this.checkLoginStatus()
 

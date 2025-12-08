@@ -1,0 +1,621 @@
+<!-- pages/health/health.wxml -->
+<view class="container health-container">
+  <!-- 顶部工具栏 -->
+  <view class="top-toolbar {{currentViewingOpenid ? 'viewing-mode' : ''}}">
+    <view class="toolbar-left">
+      <view class="view-switcher" bindtap="showViewSelector">
+        <text class="switcher-icon">👤</text>
+        <text class="switcher-text">{{currentViewingNickname || '我自己'}}</text>
+        <text wx:if="{{viewOptions.length > 1}}" class="switcher-arrow">▼</text>
+      </view>
+    </view>
+    <view class="toolbar-right">
+      <view class="auth-btn" bindtap="showAuthManagement">
+        <text class="auth-icon">🔐</text>
+        <text class="auth-text">授权</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 查看模式提示横幅 -->
+  <view wx:if="{{currentViewingOpenid}}" class="viewing-mode-banner">
+    <view class="banner-icon">👀</view>
+    <view class="banner-text">正在查看 {{currentViewingNickname}} 的数据（只读模式）</view>
+  </view>
+
+  <!-- 顶部标签栏 -->
+  <view class="tabs-container">
+    <view
+      class="tab-item {{currentTab === 'health' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="health">
+      <view class="tab-icon">📊</view>
+      <view class="tab-text">健康打卡</view>
+    </view>
+    <view
+      class="tab-item {{currentTab === 'water' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="water">
+      <view class="tab-icon">💧</view>
+      <view class="tab-text">喝水打卡</view>
+    </view>
+    <view
+      class="tab-item {{currentTab === 'medicine' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="medicine">
+      <view class="tab-icon">💊</view>
+      <view class="tab-text">吃药打卡</view>
+    </view>
+  </view>
+
+  <!-- 喝水打卡内容 -->
+  <view wx:if="{{currentTab === 'water'}}" class="tab-content">
+    <view class="water-section">
+      <!-- 今日目标卡片 -->
+      <view class="goal-card">
+        <view class="goal-header">
+          <view class="goal-title">今日饮水目标</view>
+          <view class="goal-setting" bindtap="showWaterGoalSetting">设置</view>
+        </view>
+        <view class="goal-progress-container">
+          <view class="goal-progress-bg">
+            <view class="goal-progress-bar {{waterProgressPercent >= 100 ? 'completed' : ''}}" style="width: {{waterProgressPercent}}%"></view>
+          </view>
+          <view class="goal-numbers">
+            <text class="current-amount">{{waterData.todayAmount}}ml</text>
+            <text class="goal-amount"> / {{waterData.goalAmount}}ml</text>
+          </view>
+        </view>
+        <view class="goal-status {{waterProgressPercent >= 100 ? 'completed' : ''}}">已完成 {{waterProgressPercent}}%</view>
+      </view>
+
+      <!-- 快捷加水按钮 -->
+      <view class="quick-water-btns">
+        <view class="water-btn" bindtap="addWater" data-amount="200">
+          <view class="water-amount">200ml</view>
+        </view>
+        <view class="water-btn" bindtap="addWater" data-amount="300">
+          <view class="water-amount">300ml</view>
+        </view>
+        <view class="water-btn" bindtap="addWater" data-amount="500">
+          <view class="water-amount">500ml</view>
+        </view>
+        <view class="water-btn custom" bindtap="showCustomWaterInput">
+          <view class="water-amount">自定义</view>
+        </view>
+      </view>
+
+      <!-- 本周统计与连续打卡 -->
+      <view class="stats-container">
+        <!-- 连续打卡天数 -->
+        <view class="streak-card">
+          <view class="streak-icon">🔥</view>
+          <view class="streak-info">
+            <view class="streak-number">{{waterData.streakDays}}</view>
+            <view class="streak-label">连续打卡(天)</view>
+          </view>
+        </view>
+
+        <!-- 本周统计 -->
+        <view class="weekly-stats-card">
+          <view class="stats-title">本周统计（近7天）</view>
+          <view class="stats-grid">
+            <view class="stat-item">
+              <view class="stat-value">{{waterData.weeklyStats.totalAmount}}</view>
+              <view class="stat-label">总量(ml)</view>
+            </view>
+            <view class="stat-item">
+              <view class="stat-value">{{waterData.weeklyStats.avgAmount}}</view>
+              <view class="stat-label">日均(ml)</view>
+            </view>
+            <view class="stat-item">
+              <view class="stat-value">{{waterData.weeklyStats.completeDays}}/7</view>
+              <view class="stat-label">达标天数</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 今日饮水记录 -->
+      <view class="water-records">
+        <view class="section-title">今日记录</view>
+        <view wx:if="{{waterData.todayRecords.length === 0}}" class="empty-tip">
+          <view class="empty-icon">💧</view>
+          <view class="empty-text">今天还没有喝水记录哦</view>
+        </view>
+        <view wx:else class="water-record-list">
+          <view
+            wx:for="{{waterData.todayRecords}}"
+            wx:key="id"
+            class="water-record-item"
+            bindlongpress="deleteWaterRecord"
+            data-id="{{item.id}}">
+            <view class="record-time">{{item.time}}</view>
+            <view class="record-amount">{{item.amount}}ml</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 吃药打卡内容 -->
+  <view wx:if="{{currentTab === 'medicine'}}" class="tab-content">
+    <view class="medicine-section">
+      <!-- 添加药品按钮 -->
+      <view class="add-medicine-btn" bindtap="showAddMedicine">
+        <view class="btn-icon">➕</view>
+        <view class="btn-text">添加药品提醒</view>
+      </view>
+
+      <!-- 药品列表 -->
+      <view class="medicine-list">
+        <view class="section-title">我的用药</view>
+        <view wx:if="{{medicineData.medicines.length === 0}}" class="empty-tip">
+          <view class="empty-icon">💊</view>
+          <view class="empty-text">还没有添加药品提醒</view>
+        </view>
+        <view wx:else>
+          <view
+            wx:for="{{medicineData.medicines}}"
+            wx:key="id"
+            class="medicine-card"
+            bindlongpress="showMedicineMenu"
+            data-id="{{item.id}}">
+            <view class="medicine-header">
+              <view class="medicine-name">{{item.name}}</view>
+              <view class="medicine-status {{item.todayTaken ? 'taken' : 'pending'}}">
+                {{item.todayTaken ? '已服用' : '待服用'}}
+              </view>
+            </view>
+            <view class="medicine-times">
+              <view
+                wx:for="{{item.times}}"
+                wx:key="index"
+                wx:for-item="timeItem"
+                class="time-chip {{timeItem.taken ? 'taken' : ''}}"
+                bindtap="toggleMedicineTaken"
+                data-medicine-id="{{item.id}}"
+                data-time-index="{{index}}">
+                {{timeItem.time}} {{timeItem.taken ? '✓' : ''}}
+              </view>
+            </view>
+            <view class="medicine-dosage">{{item.dosage}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 健康打卡内容 -->
+  <view wx:if="{{currentTab === 'health'}}" class="tab-content">
+  <!-- 顶部个人健康概览卡片 -->
+  <view class="health-summary-card">
+    <view class="summary-header">
+      <view class="summary-title">健康概览</view>
+      <view class="summary-date">{{todayDate}}</view>
+    </view>
+
+    <view class="summary-grid">
+      <view class="summary-item" wx:if="{{latestData.weight}}">
+        <view class="summary-icon">⚖️</view>
+        <view class="summary-value">{{latestData.weight}}</view>
+        <view class="summary-label">体重(kg)</view>
+      </view>
+      <view class="summary-item" wx:if="{{latestData.bloodPressure}}">
+        <view class="summary-icon">❤️</view>
+        <view class="summary-value">{{latestData.bloodPressure}}</view>
+        <view class="summary-label">血压</view>
+      </view>
+      <view class="summary-item" wx:if="{{latestData.bloodSugar}}">
+        <view class="summary-icon">🩸</view>
+        <view class="summary-value">{{latestData.bloodSugar}}</view>
+        <view class="summary-label">血糖</view>
+      </view>
+      <view class="summary-item" wx:if="{{latestData.height}}">
+        <view class="summary-icon">📏</view>
+        <view class="summary-value">{{latestData.height}}</view>
+        <view class="summary-label">身高(cm)</view>
+      </view>
+    </view>
+
+    <!-- 如果没有数据，显示提示 -->
+    <view wx:if="{{!hasData}}" class="no-data-tip">
+      <view class="tip-icon">📝</view>
+      <view class="tip-text">还没有记录，快来记录第一条健康数据吧！</view>
+    </view>
+  </view>
+
+  <!-- 快捷操作按钮 -->
+  <view class="quick-actions">
+    <view class="action-btn primary-btn" bindtap="goToAdd">
+      <view class="btn-icon">➕</view>
+      <view class="btn-text">添加记录</view>
+    </view>
+  </view>
+
+  <!-- 健康指标分类卡片 -->
+  <view class="health-categories">
+    <view class="category-title">健康指标</view>
+
+    <view class="category-grid">
+      <!-- 体重 -->
+      <view class="category-card" bindtap="viewDetails" data-type="weight">
+        <view class="category-icon">⚖️</view>
+        <view class="category-name">体重</view>
+        <view class="category-count">{{counts.weight}}条记录</view>
+      </view>
+
+      <!-- 血压 -->
+      <view class="category-card" bindtap="viewDetails" data-type="bloodPressure">
+        <view class="category-icon">❤️</view>
+        <view class="category-name">血压</view>
+        <view class="category-count">{{counts.bloodPressure}}条记录</view>
+      </view>
+
+      <!-- 血氧 -->
+      <view class="category-card" bindtap="viewDetails" data-type="bloodOxygen">
+        <view class="category-icon">💨</view>
+        <view class="category-name">血氧</view>
+        <view class="category-count">{{counts.bloodOxygen}}条记录</view>
+      </view>
+
+      <!-- 血糖 -->
+      <view class="category-card" bindtap="viewDetails" data-type="bloodSugar">
+        <view class="category-icon">🩸</view>
+        <view class="category-name">血糖</view>
+        <view class="category-count">{{counts.bloodSugar}}条记录</view>
+      </view>
+
+      <!-- 尿酸 -->
+      <view class="category-card" bindtap="viewDetails" data-type="uricAcid">
+        <view class="category-icon">💧</view>
+        <view class="category-name">尿酸</view>
+        <view class="category-count">{{counts.uricAcid}}条记录</view>
+      </view>
+
+      <!-- 身高 -->
+      <view class="category-card" bindtap="viewDetails" data-type="height">
+        <view class="category-icon">📏</view>
+        <view class="category-name">身高</view>
+        <view class="category-count">{{counts.height}}条记录</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近记录列表 -->
+  <view class="recent-records">
+    <view class="records-header">
+      <view class="records-title">最近记录</view>
+      <view class="records-filter" bindtap="showFilterPicker">
+        <text>{{filterText}}</text>
+        <text class="filter-arrow">▼</text>
+      </view>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+    <view wx:elif="{{recentRecords.length === 0}}" class="empty-state">
+      <view class="empty-icon">📋</view>
+      <view class="empty-text">暂无记录</view>
+    </view>
+
+    <view wx:else class="records-list">
+      <view
+        wx:for="{{recentRecords}}"
+        wx:key="_id"
+        class="record-item"
+        bindlongpress="showRecordMenu"
+        data-id="{{item._id}}">
+        <view class="record-left">
+          <view class="record-icon">{{item.icon}}</view>
+          <view class="record-info">
+            <view class="record-type">{{item.typeName}}</view>
+            <view class="record-date">{{item.dateStr}}</view>
+          </view>
+        </view>
+        <view class="record-right">
+          <view class="record-value">{{item.displayValue}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选弹窗 -->
+  <view wx:if="{{showFilterModal}}" class="filter-modal">
+    <view class="modal-mask" catchtap="hideFilterPicker"></view>
+    <view class="modal-content filter-content">
+      <view class="modal-header">
+        <text class="modal-title">选择筛选条件</text>
+        <text class="modal-close" catchtap="hideFilterPicker">✕</text>
+      </view>
+      <view class="filter-options">
+        <view
+          wx:for="{{filterOptions}}"
+          wx:key="value"
+          class="filter-option {{currentFilter === item.value ? 'active' : ''}}"
+          catchtap="selectFilter"
+          data-value="{{item.value}}">
+          <text>{{item.label}}</text>
+          <text wx:if="{{currentFilter === item.value}}" class="check-icon">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 记录操作菜单 -->
+  <view wx:if="{{showRecordMenu}}" class="record-menu-modal">
+    <view class="modal-mask" catchtap="hideRecordMenu"></view>
+    <view class="modal-content menu-content">
+      <view class="menu-option" catchtap="deleteRecord">
+        <text class="menu-icon">🗑️</text>
+        <text class="menu-text">删除记录</text>
+      </view>
+      <view class="menu-option cancel" catchtap="hideRecordMenu">
+        <text class="menu-text">取消</text>
+      </view>
+    </view>
+  </view>
+  </view>
+
+  <!-- 设置饮水目标弹窗 -->
+  <view wx:if="{{showWaterGoalModal}}" class="custom-modal">
+    <view class="modal-mask" catchtap="hideWaterGoalSetting"></view>
+    <view class="input-modal-content">
+      <view class="modal-header">
+        <text class="modal-title">设置每日饮水目标</text>
+        <text class="modal-close" catchtap="hideWaterGoalSetting">✕</text>
+      </view>
+      <view class="modal-body">
+        <view class="input-row">
+          <input
+            class="custom-input"
+            type="number"
+            placeholder="请输入目标量（ml）"
+            value="{{waterGoalInput}}"
+            bindinput="onWaterGoalInput" />
+        </view>
+        <view class="quick-goal-btns">
+          <view class="quick-goal-btn" bindtap="selectQuickGoal" data-amount="1500">1500ml</view>
+          <view class="quick-goal-btn" bindtap="selectQuickGoal" data-amount="2000">2000ml</view>
+          <view class="quick-goal-btn" bindtap="selectQuickGoal" data-amount="2500">2500ml</view>
+          <view class="quick-goal-btn" bindtap="selectQuickGoal" data-amount="3000">3000ml</view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn cancel-btn" catchtap="hideWaterGoalSetting">取消</view>
+        <view class="modal-btn confirm-btn" catchtap="saveWaterGoal">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 自定义加水量弹窗 -->
+  <view wx:if="{{showCustomWaterModal}}" class="custom-modal">
+    <view class="modal-mask" catchtap="hideCustomWaterInput"></view>
+    <view class="input-modal-content">
+      <view class="modal-header">
+        <text class="modal-title">自定义饮水量</text>
+        <text class="modal-close" catchtap="hideCustomWaterInput">✕</text>
+      </view>
+      <view class="modal-body">
+        <view class="input-row">
+          <input
+            class="custom-input"
+            type="number"
+            placeholder="请输入饮水量（ml）"
+            value="{{customWaterAmount}}"
+            bindinput="onCustomWaterInput" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn cancel-btn" catchtap="hideCustomWaterInput">取消</view>
+        <view class="modal-btn confirm-btn" catchtap="confirmCustomWater">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加药品弹窗 -->
+  <view wx:if="{{showAddMedicineModal}}" class="custom-modal">
+    <view class="modal-mask" catchtap="hideAddMedicine"></view>
+    <view class="input-modal-content">
+      <view class="modal-header">
+        <text class="modal-title">添加药品提醒</text>
+        <text class="modal-close" catchtap="hideAddMedicine">✕</text>
+      </view>
+      <view class="modal-body medicine-form">
+        <view class="form-item">
+          <view class="form-label">药品名称</view>
+          <input
+            class="form-input"
+            placeholder="请输入药品名称"
+            value="{{newMedicine.name}}"
+            bindinput="onMedicineNameInput" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">服用剂量</view>
+          <input
+            class="form-input"
+            placeholder="例如：1片/次"
+            value="{{newMedicine.dosage}}"
+            bindinput="onMedicineDosageInput" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">服用时间</view>
+          <view class="time-inputs">
+            <view
+              wx:for="{{newMedicine.times}}"
+              wx:key="index"
+              class="time-input-row">
+              <picker
+                mode="time"
+                value="{{item}}"
+                bindchange="onMedicineTimeChange"
+                data-index="{{index}}">
+                <view class="time-picker">{{item || '选择时间'}}</view>
+              </picker>
+              <view class="remove-time-btn" bindtap="removeMedicineTime" data-index="{{index}}">✕</view>
+            </view>
+            <view class="add-time-btn" bindtap="addMedicineTime">+ 添加服用时间</view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn cancel-btn" catchtap="hideAddMedicine">取消</view>
+        <view class="modal-btn confirm-btn" catchtap="saveMedicine">保存</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 药品操作菜单 -->
+  <view wx:if="{{showMedicineMenuModal}}" class="record-menu-modal">
+    <view class="modal-mask" catchtap="hideMedicineMenu"></view>
+    <view class="modal-content menu-content">
+      <view class="menu-option" catchtap="deleteMedicine">
+        <text class="menu-icon">🗑️</text>
+        <text class="menu-text">删除药品</text>
+      </view>
+      <view class="menu-option cancel" catchtap="hideMedicineMenu">
+        <text class="menu-text">取消</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 授权管理弹窗 -->
+  <view wx:if="{{showAuthModal}}" class="custom-modal">
+    <view class="modal-mask" catchtap="hideAuthManagement"></view>
+    <view class="auth-modal-content">
+      <view class="modal-header">
+        <text class="modal-title">授权管理</text>
+        <text class="modal-close" catchtap="hideAuthManagement">✕</text>
+      </view>
+      <view class="modal-body auth-body">
+        <!-- 授权操作区 -->
+        <view class="auth-actions">
+          <view class="auth-action-btn" bindtap="generateAuthCode">
+            <view class="action-icon">📤</view>
+            <view class="action-text">生成授权码</view>
+            <view class="action-desc">分享给他人查看我的数据</view>
+          </view>
+          <view class="auth-action-btn" bindtap="showInputAuthCode">
+            <view class="action-icon">📥</view>
+            <view class="action-text">输入授权码</view>
+            <view class="action-desc">获取他人数据查看权限</view>
+          </view>
+        </view>
+
+        <!-- 我授权给他人的列表 -->
+        <view class="auth-section">
+          <view class="auth-section-title">我授权的成员 ({{myAuthorizations.length}})</view>
+          <view wx:if="{{myAuthorizations.length === 0}}" class="empty-auth">
+            <view class="empty-icon">👥</view>
+            <view class="empty-text">还没有授权给任何人</view>
+          </view>
+          <view wx:else class="auth-list">
+            <view
+              wx:for="{{myAuthorizations}}"
+              wx:key="_id"
+              class="auth-item">
+              <view class="auth-info">
+                <view class="auth-nickname">{{item.authorized_nickname}}</view>
+                <view class="auth-time">{{item.createTime}}</view>
+              </view>
+              <view class="auth-action" bindtap="revokeAuthorization" data-id="{{item._id}}">
+                撤销
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 授权我查看的列表 -->
+        <view class="auth-section">
+          <view class="auth-section-title">我可查看的成员 ({{authorizedToMe.length}})</view>
+          <view wx:if="{{authorizedToMe.length === 0}}" class="empty-auth">
+            <view class="empty-icon">👀</view>
+            <view class="empty-text">还没有获得查看权限</view>
+          </view>
+          <view wx:else class="auth-list">
+            <view
+              wx:for="{{authorizedToMe}}"
+              wx:key="_id"
+              class="auth-item">
+              <view class="auth-info">
+                <view class="auth-nickname">{{item.owner_nickname}}</view>
+                <view class="auth-time">{{item.createTime}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 授权码显示弹窗 -->
+  <view wx:if="{{showAuthCodeModal}}" class="custom-modal">
+    <view class="modal-mask" catchtap="hideAuthCodeModal"></view>
+    <view class="code-modal-content">
+      <view class="modal-header">
+        <text class="modal-title">授权码</text>
+        <text class="modal-close" catchtap="hideAuthCodeModal">✕</text>
+      </view>
+      <view class="modal-body code-body">
+        <view class="code-display">{{authCode}}</view>
+        <view class="code-tip">请将此授权码告知对方</view>
+        <view class="code-countdown">
+          <view class="countdown-text">有效期剩余：{{countdown}}秒</view>
+          <view class="countdown-bar">
+            <view class="countdown-progress" style="width: {{countdown / 300 * 100}}%"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 输入授权码弹窗 -->
+  <view wx:if="{{showInputAuthCodeModal}}" class="custom-modal">
+    <view class="modal-mask" catchtap="hideInputAuthCode"></view>
+    <view class="input-modal-content">
+      <view class="modal-header">
+        <text class="modal-title">输入授权码</text>
+        <text class="modal-close" catchtap="hideInputAuthCode">✕</text>
+      </view>
+      <view class="modal-body">
+        <view class="input-row">
+          <input
+            class="custom-input"
+            type="number"
+            maxlength="6"
+            placeholder="请输入6位授权码"
+            value="{{inputAuthCode}}"
+            bindinput="onAuthCodeInput" />
+        </view>
+        <view class="input-tip">输入对方分享的6位数字授权码</view>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn cancel-btn" catchtap="hideInputAuthCode">取消</view>
+        <view class="modal-btn confirm-btn" catchtap="useAuthCode">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 查看人员选择器弹窗 -->
+  <view wx:if="{{showViewSelectorModal}}" class="custom-modal">
+    <view class="modal-mask" catchtap="hideViewSelector"></view>
+    <view class="selector-modal-content">
+      <view class="modal-header">
+        <text class="modal-title">选择查看对象</text>
+        <text class="modal-close" catchtap="hideViewSelector">✕</text>
+      </view>
+      <view class="modal-body selector-body">
+        <view
+          wx:for="{{viewOptions}}"
+          wx:key="openid"
+          class="selector-item {{currentViewingOpenid === item.openid ? 'active' : ''}}"
+          catchtap="selectViewTarget"
+          data-openid="{{item.openid}}"
+          data-nickname="{{item.nickname}}">
+          <view class="selector-nickname">{{item.nickname}}</view>
+          <view wx:if="{{currentViewingOpenid === item.openid}}" class="selector-check">✓</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

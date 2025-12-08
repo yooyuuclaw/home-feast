@@ -46,9 +46,9 @@
 
         <!-- 数量控制 -->
         <view class="item-quantity">
-          <view class="quantity-btn" bindtap="decreaseCount" data-id="{{item._id}}">-</view>
+          <view class="quantity-btn" catchtap="decreaseCount" data-id="{{item._id}}">-</view>
           <view class="quantity-num">{{item.count}}</view>
-          <view class="quantity-btn" bindtap="increaseCount" data-id="{{item._id}}">+</view>
+          <view class="quantity-btn" catchtap="increaseCount" data-id="{{item._id}}">+</view>
         </view>
       </view>
     </view>
@@ -56,11 +56,15 @@
     <!-- 聚餐日信息（只读显示） -->
     <view class="gathering-section card">
       <view class="section-title">聚餐日</view>
-      <view wx:if="{{selectedGathering}}" class="gathering-display">
+      <view wx:if="{{selectedGathering}}" class="gathering-display" bindtap="showGatheringTip">
         <text class="calendar-icon">📅</text>
         <view class="gathering-text">
           <view class="gathering-name">{{selectedGathering.displayTitle || selectedGathering.theme}}</view>
           <view class="gathering-date">{{selectedGathering.displaySubtitle || selectedGathering.dateLabel}}</view>
+        </view>
+        <view class="change-hint">
+          <text class="hint-text">点击查看提示</text>
+          <text class="hint-icon">💡</text>
         </view>
       </view>
       <view wx:else class="gathering-empty">

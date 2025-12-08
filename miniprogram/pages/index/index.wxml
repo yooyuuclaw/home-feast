@@ -45,6 +45,13 @@
       <view class="card-desc">查看投喂任务记录</view>
     </view>
 
+    <!-- 健康管理卡片（仅成员可见） -->
+    <view class="feature-card health-card" wx:if="{{canAccessHealth}}" bindtap="goToHealth">
+      <view class="card-icon">💗</view>
+      <view class="card-title">健康小本本</view>
+      <view class="card-desc">记录身体健康指标</view>
+    </view>
+
     <!-- 管理后台卡片（仅管理员可见） -->
     <view class="feature-card admin-card" wx:if="{{isAdmin}}" bindtap="goToAdmin">
       <view class="card-icon">⚙️</view>

@@ -202,6 +202,31 @@
   color: var(--color-text-secondary);
 }
 
+/* 健康管理卡片 */
+.health-card {
+  background: linear-gradient(135deg, #FFE5E5 0%, #FFD4D4 100%);
+  border: 2rpx solid #FFB3B3;
+  box-shadow: 0 6rpx 16rpx rgba(255, 102, 102, 0.3);
+}
+
+.health-card .card-icon {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+.health-card .card-title {
+  color: #D32F2F;
+}
+
+.health-card .card-desc {
+  color: #C62828;
+  opacity: 0.85;
+}
+
+.health-card:active {
+  transform: translateY(-6rpx) scale(0.98);
+  box-shadow: 0 8rpx 20rpx rgba(255, 102, 102, 0.4);
+}
+
 /* 用户信息 - 个性化增强 */
 .user-info-section {
   background: var(--color-bg-light);

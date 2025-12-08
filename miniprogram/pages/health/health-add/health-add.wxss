@@ -1,0 +1,226 @@
+/* pages/health/health-add/health-add.wxss */
+.add-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FFE5E5 0%, #F9F9F9 20%);
+  padding: 30rpx;
+  padding-bottom: 180rpx;
+}
+
+/* 分区卡片 */
+.section-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 40rpx;
+  margin-bottom: 30rpx;
+  box-shadow: var(--shadow-sm);
+  animation: slideUp var(--transition-normal);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+/* 类型选择器 */
+.type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.type-item {
+  background: linear-gradient(135deg, #F5F5F5 0%, #EEEEEE 100%);
+  border-radius: var(--radius-lg);
+  padding: 30rpx 15rpx;
+  text-align: center;
+  border: 3rpx solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.type-item.active {
+  background: linear-gradient(135deg, #FFE5E5 0%, #FFD4D4 100%);
+  border-color: #FF6B6B;
+  transform: scale(1.05);
+}
+
+.type-item:active {
+  transform: scale(0.95);
+}
+
+.type-icon {
+  font-size: 52rpx;
+  margin-bottom: 12rpx;
+}
+
+.type-name {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.type-item.active .type-name {
+  color: #D32F2F;
+  font-weight: bold;
+}
+
+/* 日期时间选择器 */
+.datetime-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.picker-item {
+  background: #F5F5F5;
+  border-radius: var(--radius-md);
+  padding: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all var(--transition-fast);
+}
+
+.picker-item:active {
+  background: #EEEEEE;
+}
+
+.picker-item.bordered {
+  background: white;
+  border: 2rpx solid #E0E0E0;
+}
+
+.picker-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.picker-value {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.picker-arrow {
+  font-size: 32rpx;
+  color: #999;
+  font-weight: normal;
+}
+
+/* 输入组 */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.input-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.input-field {
+  background: #F5F5F5;
+  border-radius: var(--radius-md);
+  padding: 25rpx 30rpx;
+  font-size: 32rpx;
+  color: #333;
+  border: 2rpx solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.input-field:focus {
+  background: white;
+  border-color: #FF6B6B;
+}
+
+.input-tip {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.5;
+  padding-left: 10rpx;
+}
+
+/* 文本域 */
+.textarea-field {
+  background: #F5F5F5;
+  border-radius: var(--radius-md);
+  padding: 25rpx 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  min-height: 200rpx;
+  border: 2rpx solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.textarea-field:focus {
+  background: white;
+  border-color: #FF6B6B;
+}
+
+.char-count {
+  text-align: right;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 30rpx;
+  display: flex;
+  gap: 20rpx;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.btn-cancel,
+.btn-save {
+  flex: 1;
+  height: 90rpx;
+  line-height: 90rpx;
+  border-radius: var(--radius-xl);
+  font-size: 32rpx;
+  font-weight: bold;
+  transition: all var(--transition-fast);
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.btn-cancel {
+  background: #F5F5F5;
+  color: #666;
+}
+
+.btn-cancel:active {
+  background: #E0E0E0;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(255, 82, 82, 0.3);
+}
+
+.btn-save:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(255, 82, 82, 0.4);
+}
+
+/* 按钮点击后去除边框 */
+button::after {
+  border: none;
+}

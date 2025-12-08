@@ -211,6 +211,8 @@
   border-radius: 40rpx;
   padding: 10rpx;
   gap: 4rpx;
+  position: relative;
+  z-index: 10;
 }
 
 .quantity-btn {
@@ -227,6 +229,9 @@
   border: 2rpx solid var(--color-primary-dark);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
+  position: relative;
+  z-index: 11;
+  pointer-events: auto;
 }
 
 .quantity-btn:active {
@@ -259,6 +264,13 @@
   box-shadow: var(--shadow-accent);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.gathering-display:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-sm);
 }
 
 /* 装饰性背景 */
@@ -299,6 +311,44 @@
   color: var(--color-primary-darker);
   opacity: 0.85;
   font-weight: 500;
+}
+
+/* 修改提示区域 */
+.change-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: 12rpx 16rpx;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-md);
+  border: 2rpx dashed var(--color-accent);
+  position: relative;
+  z-index: 1;
+}
+
+.hint-text {
+  font-size: 22rpx;
+  color: var(--color-primary-darker);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hint-icon {
+  font-size: 28rpx;
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+/* 闪烁动画 */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
 }
 
 .gathering-empty {

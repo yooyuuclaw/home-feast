@@ -6,6 +6,7 @@ Page({
   data: {
     userInfo: null,
     isAdmin: false,
+    canAccessHealth: false, // 是否可以访问健康管理（非访客）
     roleName: '',
     // 云存储照片路径
     photos: [
@@ -45,9 +46,14 @@ Page({
 
       if (res.result.success) {
         const userInfo = res.result.data
+        // 只有非未受邀访客可以访问健康管理
+        // uninvited_guest 无权限，其他角色（invited_guest, regular, chef, admin）都可以访问
+        const canAccessHealth = userInfo.role !== 'uninvited_guest'
+
         this.setData({
           userInfo: userInfo,
           isAdmin: userInfo.role === 'admin',
+          canAccessHealth: canAccessHealth,
           roleName: getRoleName(userInfo.role)
         })
 
@@ -180,6 +186,23 @@ Page({
   goToOrderHistory() {
     wx.navigateTo({
       url: '/pages/order-history/order-history'
+    })
+  },
+
+  /**
+   * 跳转到健康管理
+   */
+  goToHealth() {
+    if (!this.data.canAccessHealth) {
+      wx.showToast({
+        title: '未受邀访客无权限访问',
+        icon: 'none'
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: '/pages/health/health'
     })
   },
 

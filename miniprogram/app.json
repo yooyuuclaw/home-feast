@@ -5,6 +5,8 @@
     "pages/cart/cart",
     "pages/order-confirm/order-confirm",
     "pages/order-history/order-history",
+    "pages/health/health",
+    "pages/health/health-add/health-add",
     "pages/admin/admin",
     "pages/admin/order-manage/order-manage",
     "pages/admin/gathering-manage/gathering-manage",

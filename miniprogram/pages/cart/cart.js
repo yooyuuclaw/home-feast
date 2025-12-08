@@ -163,6 +163,24 @@ Page({
   },
 
   /**
+   * 显示聚餐日修改提示
+   */
+  showGatheringTip() {
+    wx.showModal({
+      title: '温馨提示',
+      content: '当前聚餐日已锁定，无法在此修改。\n\n如需更换聚餐日，请返回选菜页面重新选择哦！',
+      confirmText: '返回选菜',
+      cancelText: '知道了',
+      success: (res) => {
+        if (res.confirm) {
+          // 用户点击"返回选菜"，跳转到菜单页面
+          this.goToMenu()
+        }
+      }
+    })
+  },
+
+  /**
    * 提交订单
    */
   async submitOrder() {

@@ -92,11 +92,33 @@ async function getMenuList(event) {
     query = query.where(where)
   }
 
-  const res = await query.orderBy('createTime', 'desc').get()
+  // 修复：使用分页查询获取所有数据
+  // 微信云开发 .get() 默认最多返回100条，需要使用 .limit() 或分页查询
+  const MAX_LIMIT = 1000 // 单次查询最大条数
+  const allData = []
+  let hasMore = true
+  let offset = 0
+
+  while (hasMore) {
+    const res = await query
+      .orderBy('createTime', 'desc')
+      .skip(offset)
+      .limit(MAX_LIMIT)
+      .get()
+
+    allData.push(...res.data)
+
+    // 如果返回的数据少于限制数量，说明已经获取完所有数据
+    if (res.data.length < MAX_LIMIT) {
+      hasMore = false
+    } else {
+      offset += MAX_LIMIT
+    }
+  }
 
   return {
     success: true,
-    data: res.data,
+    data: allData,
     message: '获取成功'
   }
 }
