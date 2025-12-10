@@ -153,14 +153,14 @@ async function deleteHealthRecord(event, openid) {
     // 先检查记录是否属于当前用户
     const checkResult = await db.collection('health_records').doc(id).get()
 
-    if (checkResult.data.length === 0) {
+    if (!checkResult.data) {
       return {
         success: false,
         message: '记录不存在'
       }
     }
 
-    if (checkResult.data[0]._openid !== openid) {
+    if (checkResult.data._openid !== openid) {
       return {
         success: false,
         message: '无权删除他人的记录'
@@ -363,14 +363,14 @@ async function deleteWaterRecord(event, openid) {
     // 检查记录是否属于当前用户
     const checkResult = await db.collection('water_records').doc(id).get()
 
-    if (checkResult.data.length === 0) {
+    if (!checkResult.data) {
       return {
         success: false,
         message: '记录不存在'
       }
     }
 
-    if (checkResult.data[0]._openid !== openid) {
+    if (checkResult.data._openid !== openid) {
       return {
         success: false,
         message: '无权删除他人的记录'
@@ -515,14 +515,14 @@ async function toggleMedicineTaken(event, openid) {
     // 获取药品信息
     const medicineRes = await db.collection('medicines').doc(medicineId).get()
 
-    if (medicineRes.data.length === 0) {
+    if (!medicineRes.data) {
       return {
         success: false,
         message: '药品不存在'
       }
     }
 
-    const medicine = medicineRes.data[0]
+    const medicine = medicineRes.data
 
     if (medicine._openid !== openid) {
       return {
@@ -574,14 +574,14 @@ async function deleteMedicine(event, openid) {
     // 检查药品是否属于当前用户
     const checkResult = await db.collection('medicines').doc(id).get()
 
-    if (checkResult.data.length === 0) {
+    if (!checkResult.data) {
       return {
         success: false,
         message: '药品不存在'
       }
     }
 
-    if (checkResult.data[0]._openid !== openid) {
+    if (checkResult.data._openid !== openid) {
       return {
         success: false,
         message: '无权删除他人的药品'
@@ -858,14 +858,14 @@ async function revokeAuthorization(event, openid) {
     // 检查授权记录
     const authRes = await db.collection('health_authorizations').doc(authId).get()
 
-    if (authRes.data.length === 0) {
+    if (!authRes.data) {
       return {
         success: false,
         message: '授权记录不存在'
       }
     }
 
-    const auth = authRes.data[0]
+    const auth = authRes.data
 
     // 只有授权拥有者可以撤销
     if (auth.owner_openid !== openid) {

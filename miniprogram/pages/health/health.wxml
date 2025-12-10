@@ -126,10 +126,10 @@
         <view wx:else class="water-record-list">
           <view
             wx:for="{{waterData.todayRecords}}"
-            wx:key="id"
+            wx:key="_id"
             class="water-record-item"
             bindlongpress="deleteWaterRecord"
-            data-id="{{item.id}}">
+            data-id="{{item._id}}">
             <view class="record-time">{{item.time}}</view>
             <view class="record-amount">{{item.amount}}ml</view>
           </view>
@@ -157,10 +157,10 @@
         <view wx:else>
           <view
             wx:for="{{medicineData.medicines}}"
-            wx:key="id"
+            wx:key="_id"
             class="medicine-card"
             bindlongpress="showMedicineMenu"
-            data-id="{{item.id}}">
+            data-id="{{item._id}}">
             <view class="medicine-header">
               <view class="medicine-name">{{item.name}}</view>
               <view class="medicine-status {{item.todayTaken ? 'taken' : 'pending'}}">
@@ -174,9 +174,9 @@
                 wx:for-item="timeItem"
                 class="time-chip {{timeItem.taken ? 'taken' : ''}}"
                 bindtap="toggleMedicineTaken"
-                data-medicine-id="{{item.id}}"
+                data-medicine-id="{{item._id}}"
                 data-time-index="{{index}}">
-                {{timeItem.time}} {{timeItem.taken ? '✓' : ''}}
+                {{timeItem.time}}
               </view>
             </view>
             <view class="medicine-dosage">{{item.dosage}}</view>
