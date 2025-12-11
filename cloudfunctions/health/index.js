@@ -12,14 +12,24 @@ const _ = db.command
  * 检查用户权限（非未受邀访客可访问）
  */
 async function checkPermission(openid) {
-  const res = await db.collection('users').where({
-    _openid: openid
-  }).get()
+  try {
+    const res = await db.collection('users').where({
+      _openid: openid
+    }).get()
 
-  if (res.data.length === 0) return false
+    if (res.data.length === 0) {
+      console.log('用户不存在于users集合中，openid:', openid)
+      return false
+    }
 
-  // 只有未受邀访客无权限，其他角色（invited_guest, regular, chef, admin）都可以访问
-  return res.data[0].role !== 'uninvited_guest'
+    // 只有未受邀访客无权限，其他角色（invited_guest, regular, chef, admin）都可以访问
+    const hasPermission = res.data[0].role !== 'uninvited_guest'
+    console.log('用户角色:', res.data[0].role, '是否有权限:', hasPermission)
+    return hasPermission
+  } catch (err) {
+    console.error('检查权限失败:', err)
+    return false
+  }
 }
 
 /**
@@ -950,12 +960,15 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID
   const { action } = event
 
+  console.log('health云函数被调用, action:', action, 'openid:', openid)
+
   // 检查权限
   const hasPermission = await checkPermission(openid)
   if (!hasPermission) {
+    console.log('用户无权限访问健康管理功能')
     return {
       success: false,
-      message: '未受邀访客无权访问健康管理功能'
+      message: '您需要先在首页授权登录，才能使用健康管理功能'
     }
   }
 
@@ -1005,7 +1018,7 @@ exports.main = async (event, context) => {
     console.error('健康数据操作失败', err)
     return {
       success: false,
-      message: '操作失败'
+      message: '操作失败: ' + err.message
     }
   }
 }

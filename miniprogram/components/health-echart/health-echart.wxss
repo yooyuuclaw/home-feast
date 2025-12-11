@@ -1,0 +1,143 @@
+/* 健康数据 ECharts 图表组件样式 */
+.health-chart-container {
+  background: white;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin: 20rpx 0;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.chart-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.chart-icon {
+  font-size: 36rpx;
+}
+
+.chart-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 8rpx;
+  background: #F5F5F5;
+  border-radius: 24rpx;
+  padding: 6rpx;
+}
+
+.range-btn {
+  padding: 10rpx 20rpx;
+  font-size: 24rpx;
+  color: #666;
+  border-radius: 20rpx;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.range-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+}
+
+/* 数据统计摘要 */
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 20rpx;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f0f3f7 100%);
+  border-radius: 16rpx;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.stat-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-value.high {
+  color: #f56c6c;
+}
+
+.stat-value.low {
+  color: #67c23a;
+}
+
+.stat-value.trend-up {
+  color: #f56c6c;
+}
+
+.stat-value.trend-down {
+  color: #67c23a;
+}
+
+.stat-value.trend-stable {
+  color: #909399;
+}
+
+/* 图表容器 */
+.chart-wrapper {
+  width: 100%;
+  height: 500rpx;
+}
+
+.echarts-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* 空状态 */
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16rpx;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  font-weight: 500;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #ccc;
+}

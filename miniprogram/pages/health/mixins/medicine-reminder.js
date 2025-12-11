@@ -31,7 +31,7 @@ export default {
         }
       })
 
-      if (res.result.success) {
+      if (res.result && res.result.success) {
         const medicines = res.result.data || []
         // 处理今日服用状态
         medicines.forEach(medicine => {
@@ -41,6 +41,8 @@ export default {
         this.setData({
           'medicineData.medicines': medicines
         })
+      } else {
+        console.error('加载药品数据失败:', res.result ? res.result.message : '未知错误')
       }
     } catch (err) {
       console.error('加载药品数据失败', err)

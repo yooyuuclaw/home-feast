@@ -10,6 +10,9 @@ export default {
   data: {
     hasData: false,
 
+    // 存储所有健康记录（用于图表）
+    allHealthRecords: [],
+
     // 最新数据
     latestData: {
       weight: '',
@@ -69,6 +72,29 @@ export default {
         }
       })
 
+      console.log('加载健康数据返回结果:', allDataRes)
+
+      // 检查云函数调用是否成功
+      if (!allDataRes.result) {
+        console.error('云函数返回结果为空')
+        this.setData({ loading: false })
+        wx.showToast({
+          title: '数据加载异常',
+          icon: 'none'
+        })
+        return
+      }
+
+      if (!allDataRes.result.success) {
+        console.error('云函数返回失败:', allDataRes.result.message)
+        this.setData({ loading: false })
+        wx.showToast({
+          title: allDataRes.result.message || '加载失败',
+          icon: 'none'
+        })
+        return
+      }
+
       // 如果有筛选条件，再加载筛选后的数据用于显示最近记录
       let filteredRecords = []
       if (this.data.currentFilter !== 'all') {
@@ -80,34 +106,41 @@ export default {
             targetOpenid: this.data.currentViewingOpenid
           }
         })
-        if (filteredRes.result.success) {
+        if (filteredRes.result && filteredRes.result.success) {
           filteredRecords = filteredRes.result.data || []
         }
       }
 
-      if (allDataRes.result.success) {
-        const allRecords = allDataRes.result.data || []
+      const allRecords = allDataRes.result.data || []
 
-        // 使用工具函数计算各类型数量和最新值
-        const { counts, latestData } = processHealthRecords(allRecords)
+      // 使用工具函数计算各类型数量和最新值
+      const { counts, latestData } = processHealthRecords(allRecords)
 
-        // 处理记录显示 - 如果有筛选，使用筛选后的数据；否则使用全部数据
-        const recordsToDisplay = this.data.currentFilter === 'all' ? allRecords : filteredRecords
-        const recentRecords = this._formatRecentRecords(recordsToDisplay)
+      // 处理记录显示 - 如果有筛选，使用筛选后的数据；否则使用全部数据
+      const recordsToDisplay = this.data.currentFilter === 'all' ? allRecords : filteredRecords
+      const recentRecords = this._formatRecentRecords(recordsToDisplay)
 
-        this.setData({
-          recentRecords,
-          counts,  // 始终使用全部数据的统计
-          latestData,  // 始终使用全部数据的最新值
-          hasData: allRecords.length > 0,
-          loading: false
-        })
+      this.setData({
+        recentRecords,
+        counts,  // 始终使用全部数据的统计
+        latestData,  // 始终使用全部数据的最新值
+        allHealthRecords: allRecords, // 保存所有记录用于图表
+        hasData: allRecords.length > 0,
+        loading: false
+      })
+
+      console.log('健康数据加载完成，记录数量:', allRecords.length)
+      console.log('allHealthRecords:', this.data.allHealthRecords)
+
+      // 更新图表数据
+      if (this.updateChartData) {
+        this.updateChartData()
       }
     } catch (err) {
       console.error('加载健康数据失败', err)
       this.setData({ loading: false })
       wx.showToast({
-        title: '加载失败',
+        title: '加载失败: ' + (err.message || '未知错误'),
         icon: 'none'
       })
     }

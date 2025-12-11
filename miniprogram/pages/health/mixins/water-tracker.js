@@ -49,7 +49,7 @@ export default {
         }
       })
 
-      if (res.result.success) {
+      if (res.result && res.result.success) {
         const records = res.result.data || []
         const todayRecords = filterTodayRecords(records)
         const todayAmount = todayRecords.reduce((sum, item) => sum + item.amount, 0)
@@ -68,6 +68,8 @@ export default {
           'waterData.streakDays': streakDays,
           waterProgressPercent: percent
         })
+      } else {
+        console.error('加载喝水数据失败:', res.result ? res.result.message : '未知错误')
       }
     } catch (err) {
       console.error('加载喝水数据失败', err)

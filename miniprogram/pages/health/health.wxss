@@ -1790,3 +1790,86 @@
   color: #2196F3;
   font-weight: bold;
 }
+
+/* ==================== 数据趋势图表样式 ==================== */
+.charts-section {
+  margin-bottom: 24rpx;
+}
+
+.charts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.charts-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.charts-title::before {
+  content: '';
+  width: 6rpx;
+  height: 28rpx;
+  background: linear-gradient(180deg, #FF6B6B 0%, #FF5252 100%);
+  border-radius: 3rpx;
+}
+
+.chart-type-selector {
+  position: relative;
+}
+
+.chart-type-picker {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 18rpx;
+  background: linear-gradient(135deg, #F5F5F5 0%, #FAFAFA 100%);
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+  border: 2rpx solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.chart-type-picker:active {
+  transform: scale(0.95);
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+}
+
+.picker-arrow {
+  font-size: 18rpx;
+  color: #999;
+}
+
+.chart-empty-tip {
+  background: linear-gradient(135deg, #F5F5F5 0%, #FAFAFA 100%);
+  border-radius: 20rpx;
+  padding: 80rpx 40rpx;
+  text-align: center;
+  border: 2rpx dashed rgba(0, 0, 0, 0.08);
+}
+
+.chart-empty-tip .empty-icon {
+  font-size: 88rpx;
+  opacity: 0.3;
+  margin-bottom: 20rpx;
+}
+
+.chart-empty-tip .empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+  font-weight: 500;
+}
+
+.chart-empty-tip .empty-hint {
+  font-size: 24rpx;
+  color: #BBB;
+}
+

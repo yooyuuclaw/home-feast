@@ -51,8 +51,8 @@ export default {
         data: { action: 'getAuthorizedToMe' }
       })
 
-      const myAuthorizations = myAuthRes.result.data || []
-      const authorizedToMe = authorizedRes.result.data || []
+      const myAuthorizations = (myAuthRes.result && myAuthRes.result.data) || []
+      const authorizedToMe = (authorizedRes.result && authorizedRes.result.data) || []
 
       // 构建可查看的用户列表
       const viewOptions = [

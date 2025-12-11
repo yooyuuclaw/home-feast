@@ -1,0 +1,33 @@
+<!-- 折线图组件 -->
+<view class="chart-container">
+  <view class="chart-header">
+    <text class="chart-title">{{title}}</text>
+    <view class="time-range-selector">
+      <text
+        class="range-item {{timeRange === '7' ? 'active' : ''}}"
+        bindtap="changeTimeRange"
+        data-range="7">近7天</text>
+      <text
+        class="range-item {{timeRange === '30' ? 'active' : ''}}"
+        bindtap="changeTimeRange"
+        data-range="30">近30天</text>
+    </view>
+  </view>
+  <canvas
+    canvas-id="lineChart{{chartId}}"
+    id="lineChart{{chartId}}"
+    class="chart-canvas"
+    disable-scroll="true"
+    bindtouchstart="touchStart"
+    bindtouchmove="touchMove"
+    bindtouchend="touchEnd">
+  </canvas>
+  <view wx:if="{{showTooltip}}" class="chart-tooltip" style="left: {{tooltipX}}px; top: {{tooltipY}}px;">
+    <text class="tooltip-date">{{tooltipData.date}}</text>
+    <text class="tooltip-value">{{tooltipData.value}}</text>
+  </view>
+  <view wx:if="{{chartData.length === 0}}" class="chart-empty">
+    <text class="empty-icon">📊</text>
+    <text class="empty-text">暂无数据</text>
+  </view>
+</view>
