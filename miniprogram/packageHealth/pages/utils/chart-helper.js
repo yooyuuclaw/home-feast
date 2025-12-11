@@ -32,11 +32,11 @@ export function processHealthChartData(records, type, days = 7) {
   }
 
   // 修复日期格式，兼容 iOS
-  // iOS 不支持 "2025-12-09 16:42:00" 格式，需要转换为 "2025-12-09T16:42:00" 或 "2025/12/09 16:42:00"
+  // iOS 不支持带空格的日期格式，需要使用ISO 8601标准格式（带T的格式）
   const fixDateFormat = (dateStr) => {
     if (!dateStr) return new Date()
-    // 将 "YYYY-MM-DD HH:mm:ss" 转换为 "YYYY/MM/DD HH:mm:ss"
-    return new Date(dateStr.replace(/-/g, '/'))
+    // 将空格替换为 T，符合 ISO 8601 格式
+    return new Date(dateStr.replace(' ', 'T'))
   }
 
   // 按日期排序
@@ -83,8 +83,8 @@ export function processHealthChartData(records, type, days = 7) {
     value: processValue(groupedByDate[date])
   }))
 
-  // 按日期排序
-  chartData.sort((a, b) => new Date(a.date.replace(/-/g, '/')) - new Date(b.date.replace(/-/g, '/')))
+  // 按日期排序（日期格式已经是 YYYY-MM-DD，可以直接字符串比较）
+  chartData.sort((a, b) => a.date.localeCompare(b.date))
 
   console.log('[chart-helper] 最终图表数据:', chartData)
 

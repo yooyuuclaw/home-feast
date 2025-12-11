@@ -77,7 +77,7 @@ Page({
    */
   goToOrderManage() {
     wx.navigateTo({
-      url: '/pages/admin/order-manage/order-manage'
+      url: '/packageAdmin/pages/order-manage/order-manage'
     })
   },
 
@@ -86,7 +86,7 @@ Page({
    */
   goToGatheringManage() {
     wx.navigateTo({
-      url: '/pages/admin/gathering-manage/gathering-manage'
+      url: '/packageAdmin/pages/gathering-manage/gathering-manage'
     })
   },
 
@@ -95,7 +95,7 @@ Page({
    */
   goToMenuManage() {
     wx.navigateTo({
-      url: '/pages/admin/menu-manage/menu-manage'
+      url: '/packageAdmin/pages/menu-manage/menu-manage'
     })
   },
 
@@ -104,7 +104,7 @@ Page({
    */
   goToUserManage() {
     wx.navigateTo({
-      url: '/pages/admin/user-manage/user-manage'
+      url: '/packageAdmin/pages/user-manage/user-manage'
     })
   },
 
@@ -113,7 +113,7 @@ Page({
    */
   goToStatistics() {
     wx.navigateTo({
-      url: '/pages/admin/statistics/statistics'
+      url: '/packageAdmin/pages/statistics/statistics'
     })
   },
 
@@ -122,7 +122,7 @@ Page({
    */
   goToBackupManage() {
     wx.navigateTo({
-      url: '/pages/admin/backup-manage/backup-manage'
+      url: '/packageAdmin/pages/backup-manage/backup-manage'
     })
   },
 
@@ -131,7 +131,7 @@ Page({
    */
   goToAuditLogs() {
     wx.navigateTo({
-      url: '/pages/admin/audit-logs/audit-logs'
+      url: '/packageAdmin/pages/audit-logs/audit-logs'
     })
   }
 })

@@ -166,7 +166,7 @@ export default {
     if (this.checkViewMode()) return
 
     wx.navigateTo({
-      url: '/pages/health/health-add/health-add'
+      url: '/packageHealth/pages/health-add/health-add'
     })
   },
 

@@ -202,7 +202,7 @@ Page({
     }
 
     wx.navigateTo({
-      url: '/pages/health/health'
+      url: '/packageHealth/pages/health'
     })
   },
 
@@ -219,7 +219,7 @@ Page({
     }
 
     wx.navigateTo({
-      url: '/pages/admin/admin'
+      url: '/packageAdmin/pages/admin'
     })
   },
 

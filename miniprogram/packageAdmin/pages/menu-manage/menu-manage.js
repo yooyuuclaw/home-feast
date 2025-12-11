@@ -132,7 +132,7 @@ Page({
    */
   addDish() {
     wx.navigateTo({
-      url: '/pages/admin/menu-edit/menu-edit'
+      url: '/packageAdmin/pages/menu-edit/menu-edit'
     })
   },
 
@@ -142,7 +142,7 @@ Page({
   editDish(e) {
     const id = e.currentTarget.dataset.id
     wx.navigateTo({
-      url: `/pages/admin/menu-edit/menu-edit?id=${id}`
+      url: `/packageAdmin/pages/menu-edit/menu-edit?id=${id}`
     })
   },
 

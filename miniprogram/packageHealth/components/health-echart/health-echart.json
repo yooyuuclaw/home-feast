@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "ec-canvas": "/packageHealth/components/ec-canvas/ec-canvas"
+  }
+}

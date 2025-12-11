@@ -62,12 +62,12 @@ Page({
     if (id) {
       // 编辑
       wx.navigateTo({
-        url: `/pages/admin/gathering-edit/gathering-edit?id=${id}`
+        url: `/packageAdmin/pages/gathering-edit/gathering-edit?id=${id}`
       })
     } else {
       // 新增
       wx.navigateTo({
-        url: '/pages/admin/gathering-edit/gathering-edit'
+        url: '/packageAdmin/pages/gathering-edit/gathering-edit'
       })
     }
   },

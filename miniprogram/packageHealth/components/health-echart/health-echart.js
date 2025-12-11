@@ -95,7 +95,7 @@ Component({
       chart = echarts.init(canvas, null, {
         width: canvas.width,
         height: canvas.height,
-        devicePixelRatio: wx.getSystemInfoSync().pixelRatio
+        devicePixelRatio: wx.getWindowInfo().pixelRatio
       })
 
       console.log('[health-echart] 图表实例已创建:', chart)

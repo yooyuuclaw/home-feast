@@ -188,43 +188,6 @@
 
   <!-- 健康打卡内容 -->
   <view wx:if="{{currentTab === 'health'}}" class="tab-content">
-  <!-- 顶部个人健康概览卡片 -->
-  <view class="health-summary-card">
-    <view class="summary-header">
-      <view class="summary-title">健康概览</view>
-      <view class="summary-date">{{todayDate}}</view>
-    </view>
-
-    <view class="summary-grid">
-      <view class="summary-item" wx:if="{{latestData.weight}}">
-        <view class="summary-icon">⚖️</view>
-        <view class="summary-value">{{latestData.weight}}</view>
-        <view class="summary-label">体重(kg)</view>
-      </view>
-      <view class="summary-item" wx:if="{{latestData.bloodPressure}}">
-        <view class="summary-icon">❤️</view>
-        <view class="summary-value">{{latestData.bloodPressure}}</view>
-        <view class="summary-label">血压</view>
-      </view>
-      <view class="summary-item" wx:if="{{latestData.bloodSugar}}">
-        <view class="summary-icon">🩸</view>
-        <view class="summary-value">{{latestData.bloodSugar}}</view>
-        <view class="summary-label">血糖</view>
-      </view>
-      <view class="summary-item" wx:if="{{latestData.height}}">
-        <view class="summary-icon">📏</view>
-        <view class="summary-value">{{latestData.height}}</view>
-        <view class="summary-label">身高(cm)</view>
-      </view>
-    </view>
-
-    <!-- 如果没有数据，显示提示 -->
-    <view wx:if="{{!hasData}}" class="no-data-tip">
-      <view class="tip-icon">📝</view>
-      <view class="tip-text">还没有记录，快来记录第一条健康数据吧！</view>
-    </view>
-  </view>
-
   <!-- 数据趋势图表区域 -->
   <view class="charts-section">
     <view class="charts-header">

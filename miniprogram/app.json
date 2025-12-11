@@ -4,19 +4,33 @@
     "pages/menu/menu",
     "pages/cart/cart",
     "pages/order-confirm/order-confirm",
-    "pages/order-history/order-history",
-    "pages/health/health",
-    "pages/health/health-add/health-add",
-    "pages/admin/admin",
-    "pages/admin/order-manage/order-manage",
-    "pages/admin/gathering-manage/gathering-manage",
-    "pages/admin/gathering-edit/gathering-edit",
-    "pages/admin/menu-manage/menu-manage",
-    "pages/admin/menu-edit/menu-edit",
-    "pages/admin/user-manage/user-manage",
-    "pages/admin/backup-manage/backup-manage",
-    "pages/admin/statistics/statistics",
-    "pages/admin/audit-logs/audit-logs"
+    "pages/order-history/order-history"
+  ],
+  "subPackages": [
+    {
+      "root": "packageHealth",
+      "name": "health",
+      "pages": [
+        "pages/health",
+        "pages/health-add/health-add"
+      ]
+    },
+    {
+      "root": "packageAdmin",
+      "name": "admin",
+      "pages": [
+        "pages/admin",
+        "pages/order-manage/order-manage",
+        "pages/gathering-manage/gathering-manage",
+        "pages/gathering-edit/gathering-edit",
+        "pages/menu-manage/menu-manage",
+        "pages/menu-edit/menu-edit",
+        "pages/user-manage/user-manage",
+        "pages/backup-manage/backup-manage",
+        "pages/statistics/statistics",
+        "pages/audit-logs/audit-logs"
+      ]
+    }
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -27,5 +41,11 @@
   "style": "v2",
   "sitemapLocation": "sitemap.json",
   "cloud": true,
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["health", "admin"]
+    }
+  }
 }
