@@ -403,3 +403,45 @@
   font-size: 28rpx;
   color: #999;
 }
+
+/* 分页控件 */
+.pagination-bar {
+  background: white;
+  border-radius: 16rpx;
+  padding: 25rpx 30rpx;
+  margin-top: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.pagination-info {
+  text-align: center;
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.pagination-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15rpx;
+}
+
+.pagination-btn {
+  background: linear-gradient(135deg, #FFB74D, #FFA726);
+  color: white;
+  border: none;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  padding: 8rpx 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(255, 152, 0, 0.3);
+}
+
+.pagination-btn[disabled] {
+  background: #E0E0E0;
+  color: #999;
+  box-shadow: none;
+}

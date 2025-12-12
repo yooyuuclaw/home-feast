@@ -70,6 +70,7 @@ async function recordSession(event, openid) {
 
 /**
  * 获取用户活动统计
+ * 支持分页和排序参数
  */
 async function getStatistics(event, openid) {
   // 检查是否为管理员
@@ -84,13 +85,54 @@ async function getStatistics(event, openid) {
     }
   }
 
-  // 获取所有用户信息
-  const usersRes = await db.collection('users').get()
-  const users = usersRes.data
+  const page = event.page || 1
+  const pageSize = event.pageSize || 100
+  const sortBy = event.sortBy || 'sessionCount'
+
+  console.log('[user-activity getStatistics] 接收参数:', { page, pageSize, sortBy })
+
+  // 获取所有用户信息（分批获取，支持超过100条）
+  let allUsers = []
+  const MAX_LIMIT = 100
+
+  // 先统计用户总数
+  const userCountRes = await db.collection('users').count()
+  const totalUsers = userCountRes.total
+
+  if (totalUsers <= MAX_LIMIT) {
+    const res = await db.collection('users').get()
+    allUsers = res.data
+  } else {
+    // 分批获取所有用户
+    let hasMoreUsers = true
+    let lastUserId = null
+
+    while (hasMoreUsers) {
+      let userQuery = db.collection('users')
+        .orderBy('_id', 'asc')
+        .limit(MAX_LIMIT)
+
+      if (lastUserId) {
+        userQuery = userQuery.where({
+          _id: db.command.gt(lastUserId)
+        })
+      }
+
+      const usersRes = await userQuery.get()
+      allUsers = allUsers.concat(usersRes.data)
+
+      if (usersRes.data.length < MAX_LIMIT) {
+        hasMoreUsers = false
+      } else {
+        lastUserId = usersRes.data[usersRes.data.length - 1]._id
+      }
+    }
+  }
+
+  console.log('[user-activity getStatistics] 获取到的用户总数:', allUsers.length)
 
   // 获取所有会话记录（分批获取，因为单次 get() 最多返回100条）
   let sessions = []
-  const MAX_LIMIT = 100
   let hasMore = true
   let lastId = null
 
@@ -113,10 +155,10 @@ async function getStatistics(event, openid) {
     }
   }
 
-  console.log('获取到的会话记录总数:', sessions.length)
+  console.log('[user-activity getStatistics] 获取到的会话记录总数:', sessions.length)
 
   // 为每个用户计算统计数据
-  const statistics = users.map(user => {
+  const statistics = allUsers.map(user => {
     // 过滤该用户的会话
     const userSessions = sessions.filter(s => s._openid === user._openid)
 
@@ -143,16 +185,27 @@ async function getStatistics(event, openid) {
       }
     }
 
-    if (user.lastOnlineTime) {
-      if (user.lastOnlineTime.$date) {
-        lastOnlineTime = new Date(user.lastOnlineTime.$date).getTime()
-      } else if (typeof user.lastOnlineTime === 'object' && user.lastOnlineTime instanceof Date) {
-        lastOnlineTime = user.lastOnlineTime.getTime()
-      } else {
-        lastOnlineTime = new Date(user.lastOnlineTime).getTime()
-      }
+    // 获取最后上线时间（取最新会话的时间）
+    if (userSessions.length > 0) {
+      const latestSession = userSessions.reduce((latest, s) => {
+        const sessionTime = s.sessionTime || s.createTime
+        if (!sessionTime) return latest
+
+        let timestamp = 0
+        if (sessionTime.$date) {
+          timestamp = new Date(sessionTime.$date).getTime()
+        } else if (sessionTime instanceof Date) {
+          timestamp = sessionTime.getTime()
+        } else {
+          timestamp = new Date(sessionTime).getTime()
+        }
+
+        return timestamp > latest ? timestamp : latest
+      }, 0)
+      lastOnlineTime = latestSession
     } else {
-      lastOnlineTime = createTime // 如果没有 lastOnlineTime，使用 createTime
+      // 如果没有会话记录，使用用户创建时间
+      lastOnlineTime = createTime
     }
 
     return {
@@ -169,16 +222,45 @@ async function getStatistics(event, openid) {
     }
   })
 
-  // 按最后上线时间倒序排序
+  // 根据排序字段排序
   statistics.sort((a, b) => {
-    const timeA = a.lastOnlineTime || a.createTime || 0
-    const timeB = b.lastOnlineTime || b.createTime || 0
-    return timeB - timeA
+    switch(sortBy) {
+      case 'createTime':
+        // 首次上线时间（从早到晚）
+        return (a.createTime || 0) - (b.createTime || 0)
+      case 'lastOnlineTime':
+        // 最后上线时间（从晚到早，最近的在前）
+        return (b.lastOnlineTime || 0) - (a.lastOnlineTime || 0)
+      case 'sessionCount':
+        // 访问次数（从多到少）
+        return (b.sessionCount || 0) - (a.sessionCount || 0)
+      case 'totalDuration':
+        // 总在线时长（从长到短）
+        return (b.totalDuration || 0) - (a.totalDuration || 0)
+      case 'avgDuration':
+        // 平均在线时长（从长到短）
+        return (b.avgDuration || 0) - (a.avgDuration || 0)
+      default:
+        return 0
+    }
   })
+
+  console.log('[user-activity getStatistics] 排序方式:', sortBy)
+  console.log('[user-activity getStatistics] 排序后总数:', statistics.length)
+
+  // 分页
+  const skip = (page - 1) * pageSize
+  const paginatedStats = statistics.slice(skip, skip + pageSize)
+
+  console.log('[user-activity getStatistics] 分页: page=', page, 'skip=', skip, '返回数=', paginatedStats.length)
 
   return {
     success: true,
-    data: statistics,
+    data: paginatedStats,
+    total: statistics.length,
+    page: page,
+    pageSize: pageSize,
+    totalPages: Math.ceil(statistics.length / pageSize),
     message: '获取统计数据成功'
   }
 }

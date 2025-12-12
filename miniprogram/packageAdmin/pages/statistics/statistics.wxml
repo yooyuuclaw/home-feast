@@ -111,6 +111,35 @@
             </view>
           </view>
         </view>
+
+        <!-- 分页控件 -->
+        <view wx:if="{{totalPages > 1}}" class="pagination-bar">
+          <view class="pagination-info">
+            第 {{currentPage}} / {{totalPages}} 页 (共 {{totalUsers}} 位)
+          </view>
+          <view class="pagination-buttons">
+            <button
+              class="pagination-btn"
+              size="mini"
+              bindtap="prevPage"
+              disabled="{{currentPage <= 1}}">
+              上一页
+            </button>
+            <button
+              class="pagination-btn"
+              size="mini"
+              bindtap="goToPage">
+              跳转
+            </button>
+            <button
+              class="pagination-btn"
+              size="mini"
+              bindtap="nextPage"
+              disabled="{{currentPage >= totalPages}}">
+              下一页
+            </button>
+          </view>
+        </view>
       </view>
 
       <!-- 热门菜品 -->
