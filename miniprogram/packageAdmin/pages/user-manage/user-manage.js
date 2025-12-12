@@ -8,9 +8,9 @@ Page({
     loading: true,
     allRoles: [],
     roleNames: [],
-    sortOptions: ['访问次数', '总在线时长', '最后访问时间'],
+    sortOptions: ['首次上线', '最后上线', '访问次数', '总在线时长', '平均时长'],
     currentSortIndex: 0,
-    currentSortLabel: '访问次数',
+    currentSortLabel: '首次上线',
 
     // 分页相关
     currentPage: 1,
@@ -19,7 +19,7 @@ Page({
     totalPages: 0,
 
     // 排序字段映射
-    sortFieldMap: ['visitCount', 'totalDuration', 'lastOnlineTime']
+    sortFieldMap: ['firstOnlineTime', 'lastOnlineTime', 'visitCount', 'totalDuration', 'avgDuration']
   },
 
   onLoad() {

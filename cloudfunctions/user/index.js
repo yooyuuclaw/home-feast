@@ -68,7 +68,7 @@ exports.main = async (event, context) => {
 /**
  * 获取所有用户（需要管理员权限）
  * 支持分页参数：page（页码，从1开始）, pageSize（每页条数，默认100）
- * 支持排序参数：sortBy（排序字段：visitCount, totalDuration, lastOnlineTime）
+ * 支持排序参数：sortBy（排序字段：firstOnlineTime, lastOnlineTime, visitCount, totalDuration, avgDuration）
  */
 async function getAllUsers(openid, options = {}) {
   const isAdmin = await checkAdmin(openid)
@@ -168,6 +168,9 @@ async function getAllUsers(openid, options = {}) {
     // 会话次数
     const sessionCount = userSessions.length
 
+    // 平均在线时长（秒）
+    const avgDuration = sessionCount > 0 ? Math.floor(totalDuration / sessionCount) : 0
+
     // 获取最后访问时间（取最新会话的时间）
     let lastOnlineTime = 0
     if (userSessions.length > 0) {
@@ -200,10 +203,24 @@ async function getAllUsers(openid, options = {}) {
       }
     }
 
+    // 获取首次上线时间（用户创建时间）
+    let firstOnlineTime = 0
+    if (user.createTime) {
+      if (user.createTime.$date) {
+        firstOnlineTime = new Date(user.createTime.$date).getTime()
+      } else if (user.createTime instanceof Date) {
+        firstOnlineTime = user.createTime.getTime()
+      } else {
+        firstOnlineTime = new Date(user.createTime).getTime()
+      }
+    }
+
     statsMap[user._id] = {
       sessionCount,
       totalDuration,
-      lastOnlineTime
+      avgDuration,
+      lastOnlineTime,
+      firstOnlineTime
     }
   })
 
@@ -220,24 +237,34 @@ async function getAllUsers(openid, options = {}) {
     lastOnlineTime: user.lastOnlineTime,
     visitCount: statsMap[user._id]?.sessionCount || 0,
     totalDuration: statsMap[user._id]?.totalDuration || 0,
-    lastOnlineTimeStat: statsMap[user._id]?.lastOnlineTime || 0
+    avgDuration: statsMap[user._id]?.avgDuration || 0,
+    lastOnlineTimeStat: statsMap[user._id]?.lastOnlineTime || 0,
+    firstOnlineTimeStat: statsMap[user._id]?.firstOnlineTime || 0
   }))
 
   console.log('[getAllUsers] 排序前前3个用户的数据:')
   usersWithStats.slice(0, 3).forEach(u => {
-    console.log(`  ${u.nickname}: visitCount=${u.visitCount}, totalDuration=${u.totalDuration}, lastOnlineTimeStat=${u.lastOnlineTimeStat}`)
+    console.log(`  ${u.nickname}: visitCount=${u.visitCount}, totalDuration=${u.totalDuration}, avgDuration=${u.avgDuration}`)
   })
 
   // 根据排序字段排序
   usersWithStats.sort((a, b) => {
     switch(sortBy) {
+      case 'firstOnlineTime':
+        // 首次上线时间（从早到晚，越早的越靠前）
+        return (a.firstOnlineTimeStat || 0) - (b.firstOnlineTimeStat || 0)
+      case 'lastOnlineTime':
+        // 最后上线时间（从晚到早，最近的越靠前）
+        return (b.lastOnlineTimeStat || 0) - (a.lastOnlineTimeStat || 0)
       case 'visitCount':
+        // 访问次数（从多到少）
         return (b.visitCount || 0) - (a.visitCount || 0)
       case 'totalDuration':
+        // 总在线时长（从长到短）
         return (b.totalDuration || 0) - (a.totalDuration || 0)
-      case 'lastOnlineTime':
-        // 使用统计数据中的 lastOnlineTime（时间戳）
-        return (b.lastOnlineTimeStat || 0) - (a.lastOnlineTimeStat || 0)
+      case 'avgDuration':
+        // 平均在线时长（从长到短）
+        return (b.avgDuration || 0) - (a.avgDuration || 0)
       default:
         return 0
     }
@@ -246,7 +273,7 @@ async function getAllUsers(openid, options = {}) {
   console.log('[getAllUsers] 排序方式:', sortBy)
   console.log('[getAllUsers] 排序后前3个用户的数据:')
   usersWithStats.slice(0, 3).forEach(u => {
-    console.log(`  ${u.nickname}: visitCount=${u.visitCount}, totalDuration=${u.totalDuration}, lastOnlineTimeStat=${u.lastOnlineTimeStat}`)
+    console.log(`  ${u.nickname}: visitCount=${u.visitCount}, totalDuration=${u.totalDuration}, avgDuration=${u.avgDuration}`)
   })
 
   // 分页
