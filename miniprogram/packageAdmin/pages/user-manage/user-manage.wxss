@@ -2,6 +2,7 @@
 .user-manage-container {
   min-height: 100vh;
   background: #F9F9F9;
+  padding-bottom: 100rpx; /* 为分页栏留出空间 */
 }
 
 /* 顶部标题栏 */
@@ -59,7 +60,7 @@
 
 /* 2列网格布局 */
 .user-grid {
-  padding: 15rpx;
+  padding: 15rpx 15rpx 150rpx 15rpx; /* 底部增加更多空间，避免被分页栏遮挡 */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15rpx;
@@ -183,6 +184,52 @@
   background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
   color: #6B7280;
   border: 1rpx solid #D1D5DB;
+}
+
+/* 分页栏 */
+.pagination-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 20rpx 30rpx;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+  z-index: 100;
+}
+
+.pagination-info {
+  text-align: center;
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.pagination-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.pagination-btn {
+  background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  color: white;
+  border: none;
+  font-size: 24rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 8rpx;
+  font-weight: 500;
+  box-shadow: 0 2rpx 6rpx rgba(255, 152, 0, 0.2);
+}
+
+.pagination-btn[disabled] {
+  background: #E5E7EB;
+  color: #9CA3AF;
+  box-shadow: none;
 }
 
 /* 加载状态 */

@@ -33,9 +33,9 @@ exports.main = async (event, context) => {
   try {
     switch (action) {
       case 'getAllUsers':
-        return await getAllUsers(openid)
+        return await getAllUsers(openid, { page: event.page, pageSize: event.pageSize })
       case 'list':
-        return await getAllUsers(openid) // list 和 getAllUsers 是同一个功能
+        return await getAllUsers(openid, { page: event.page, pageSize: event.pageSize }) // list 和 getAllUsers 是同一个功能
       case 'getUserInfo':
         return await getUserInfo(openid)
       case 'updateRole':
@@ -59,8 +59,9 @@ exports.main = async (event, context) => {
 
 /**
  * 获取所有用户（需要管理员权限）
+ * 支持分页参数：page（页码，从1开始）, pageSize（每页条数，默认100）
  */
-async function getAllUsers(openid) {
+async function getAllUsers(openid, options = {}) {
   const isAdmin = await checkAdmin(openid)
   if (!isAdmin) {
     return {
@@ -69,8 +70,19 @@ async function getAllUsers(openid) {
     }
   }
 
+  const page = options.page || 1
+  const pageSize = options.pageSize || 100
+  const skip = (page - 1) * pageSize
+
+  // 获取总数
+  const countRes = await db.collection('users').count()
+  const total = countRes.total
+
+  // 分页查询
   const res = await db.collection('users')
     .orderBy('createTime', 'desc')
+    .skip(skip)
+    .limit(pageSize)
     .get()
 
   // 安全修复：移除敏感字段 _openid（但管理员需要它来设置受邀访客）
@@ -88,6 +100,10 @@ async function getAllUsers(openid) {
   return {
     success: true,
     data: safeData,
+    total: total,
+    page: page,
+    pageSize: pageSize,
+    totalPages: Math.ceil(total / pageSize),
     message: '获取成功'
   }
 }

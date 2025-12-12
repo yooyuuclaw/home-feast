@@ -10,7 +10,13 @@ Page({
     roleNames: [],
     sortOptions: ['访问次数', '总在线时长', '最后访问时间'],
     currentSortIndex: 0,
-    currentSortLabel: '访问次数'
+    currentSortLabel: '访问次数',
+
+    // 分页相关
+    currentPage: 1,
+    pageSize: 100,
+    totalUsers: 0,
+    totalPages: 0
   },
 
   onLoad() {
@@ -27,11 +33,13 @@ Page({
     try {
       this.setData({ loading: true })
 
-      // 获取用户列表
+      // 获取用户列表（带分页）
       const userRes = await wx.cloud.callFunction({
         name: 'user',
         data: {
-          action: 'getAllUsers'
+          action: 'getAllUsers',
+          page: this.data.currentPage,
+          pageSize: this.data.pageSize
         }
       })
 
@@ -63,9 +71,17 @@ Page({
 
         console.log('用户数据:', users)
         console.log('统计数据:', statsRes.result.data)
+        console.log('分页信息:', {
+          total: userRes.result.total,
+          page: userRes.result.page,
+          totalPages: userRes.result.totalPages
+        })
 
         this.setData({
           users: users,
+          totalUsers: userRes.result.total,
+          totalPages: userRes.result.totalPages,
+          currentPage: userRes.result.page,
           loading: false
         })
 
@@ -77,6 +93,58 @@ Page({
       this.setData({ loading: false })
       wx.showToast({ title: '加载失败', icon: 'none' })
     }
+  },
+
+  /**
+   * 上一页
+   */
+  prevPage() {
+    if (this.data.currentPage > 1) {
+      this.setData({
+        currentPage: this.data.currentPage - 1
+      })
+      this.loadUsers()
+    }
+  },
+
+  /**
+   * 下一页
+   */
+  nextPage() {
+    if (this.data.currentPage < this.data.totalPages) {
+      this.setData({
+        currentPage: this.data.currentPage + 1
+      })
+      this.loadUsers()
+    }
+  },
+
+  /**
+   * 跳转到指定页
+   */
+  goToPage() {
+    wx.showModal({
+      title: '跳转到页面',
+      content: `请输入页码（1-${this.data.totalPages}）`,
+      editable: true,
+      placeholderText: '输入页码',
+      success: (res) => {
+        if (res.confirm && res.content) {
+          const page = parseInt(res.content)
+          if (page >= 1 && page <= this.data.totalPages) {
+            this.setData({
+              currentPage: page
+            })
+            this.loadUsers()
+          } else {
+            wx.showToast({
+              title: '页码超出范围',
+              icon: 'none'
+            })
+          }
+        }
+      }
+    })
   },
 
   /**
