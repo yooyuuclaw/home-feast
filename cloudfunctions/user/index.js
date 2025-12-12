@@ -68,7 +68,7 @@ exports.main = async (event, context) => {
 /**
  * 获取所有用户（需要管理员权限）
  * 支持分页参数：page（页码，从1开始）, pageSize（每页条数，默认100）
- * 注意：返回所有用户数据，排序在前端进行（因为统计数据需要从 user-activity 云函数获取）
+ * 支持排序参数：sortBy（排序字段：visitCount, totalDuration, lastOnlineTime）
  */
 async function getAllUsers(openid, options = {}) {
   const isAdmin = await checkAdmin(openid)
@@ -81,13 +81,13 @@ async function getAllUsers(openid, options = {}) {
 
   const page = options.page || 1
   const pageSize = options.pageSize || 100
+  const sortBy = options.sortBy || 'visitCount'
 
   // 获取总数
   const countRes = await db.collection('users').count()
   const total = countRes.total
 
-  // 获取所有用户（不分页，因为需要在前端与统计数据合并后排序）
-  // 如果用户数超过100，需要分批获取
+  // 获取所有用户（不分页，因为需要与统计数据合并后排序）
   let allUsers = []
   const MAX_LIMIT = 100
 
@@ -124,8 +124,57 @@ async function getAllUsers(openid, options = {}) {
     }
   }
 
-  // 安全修复：移除敏感字段 _openid（但管理员需要它来设置受邀访客）
-  const safeData = allUsers.map(user => ({
+  // 调用 user-activity 云函数获取统计数据
+  const statsResult = await cloud.callFunction({
+    name: 'user-activity',
+    data: {
+      action: 'getStatistics'
+    }
+  })
+
+  // 创建统计数据映射
+  const statsMap = {}
+  if (statsResult.result && statsResult.result.success && statsResult.result.data) {
+    statsResult.result.data.forEach(stat => {
+      statsMap[stat._id] = stat
+    })
+  }
+
+  // 合并用户和统计数据
+  const usersWithStats = allUsers.map(user => ({
+    _id: user._id,
+    _openid: user._openid,
+    nickname: user.nickname,
+    avatar: user.avatar,
+    role: user.role,
+    createTime: user.createTime,
+    lastOnlineTime: user.lastOnlineTime,
+    visitCount: statsMap[user._id]?.sessionCount || 0,
+    totalDuration: statsMap[user._id]?.totalDuration || 0,
+    lastOnlineTimeStat: statsMap[user._id]?.lastOnlineTime || 0
+  }))
+
+  // 根据排序字段排序
+  usersWithStats.sort((a, b) => {
+    switch(sortBy) {
+      case 'visitCount':
+        return (b.visitCount || 0) - (a.visitCount || 0)
+      case 'totalDuration':
+        return (b.totalDuration || 0) - (a.totalDuration || 0)
+      case 'lastOnlineTime':
+        // 使用统计数据中的 lastOnlineTime（时间戳）
+        return (b.lastOnlineTimeStat || 0) - (a.lastOnlineTimeStat || 0)
+      default:
+        return 0
+    }
+  })
+
+  // 分页
+  const skip = (page - 1) * pageSize
+  const paginatedUsers = usersWithStats.slice(skip, skip + pageSize)
+
+  // 移除敏感字段和临时字段
+  const safeData = paginatedUsers.map(user => ({
     _id: user._id,
     _openid: user._openid,  // 管理员需要此字段来设置聚餐日的受邀访客列表
     nickname: user.nickname,
@@ -139,6 +188,10 @@ async function getAllUsers(openid, options = {}) {
     success: true,
     data: safeData,
     total: total,
+    page: page,
+    pageSize: pageSize,
+    totalPages: Math.ceil(total / pageSize),
+    sortBy: sortBy,
     message: '获取成功'
   }
 }
