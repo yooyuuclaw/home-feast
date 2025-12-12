@@ -83,6 +83,8 @@ async function getAllUsers(openid, options = {}) {
   const pageSize = options.pageSize || 100
   const sortBy = options.sortBy || 'visitCount'
 
+  console.log('[getAllUsers] 接收到的参数:', { page, pageSize, sortBy })
+
   // 获取总数
   const countRes = await db.collection('users').count()
   const total = countRes.total
@@ -124,21 +126,88 @@ async function getAllUsers(openid, options = {}) {
     }
   }
 
-  // 调用 user-activity 云函数获取统计数据
-  const statsResult = await cloud.callFunction({
-    name: 'user-activity',
-    data: {
-      action: 'getStatistics'
+  console.log('[getAllUsers] 获取到的用户总数:', allUsers.length)
+
+  // 获取所有会话记录（分批获取）
+  let sessions = []
+  let hasMoreSessions = true
+  let lastSessionId = null
+
+  while (hasMoreSessions) {
+    let sessionQuery = db.collection('user_sessions')
+      .limit(MAX_LIMIT)
+      .orderBy('_id', 'asc')
+
+    if (lastSessionId) {
+      sessionQuery = sessionQuery.where({
+        _id: db.command.gt(lastSessionId)
+      })
+    }
+
+    const sessionsRes = await sessionQuery.get()
+    sessions = sessions.concat(sessionsRes.data)
+
+    if (sessionsRes.data.length < MAX_LIMIT) {
+      hasMoreSessions = false
+    } else {
+      lastSessionId = sessionsRes.data[sessionsRes.data.length - 1]._id
+    }
+  }
+
+  console.log('[getAllUsers] 获取到的会话记录总数:', sessions.length)
+
+  // 为每个用户计算统计数据
+  const statsMap = {}
+  allUsers.forEach(user => {
+    // 过滤该用户的会话
+    const userSessions = sessions.filter(s => s._openid === user._openid)
+
+    // 计算总在线时长（秒）
+    const totalDuration = userSessions.reduce((sum, s) => sum + (s.duration || 0), 0)
+
+    // 会话次数
+    const sessionCount = userSessions.length
+
+    // 获取最后访问时间（取最新会话的时间）
+    let lastOnlineTime = 0
+    if (userSessions.length > 0) {
+      const latestSession = userSessions.reduce((latest, s) => {
+        const sessionTime = s.sessionTime || s.createTime
+        if (!sessionTime) return latest
+
+        let timestamp = 0
+        if (sessionTime.$date) {
+          timestamp = new Date(sessionTime.$date).getTime()
+        } else if (sessionTime instanceof Date) {
+          timestamp = sessionTime.getTime()
+        } else {
+          timestamp = new Date(sessionTime).getTime()
+        }
+
+        return timestamp > latest ? timestamp : latest
+      }, 0)
+      lastOnlineTime = latestSession
+    }
+
+    // 如果没有会话记录，使用用户创建时间
+    if (lastOnlineTime === 0 && user.createTime) {
+      if (user.createTime.$date) {
+        lastOnlineTime = new Date(user.createTime.$date).getTime()
+      } else if (user.createTime instanceof Date) {
+        lastOnlineTime = user.createTime.getTime()
+      } else {
+        lastOnlineTime = new Date(user.createTime).getTime()
+      }
+    }
+
+    statsMap[user._id] = {
+      sessionCount,
+      totalDuration,
+      lastOnlineTime
     }
   })
 
-  // 创建统计数据映射
-  const statsMap = {}
-  if (statsResult.result && statsResult.result.success && statsResult.result.data) {
-    statsResult.result.data.forEach(stat => {
-      statsMap[stat._id] = stat
-    })
-  }
+  console.log('[getAllUsers] 统计数据计算完成，用户数:', Object.keys(statsMap).length)
 
   // 合并用户和统计数据
   const usersWithStats = allUsers.map(user => ({
@@ -153,6 +222,11 @@ async function getAllUsers(openid, options = {}) {
     totalDuration: statsMap[user._id]?.totalDuration || 0,
     lastOnlineTimeStat: statsMap[user._id]?.lastOnlineTime || 0
   }))
+
+  console.log('[getAllUsers] 排序前前3个用户的数据:')
+  usersWithStats.slice(0, 3).forEach(u => {
+    console.log(`  ${u.nickname}: visitCount=${u.visitCount}, totalDuration=${u.totalDuration}, lastOnlineTimeStat=${u.lastOnlineTimeStat}`)
+  })
 
   // 根据排序字段排序
   usersWithStats.sort((a, b) => {
@@ -169,9 +243,17 @@ async function getAllUsers(openid, options = {}) {
     }
   })
 
+  console.log('[getAllUsers] 排序方式:', sortBy)
+  console.log('[getAllUsers] 排序后前3个用户的数据:')
+  usersWithStats.slice(0, 3).forEach(u => {
+    console.log(`  ${u.nickname}: visitCount=${u.visitCount}, totalDuration=${u.totalDuration}, lastOnlineTimeStat=${u.lastOnlineTimeStat}`)
+  })
+
   // 分页
   const skip = (page - 1) * pageSize
   const paginatedUsers = usersWithStats.slice(skip, skip + pageSize)
+
+  console.log('[getAllUsers] 分页: page=', page, 'skip=', skip, 'pageSize=', pageSize, '返回用户数=', paginatedUsers.length)
 
   // 移除敏感字段和临时字段
   const safeData = paginatedUsers.map(user => ({
