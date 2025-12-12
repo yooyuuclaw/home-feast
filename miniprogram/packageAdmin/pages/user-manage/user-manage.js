@@ -16,7 +16,10 @@ Page({
     currentPage: 1,
     pageSize: 100,
     totalUsers: 0,
-    totalPages: 0
+    totalPages: 0,
+
+    // 排序字段映射
+    sortFieldMap: ['visitCount', 'totalDuration', 'lastOnlineTime']
   },
 
   onLoad() {
@@ -33,13 +36,17 @@ Page({
     try {
       this.setData({ loading: true })
 
-      // 获取用户列表（带分页）
+      // 获取当前排序字段
+      const sortBy = this.data.sortFieldMap[this.data.currentSortIndex]
+
+      // 获取用户列表（带分页和排序）
       const userRes = await wx.cloud.callFunction({
         name: 'user',
         data: {
           action: 'getAllUsers',
           page: this.data.currentPage,
-          pageSize: this.data.pageSize
+          pageSize: this.data.pageSize,
+          sortBy: sortBy
         }
       })
 
@@ -74,19 +81,18 @@ Page({
         console.log('分页信息:', {
           total: userRes.result.total,
           page: userRes.result.page,
-          totalPages: userRes.result.totalPages
+          totalPages: userRes.result.totalPages,
+          sortBy: userRes.result.sortBy
         })
 
         this.setData({
           users: users,
+          displayUsers: users, // 直接使用服务端排序好的数据
           totalUsers: userRes.result.total,
           totalPages: userRes.result.totalPages,
           currentPage: userRes.result.page,
           loading: false
         })
-
-        // 应用当前排序
-        this.sortUsers(this.data.currentSortIndex)
       }
     } catch (err) {
       console.error('加载用户失败', err)
@@ -154,33 +160,14 @@ Page({
     wx.showActionSheet({
       itemList: this.data.sortOptions,
       success: (res) => {
-        this.sortUsers(res.tapIndex)
+        // 切换排序方式时，重置到第一页
+        this.setData({
+          currentSortIndex: res.tapIndex,
+          currentSortLabel: this.data.sortOptions[res.tapIndex],
+          currentPage: 1
+        })
+        this.loadUsers()
       }
-    })
-  },
-
-  /**
-   * 排序用户列表
-   */
-  sortUsers(sortIndex) {
-    const users = [...this.data.users]
-
-    switch(sortIndex) {
-      case 0: // 访问次数
-        users.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0))
-        break
-      case 1: // 总在线时长
-        users.sort((a, b) => (b.totalDuration || 0) - (a.totalDuration || 0))
-        break
-      case 2: // 最后访问时间
-        users.sort((a, b) => (b.lastOnlineTime || 0) - (a.lastOnlineTime || 0))
-        break
-    }
-
-    this.setData({
-      displayUsers: users,
-      currentSortIndex: sortIndex,
-      currentSortLabel: this.data.sortOptions[sortIndex]
     })
   },
 

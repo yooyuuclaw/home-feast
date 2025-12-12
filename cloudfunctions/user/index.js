@@ -33,9 +33,17 @@ exports.main = async (event, context) => {
   try {
     switch (action) {
       case 'getAllUsers':
-        return await getAllUsers(openid, { page: event.page, pageSize: event.pageSize })
+        return await getAllUsers(openid, {
+          page: event.page,
+          pageSize: event.pageSize,
+          sortBy: event.sortBy
+        })
       case 'list':
-        return await getAllUsers(openid, { page: event.page, pageSize: event.pageSize }) // list 和 getAllUsers 是同一个功能
+        return await getAllUsers(openid, {
+          page: event.page,
+          pageSize: event.pageSize,
+          sortBy: event.sortBy
+        }) // list 和 getAllUsers 是同一个功能
       case 'getUserInfo':
         return await getUserInfo(openid)
       case 'updateRole':
@@ -60,6 +68,7 @@ exports.main = async (event, context) => {
 /**
  * 获取所有用户（需要管理员权限）
  * 支持分页参数：page（页码，从1开始）, pageSize（每页条数，默认100）
+ * 支持排序参数：sortBy（排序字段：visitCount, totalDuration, lastOnlineTime, createTime）
  */
 async function getAllUsers(openid, options = {}) {
   const isAdmin = await checkAdmin(openid)
@@ -72,39 +81,105 @@ async function getAllUsers(openid, options = {}) {
 
   const page = options.page || 1
   const pageSize = options.pageSize || 100
-  const skip = (page - 1) * pageSize
+  const sortBy = options.sortBy || 'createTime' // 默认按创建时间排序
 
   // 获取总数
   const countRes = await db.collection('users').count()
   const total = countRes.total
 
-  // 分页查询
-  const res = await db.collection('users')
-    .orderBy('createTime', 'desc')
-    .skip(skip)
-    .limit(pageSize)
-    .get()
+  // 如果需要按访问数据排序，需要先获取所有用户和统计数据
+  if (['visitCount', 'totalDuration', 'lastOnlineTime'].includes(sortBy)) {
+    // 获取所有用户（不分页）
+    const allUsersRes = await db.collection('users').get()
 
-  // 安全修复：移除敏感字段 _openid（但管理员需要它来设置受邀访客）
-  // 注意：虽然管理员可以看到 openid，但这比之前所有人都能看到要安全得多
-  const safeData = res.data.map(user => ({
-    _id: user._id,
-    _openid: user._openid,  // 管理员需要此字段来设置聚餐日的受邀访客列表
-    nickname: user.nickname,
-    avatar: user.avatar,
-    role: user.role,
-    createTime: user.createTime,
-    lastOnlineTime: user.lastOnlineTime
-  }))
+    // 获取所有用户活动统计
+    const statsRes = await db.collection('user-activity-stats').get()
 
-  return {
-    success: true,
-    data: safeData,
-    total: total,
-    page: page,
-    pageSize: pageSize,
-    totalPages: Math.ceil(total / pageSize),
-    message: '获取成功'
+    // 创建统计数据映射
+    const statsMap = {}
+    statsRes.data.forEach(stat => {
+      statsMap[stat._id] = stat
+    })
+
+    // 合并用户和统计数据
+    const usersWithStats = allUsersRes.data.map(user => ({
+      ...user,
+      visitCount: statsMap[user._id]?.sessionCount || 0,
+      totalDuration: statsMap[user._id]?.totalDuration || 0,
+      lastOnlineTime: statsMap[user._id]?.lastOnlineTime || 0
+    }))
+
+    // 排序
+    usersWithStats.sort((a, b) => {
+      switch(sortBy) {
+        case 'visitCount':
+          return (b.visitCount || 0) - (a.visitCount || 0)
+        case 'totalDuration':
+          return (b.totalDuration || 0) - (a.totalDuration || 0)
+        case 'lastOnlineTime':
+          return (b.lastOnlineTime || 0) - (a.lastOnlineTime || 0)
+        default:
+          return 0
+      }
+    })
+
+    // 分页
+    const skip = (page - 1) * pageSize
+    const paginatedUsers = usersWithStats.slice(skip, skip + pageSize)
+
+    // 移除敏感字段
+    const safeData = paginatedUsers.map(user => ({
+      _id: user._id,
+      _openid: user._openid,  // 管理员需要此字段来设置聚餐日的受邀访客列表
+      nickname: user.nickname,
+      avatar: user.avatar,
+      role: user.role,
+      createTime: user.createTime,
+      lastOnlineTime: user.lastOnlineTime
+    }))
+
+    return {
+      success: true,
+      data: safeData,
+      total: total,
+      page: page,
+      pageSize: pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      sortBy: sortBy,
+      message: '获取成功'
+    }
+  } else {
+    // 按创建时间排序，直接在数据库层排序
+    const skip = (page - 1) * pageSize
+
+    const res = await db.collection('users')
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get()
+
+    // 安全修复：移除敏感字段 _openid（但管理员需要它来设置受邀访客）
+    // 注意：虽然管理员可以看到 openid，但这比之前所有人都能看到要安全得多
+    const safeData = res.data.map(user => ({
+      _id: user._id,
+      _openid: user._openid,  // 管理员需要此字段来设置聚餐日的受邀访客列表
+      nickname: user.nickname,
+      avatar: user.avatar,
+      role: user.role,
+      createTime: user.createTime,
+      lastOnlineTime: user.lastOnlineTime
+    }))
+
+    return {
+      success: true,
+      data: safeData,
+      total: total,
+      page: page,
+      pageSize: pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      sortBy: sortBy,
+      message: '获取成功'
+    }
   }
 }
 
