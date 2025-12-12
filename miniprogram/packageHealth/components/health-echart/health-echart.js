@@ -1,6 +1,6 @@
 // 健康数据 ECharts 图表组件
 import * as echarts from '../ec-canvas/echarts.min'
-import { calculateHealthStats } from '../../pages/health/utils/chart-helper'
+import { calculateHealthStats } from '../../pages/utils/chart-helper'
 
 let chart = null
 
