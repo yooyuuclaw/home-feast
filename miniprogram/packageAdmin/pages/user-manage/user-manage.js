@@ -3,8 +3,8 @@ const { getAllRoles, getRoleName } = require('../../../utils/roles.js')
 
 Page({
   data: {
-    users: [],
-    displayUsers: [], // 用于显示的排序后的用户列表
+    allUsers: [], // 所有用户数据（已合并统计数据）
+    displayUsers: [], // 当前页显示的用户
     loading: true,
     allRoles: [],
     roleNames: [],
@@ -16,10 +16,7 @@ Page({
     currentPage: 1,
     pageSize: 100,
     totalUsers: 0,
-    totalPages: 0,
-
-    // 排序字段映射
-    sortFieldMap: ['visitCount', 'totalDuration', 'lastOnlineTime']
+    totalPages: 0
   },
 
   onLoad() {
@@ -36,17 +33,11 @@ Page({
     try {
       this.setData({ loading: true })
 
-      // 获取当前排序字段
-      const sortBy = this.data.sortFieldMap[this.data.currentSortIndex]
-
-      // 获取用户列表（带分页和排序）
+      // 获取所有用户列表
       const userRes = await wx.cloud.callFunction({
         name: 'user',
         data: {
-          action: 'getAllUsers',
-          page: this.data.currentPage,
-          pageSize: this.data.pageSize,
-          sortBy: sortBy
+          action: 'getAllUsers'
         }
       })
 
@@ -60,7 +51,6 @@ Page({
 
       if (userRes.result.success) {
         // 合并用户数据和统计数据
-        // 修复：使用 _id 而不是 _openid 来匹配，因为统计数据中已移除 _openid
         const statsMap = {}
         if (statsRes.result.success) {
           statsRes.result.data.forEach(stat => {
@@ -68,7 +58,7 @@ Page({
           })
         }
 
-        const users = userRes.result.data.map(user => ({
+        const allUsers = userRes.result.data.map(user => ({
           ...user,
           roleName: getRoleName(user.role),
           visitCount: statsMap[user._id]?.sessionCount || 0,
@@ -76,29 +66,63 @@ Page({
           lastOnlineTime: statsMap[user._id]?.lastOnlineTime || 0
         }))
 
-        console.log('用户数据:', users)
+        console.log('所有用户数据:', allUsers)
         console.log('统计数据:', statsRes.result.data)
-        console.log('分页信息:', {
-          total: userRes.result.total,
-          page: userRes.result.page,
-          totalPages: userRes.result.totalPages,
-          sortBy: userRes.result.sortBy
-        })
 
         this.setData({
-          users: users,
-          displayUsers: users, // 直接使用服务端排序好的数据
+          allUsers: allUsers,
           totalUsers: userRes.result.total,
-          totalPages: userRes.result.totalPages,
-          currentPage: userRes.result.page,
           loading: false
         })
+
+        // 应用排序和分页
+        this.applyFilterAndPagination()
       }
     } catch (err) {
       console.error('加载用户失败', err)
       this.setData({ loading: false })
       wx.showToast({ title: '加载失败', icon: 'none' })
     }
+  },
+
+  /**
+   * 应用排序和分页
+   */
+  applyFilterAndPagination() {
+    const { allUsers, currentSortIndex, currentPage, pageSize } = this.data
+
+    // 排序
+    const sortedUsers = [...allUsers]
+    switch(currentSortIndex) {
+      case 0: // 访问次数
+        sortedUsers.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0))
+        break
+      case 1: // 总在线时长
+        sortedUsers.sort((a, b) => (b.totalDuration || 0) - (a.totalDuration || 0))
+        break
+      case 2: // 最后访问时间
+        sortedUsers.sort((a, b) => (b.lastOnlineTime || 0) - (a.lastOnlineTime || 0))
+        break
+    }
+
+    // 计算总页数
+    const totalPages = Math.ceil(sortedUsers.length / pageSize)
+
+    // 分页
+    const skip = (currentPage - 1) * pageSize
+    const displayUsers = sortedUsers.slice(skip, skip + pageSize)
+
+    this.setData({
+      displayUsers: displayUsers,
+      totalPages: totalPages
+    })
+
+    console.log('排序后分页数据:', {
+      currentPage,
+      totalPages,
+      displayCount: displayUsers.length,
+      sortBy: this.data.sortOptions[currentSortIndex]
+    })
   },
 
   /**
@@ -109,7 +133,7 @@ Page({
       this.setData({
         currentPage: this.data.currentPage - 1
       })
-      this.loadUsers()
+      this.applyFilterAndPagination()
     }
   },
 
@@ -121,7 +145,7 @@ Page({
       this.setData({
         currentPage: this.data.currentPage + 1
       })
-      this.loadUsers()
+      this.applyFilterAndPagination()
     }
   },
 
@@ -141,7 +165,7 @@ Page({
             this.setData({
               currentPage: page
             })
-            this.loadUsers()
+            this.applyFilterAndPagination()
           } else {
             wx.showToast({
               title: '页码超出范围',
@@ -166,7 +190,7 @@ Page({
           currentSortLabel: this.data.sortOptions[res.tapIndex],
           currentPage: 1
         })
-        this.loadUsers()
+        this.applyFilterAndPagination()
       }
     })
   },
