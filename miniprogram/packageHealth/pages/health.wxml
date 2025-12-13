@@ -194,42 +194,42 @@
 
     <view class="category-grid">
       <!-- 体重 -->
-      <view class="category-card" bindtap="viewDetails" data-type="weight">
+      <view class="category-card {{selectedHealthType === 'weight' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="weight">
         <view class="category-icon">⚖️</view>
         <view class="category-name">体重</view>
         <view class="category-count">{{counts.weight}}条记录</view>
       </view>
 
       <!-- 血压 -->
-      <view class="category-card" bindtap="viewDetails" data-type="bloodPressure">
+      <view class="category-card {{selectedHealthType === 'bloodPressure' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="bloodPressure">
         <view class="category-icon">❤️</view>
         <view class="category-name">血压</view>
         <view class="category-count">{{counts.bloodPressure}}条记录</view>
       </view>
 
       <!-- 血氧 -->
-      <view class="category-card" bindtap="viewDetails" data-type="bloodOxygen">
+      <view class="category-card {{selectedHealthType === 'bloodOxygen' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="bloodOxygen">
         <view class="category-icon">💨</view>
         <view class="category-name">血氧</view>
         <view class="category-count">{{counts.bloodOxygen}}条记录</view>
       </view>
 
       <!-- 血糖 -->
-      <view class="category-card" bindtap="viewDetails" data-type="bloodSugar">
+      <view class="category-card {{selectedHealthType === 'bloodSugar' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="bloodSugar">
         <view class="category-icon">🩸</view>
         <view class="category-name">血糖</view>
         <view class="category-count">{{counts.bloodSugar}}条记录</view>
       </view>
 
       <!-- 尿酸 -->
-      <view class="category-card" bindtap="viewDetails" data-type="uricAcid">
+      <view class="category-card {{selectedHealthType === 'uricAcid' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="uricAcid">
         <view class="category-icon">💧</view>
         <view class="category-name">尿酸</view>
         <view class="category-count">{{counts.uricAcid}}条记录</view>
       </view>
 
       <!-- 身高 -->
-      <view class="category-card" bindtap="viewDetails" data-type="height">
+      <view class="category-card {{selectedHealthType === 'height' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="height">
         <view class="category-icon">📏</view>
         <view class="category-name">身高</view>
         <view class="category-count">{{counts.height}}条记录</view>
@@ -241,19 +241,6 @@
   <view class="charts-section">
     <view class="charts-header">
       <view class="charts-title">数据趋势</view>
-      <view class="chart-type-selector">
-        <picker
-          mode="selector"
-          range="{{chartTypeOptions}}"
-          range-key="label"
-          value="{{currentChartTypeIndex}}"
-          bindchange="onChartTypeChange">
-          <view class="chart-type-picker">
-            <text>{{chartTypeOptions[currentChartTypeIndex] ? chartTypeOptions[currentChartTypeIndex].label : '体重'}}</text>
-            <text class="picker-arrow">▼</text>
-          </view>
-        </picker>
-      </view>
     </view>
 
     <!-- 趋势图 -->
@@ -287,10 +274,6 @@
   <view class="recent-records">
     <view class="records-header">
       <view class="records-title">最近记录</view>
-      <view class="records-filter" bindtap="showFilterPicker">
-        <text>{{filterText}}</text>
-        <text class="filter-arrow">▼</text>
-      </view>
     </view>
 
     <view wx:if="{{loading}}" class="loading">加载中...</view>

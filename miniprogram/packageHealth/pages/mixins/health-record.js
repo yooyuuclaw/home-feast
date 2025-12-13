@@ -36,10 +36,13 @@ export default {
     // 最近记录
     recentRecords: [],
 
-    // 筛选相关
+    // 当前选中的健康指标类型（用于联动）
+    selectedHealthType: 'weight',
+
+    // 筛选相关（保留用于兼容性）
     showFilterModal: false,
-    currentFilter: 'all',
-    filterText: '全部',
+    currentFilter: 'weight',
+    filterText: '体重',
     filterOptions: [
       { label: '全部', value: 'all' },
       { label: '体重', value: 'weight' },
@@ -95,14 +98,14 @@ export default {
         return
       }
 
-      // 如果有筛选条件，再加载筛选后的数据用于显示最近记录
+      // 根据selectedHealthType加载筛选后的数据用于显示最近记录
       let filteredRecords = []
-      if (this.data.currentFilter !== 'all') {
+      if (this.data.selectedHealthType) {
         const filteredRes = await wx.cloud.callFunction({
           name: 'health',
           data: {
             action: 'list',
-            filter: this.data.currentFilter,
+            filter: this.data.selectedHealthType,
             targetOpenid: this.data.currentViewingOpenid
           }
         })
@@ -116,9 +119,8 @@ export default {
       // 使用工具函数计算各类型数量和最新值
       const { counts, latestData } = processHealthRecords(allRecords)
 
-      // 处理记录显示 - 如果有筛选，使用筛选后的数据；否则使用全部数据
-      const recordsToDisplay = this.data.currentFilter === 'all' ? allRecords : filteredRecords
-      const recentRecords = this._formatRecentRecords(recordsToDisplay)
+      // 处理记录显示 - 使用筛选后的数据
+      const recentRecords = this._formatRecentRecords(filteredRecords)
 
       this.setData({
         recentRecords,
@@ -184,6 +186,41 @@ export default {
       })
       this.loadHealthData()
     }
+  },
+
+  /**
+   * 选择健康指标类型（联动更新图表和最近记录）
+   */
+  selectHealthType(e) {
+    const type = e.currentTarget.dataset.type
+
+    console.log('选择健康指标类型:', type)
+
+    // 更新选中状态
+    this.setData({
+      selectedHealthType: type,
+      currentFilter: type
+    })
+
+    // 更新图表类型索引
+    const typeMapping = {
+      'weight': 0,
+      'bloodPressure': 1,
+      'bloodOxygen': 2,
+      'bloodSugar': 3,
+      'uricAcid': 4,
+      'height': 5
+    }
+
+    const chartIndex = typeMapping[type]
+    if (chartIndex !== undefined) {
+      this.setData({
+        currentChartTypeIndex: chartIndex
+      })
+    }
+
+    // 重新加载数据（最近记录会根据selectedHealthType筛选）
+    this.loadHealthData()
   },
 
   /**
