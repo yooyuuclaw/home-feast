@@ -637,10 +637,10 @@ async function getMedicines(event, openid) {
 }
 
 /**
- * 切换服药状态
+ * 切换服药状态（支持拍照）
  */
 async function toggleMedicineTaken(event, openid) {
-  const { medicineId, timeIndex } = event
+  const { medicineId, timeIndex, photoPath, hasPhoto } = event
 
   if (!medicineId || timeIndex === undefined) {
     return {
@@ -669,8 +669,20 @@ async function toggleMedicineTaken(event, openid) {
       }
     }
 
+    // 获取当前时间（东八区）
+    const now = new Date()
+    const offset = 8 * 60
+    const localTime = new Date(now.getTime() + offset * 60 * 1000)
+    const year = localTime.getUTCFullYear()
+    const month = String(localTime.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(localTime.getUTCDate()).padStart(2, '0')
+    const hour = String(localTime.getUTCHours()).padStart(2, '0')
+    const minute = String(localTime.getUTCMinutes()).padStart(2, '0')
+    const second = String(localTime.getUTCSeconds()).padStart(2, '0')
+    const localDateStr = `${year}-${month}-${day} ${hour}:${minute}:${second}`
+    const today = `${year}-${month}-${day}`
+
     // 更新服药状态
-    const today = new Date().toISOString().split('T')[0]
     const times = medicine.times
     const currentStatus = times[timeIndex].lastTakeDate === today
 
@@ -682,6 +694,37 @@ async function toggleMedicineTaken(event, openid) {
       }
     })
 
+    // 如果是服药（不是取消服药）且有照片或hasPhoto标记，添加服药记录
+    if (!currentStatus) {
+      await db.collection('medicine_records').add({
+        data: {
+          _openid: openid,
+          medicineId: medicineId,
+          medicineName: medicine.name,
+          dosage: medicine.dosage,
+          time: times[timeIndex].time,
+          photoPath: photoPath || null,
+          hasPhoto: hasPhoto || false,
+          date: localDateStr,
+          createTime: db.serverDate()
+        }
+      })
+    } else {
+      // 如果是取消服药，删除对应的服药记录
+      const recordRes = await db.collection('medicine_records').where({
+        _openid: openid,
+        medicineId: medicineId,
+        date: _.gte(today).and(_.lt(today + ' 23:59:59'))
+      }).get()
+
+      if (recordRes.data.length > 0) {
+        const deletePromises = recordRes.data.map(record =>
+          db.collection('medicine_records').doc(record._id).remove()
+        )
+        await Promise.all(deletePromises)
+      }
+    }
+
     return {
       success: true,
       message: '更新成功'
@@ -691,6 +734,72 @@ async function toggleMedicineTaken(event, openid) {
     return {
       success: false,
       message: '操作失败'
+    }
+  }
+}
+
+/**
+ * 获取今日服药记录
+ */
+async function getMedicineTodayRecords(event, openid) {
+  const { targetOpenid } = event
+
+  try {
+    // 确定要查询的openid
+    let queryOpenid = openid
+
+    // 如果要查看他人数据，需要检查权限
+    if (targetOpenid && targetOpenid !== openid) {
+      const authCheck = await db.collection('health_authorizations').where({
+        owner_openid: targetOpenid,
+        authorized_openid: openid,
+        status: 'active'
+      }).get()
+
+      if (authCheck.data.length === 0) {
+        return {
+          success: false,
+          message: '无权查看该用户的健康数据'
+        }
+      }
+
+      queryOpenid = targetOpenid
+    }
+
+    // 获取今天的日期范围
+    const now = new Date()
+    const offset = 8 * 60
+    const localTime = new Date(now.getTime() + offset * 60 * 1000)
+    const year = localTime.getUTCFullYear()
+    const month = String(localTime.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(localTime.getUTCDate()).padStart(2, '0')
+    const today = `${year}-${month}-${day}`
+
+    const result = await db.collection('medicine_records')
+      .where({
+        _openid: queryOpenid,
+        date: _.gte(today).and(_.lt(today + ' 23:59:59'))
+      })
+      .orderBy('date', 'desc')
+      .limit(100)
+      .get()
+
+    // 格式化记录
+    const records = result.data.map(record => ({
+      ...record,
+      time: record.date.substring(11, 16) // 提取时间部分 HH:mm
+    }))
+
+    return {
+      success: true,
+      data: records
+    }
+  } catch (err) {
+    console.error('获取今日服药记录失败', err)
+    return {
+      success: false,
+      message: '获取记录失败',
+      data: []
     }
   }
 }
@@ -1128,6 +1237,8 @@ exports.main = async (event, context) => {
         return await getMedicines(event, openid)
       case 'toggleMedicineTaken':
         return await toggleMedicineTaken(event, openid)
+      case 'getMedicineTodayRecords':
+        return await getMedicineTodayRecords(event, openid)
       case 'deleteMedicine':
         return await deleteMedicine(event, openid)
       case 'generateAuthCode':

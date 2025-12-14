@@ -6,7 +6,8 @@ export default {
   data: {
     // 吃药打卡数据
     medicineData: {
-      medicines: []
+      medicines: [],
+      todayRecords: [] // 今日服药记录
     },
     showAddMedicineModal: false,
     showMedicineMenuModal: false,
@@ -15,7 +16,14 @@ export default {
       name: '',
       dosage: '',
       times: ['']
-    }
+    },
+
+    // 拍照打卡相关
+    showMedicinePhotoOptions: false,  // 显示拍照选项弹窗
+    pendingMedicineData: null,        // 待记录的服药数据 {medicineId, timeIndex, medicineName, time}
+    tempMedicinePhotoPath: '',        // 临时照片路径
+    showMedicinePhotoWall: false,     // 显示照片墙
+    hasMedicinePhotoRecords: false    // 是否有拍照记录
   },
 
   /**
@@ -41,11 +49,45 @@ export default {
         this.setData({
           'medicineData.medicines': medicines
         })
+
+        // 加载今日服药记录
+        this.loadMedicineTodayRecords()
       } else {
         console.error('加载药品数据失败:', res.result ? res.result.message : '未知错误')
       }
     } catch (err) {
       console.error('加载药品数据失败', err)
+    }
+  },
+
+  /**
+   * 加载今日服药记录
+   */
+  async loadMedicineTodayRecords() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'health',
+        data: {
+          action: 'getMedicineTodayRecords',
+          targetOpenid: this.data.currentViewingOpenid
+        }
+      })
+
+      if (res.result && res.result.success) {
+        const records = res.result.data || []
+
+        // 检查是否有拍照记录
+        const hasPhotoRecords = records.some(record => record.hasPhoto && record.photoPath)
+
+        this.setData({
+          'medicineData.todayRecords': records,
+          hasMedicinePhotoRecords: hasPhotoRecords
+        })
+      } else {
+        console.error('加载服药记录失败:', res.result ? res.result.message : '未知错误')
+      }
+    } catch (err) {
+      console.error('加载服药记录失败', err)
     }
   },
 
@@ -170,7 +212,7 @@ export default {
   },
 
   /**
-   * 切换服药状态
+   * 切换服药状态（添加拍照功能）
    */
   async toggleMedicineTaken(e) {
     if (this.checkViewMode()) return
@@ -178,25 +220,262 @@ export default {
     const medicineId = e.currentTarget.dataset.medicineId
     const timeIndex = e.currentTarget.dataset.timeIndex
 
+    // 查找对应的药品和时间信息
+    const medicine = this.data.medicineData.medicines.find(m => m._id === medicineId)
+    if (!medicine) return
+
+    const timeItem = medicine.times[timeIndex]
+    const isTaken = timeItem.taken
+
+    // 如果是从未服用到已服用，显示拍照选项
+    if (!isTaken) {
+      this.setData({
+        showMedicinePhotoOptions: true,
+        pendingMedicineData: {
+          medicineId: medicineId,
+          timeIndex: timeIndex,
+          medicineName: medicine.name,
+          time: timeItem.time
+        },
+        tempMedicinePhotoPath: ''
+      })
+    } else {
+      // 如果是取消服药，直接调用云函数
+      this.submitMedicineRecord(medicineId, timeIndex, null, false)
+    }
+  },
+
+  /**
+   * 隐藏拍照选项弹窗
+   */
+  hideMedicinePhotoOptions() {
+    this.setData({
+      showMedicinePhotoOptions: false,
+      pendingMedicineData: null,
+      tempMedicinePhotoPath: ''
+    })
+  },
+
+  /**
+   * 拍照打卡（服药）
+   */
+  async takeMedicinePhoto() {
     try {
+      const res = await wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera'],
+        sizeType: ['compressed'],
+        camera: 'back'
+      })
+
+      if (res.tempFiles && res.tempFiles.length > 0) {
+        const tempFilePath = res.tempFiles[0].tempFilePath
+
+        const saveRes = await wx.saveFile({
+          tempFilePath: tempFilePath
+        })
+
+        const savedFilePath = saveRes.savedFilePath
+
+        this.setData({
+          tempMedicinePhotoPath: savedFilePath
+        })
+
+        // 自动提交记录
+        this.submitMedicineRecord(
+          this.data.pendingMedicineData.medicineId,
+          this.data.pendingMedicineData.timeIndex,
+          savedFilePath,
+          true
+        )
+      }
+    } catch (err) {
+      console.error('拍照失败', err)
+      if (err.errMsg && !err.errMsg.includes('cancel')) {
+        wx.showToast({ title: '拍照失败', icon: 'none' })
+      }
+    }
+  },
+
+  /**
+   * 选择相册照片（服药）
+   */
+  async chooseMedicinePhoto() {
+    try {
+      const res = await wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album'],
+        sizeType: ['compressed']
+      })
+
+      if (res.tempFiles && res.tempFiles.length > 0) {
+        const tempFile = res.tempFiles[0]
+        const tempFilePath = tempFile.tempFilePath
+
+        // 简单友好的确认
+        const confirmRes = await new Promise(resolve => {
+          wx.showModal({
+            title: '📷 确认打卡照片',
+            content: '请确认：这张照片是今天拍的吗？\n\n💡 小提示：为了记录更准确，建议使用今天拍摄的照片哦～',
+            confirmText: '是今天的',
+            confirmColor: '#9C27B0',
+            cancelText: '不是',
+            success: (res) => resolve(res.confirm)
+          })
+        })
+
+        if (!confirmRes) {
+          const tips = [
+            '那就再拍一张新鲜的吧！📸 今天的打卡要用今天的照片哦～',
+            '时光倒流失败！⏰ 换一张今天的照片试试？',
+            '我们只接受"新鲜出炉"的打卡照！🔥 重新拍一张吧～',
+            '要不现在拍一张？今天的打卡就要今天的照片！✨'
+          ]
+          const randomTip = tips[Math.floor(Math.random() * tips.length)]
+          wx.showToast({ title: randomTip, icon: 'none', duration: 2500 })
+          return
+        }
+
+        // 保存照片
+        try {
+          const saveRes = await wx.saveFile({
+            tempFilePath: tempFilePath
+          })
+
+          const savedFilePath = saveRes.savedFilePath
+
+          this.setData({
+            tempMedicinePhotoPath: savedFilePath
+          })
+
+          // 自动提交记录
+          this.submitMedicineRecord(
+            this.data.pendingMedicineData.medicineId,
+            this.data.pendingMedicineData.timeIndex,
+            savedFilePath,
+            true
+          )
+        } catch (saveErr) {
+          console.error('保存照片失败:', saveErr)
+          wx.showToast({ title: '保存照片失败', icon: 'none' })
+        }
+      }
+    } catch (err) {
+      console.error('选择照片失败', err)
+      if (err.errMsg && !err.errMsg.includes('cancel')) {
+        wx.showToast({ title: '选择照片失败', icon: 'none' })
+      }
+    }
+  },
+
+  /**
+   * 跳过拍照，直接记录
+   */
+  skipMedicinePhoto() {
+    this.submitMedicineRecord(
+      this.data.pendingMedicineData.medicineId,
+      this.data.pendingMedicineData.timeIndex,
+      null,
+      false
+    )
+  },
+
+  /**
+   * 提交服药记录
+   */
+  async submitMedicineRecord(medicineId, timeIndex, photoPath, hasPhoto) {
+    this.setData({ showMedicinePhotoOptions: false })
+
+    try {
+      wx.showLoading({ title: '记录中...' })
+
       const res = await wx.cloud.callFunction({
         name: 'health',
         data: {
           action: 'toggleMedicineTaken',
           medicineId: medicineId,
-          timeIndex: timeIndex
+          timeIndex: timeIndex,
+          photoPath: photoPath || null,
+          hasPhoto: hasPhoto || false
         }
       })
 
+      wx.hideLoading()
+
       if (res.result.success) {
+        wx.showToast({
+          title: photoPath ? '拍照打卡成功' : '记录成功',
+          icon: 'success'
+        })
         this.loadMedicineData()
+        this.loadMedicineTodayRecords()
+
+        // 重置状态
+        this.setData({
+          pendingMedicineData: null,
+          tempMedicinePhotoPath: ''
+        })
       } else {
         wx.showToast({ title: res.result.message || '操作失败', icon: 'none' })
       }
     } catch (err) {
       console.error('切换服药状态失败', err)
+      wx.hideLoading()
       wx.showToast({ title: '操作失败', icon: 'none' })
     }
+  },
+
+  /**
+   * 预览照片
+   */
+  previewMedicinePhoto(e) {
+    const photoPath = e.currentTarget.dataset.photo
+    if (!photoPath) {
+      wx.showToast({ title: '该记录无照片', icon: 'none' })
+      return
+    }
+
+    wx.previewImage({
+      urls: [photoPath],
+      current: photoPath
+    })
+  },
+
+  /**
+   * 显示照片墙
+   */
+  showMedicinePhotoWall() {
+    const photosRecords = this.data.medicineData.todayRecords.filter(record => record.hasPhoto && record.photoPath)
+
+    if (photosRecords.length === 0) {
+      wx.showToast({ title: '还没有拍照记录哦', icon: 'none' })
+      return
+    }
+
+    this.setData({ showMedicinePhotoWall: true })
+  },
+
+  /**
+   * 隐藏照片墙
+   */
+  hideMedicinePhotoWall() {
+    this.setData({ showMedicinePhotoWall: false })
+  },
+
+  /**
+   * 照片墙中预览照片
+   */
+  previewMedicinePhotoInWall(e) {
+    const index = e.currentTarget.dataset.index
+    const photosRecords = this.data.medicineData.todayRecords.filter(record => record.hasPhoto && record.photoPath)
+    const urls = photosRecords.map(record => record.photoPath)
+
+    wx.previewImage({
+      urls: urls,
+      current: urls[index]
+    })
   },
 
   /**

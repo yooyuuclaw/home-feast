@@ -188,6 +188,41 @@
           </view>
         </view>
       </view>
+
+      <!-- 今日服药记录 -->
+      <view class="medicine-records">
+        <view class="section-title">
+          <text>今日记录</text>
+          <view wx:if="{{medicineData.todayRecords.length > 0}}" class="photo-wall-btn" bindtap="showMedicinePhotoWall">
+            <text class="btn-icon">📷</text>
+            <text class="btn-text">照片墙</text>
+          </view>
+        </view>
+        <view wx:if="{{medicineData.todayRecords.length === 0}}" class="empty-tip">
+          <view class="empty-icon">💊</view>
+          <view class="empty-text">今天还没有服药记录哦</view>
+        </view>
+        <view wx:else class="medicine-record-list">
+          <view
+            wx:for="{{medicineData.todayRecords}}"
+            wx:key="_id"
+            class="medicine-record-item {{item.hasPhoto ? 'has-photo' : ''}}">
+            <!-- 照片缩略图 -->
+            <view wx:if="{{item.hasPhoto && item.photoPath}}" class="record-photo" bindtap="previewMedicinePhoto" data-photo="{{item.photoPath}}">
+              <image src="{{item.photoPath}}" mode="aspectFill" class="photo-thumbnail"></image>
+              <view class="photo-badge">📷</view>
+            </view>
+            <!-- 记录信息 -->
+            <view class="record-info-wrapper">
+              <view class="record-medicine-name">{{item.medicineName}}</view>
+              <view class="record-time-dosage">
+                <text class="record-time">{{item.time}}</text>
+                <text class="record-dosage">{{item.dosage}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
 
@@ -659,6 +694,64 @@
           </block>
         </view>
         <view wx:if="{{!hasPhotoRecords}}" class="empty-photo-wall">
+          <view class="empty-icon">📸</view>
+          <view class="empty-text">还没有拍照打卡记录</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 服药拍照选项弹窗 -->
+  <view wx:if="{{showMedicinePhotoOptions}}" class="custom-modal photo-options-modal">
+    <view class="modal-mask" catchtap="hideMedicinePhotoOptions"></view>
+    <view class="photo-options-content">
+      <view class="modal-header">
+        <text class="modal-title">记录服药：{{pendingMedicineData ? pendingMedicineData.medicineName : ''}}</text>
+        <text class="modal-close" catchtap="hideMedicinePhotoOptions">✕</text>
+      </view>
+      <view class="modal-body photo-options-body">
+        <view class="option-tip">💡 拍照打卡更有仪式感哦~</view>
+        <view class="photo-option-btn camera-btn" catchtap="takeMedicinePhoto">
+          <view class="option-icon">📷</view>
+          <view class="option-text">拍照打卡</view>
+          <view class="option-desc">打开相机拍摄</view>
+        </view>
+        <view class="photo-option-btn album-btn" catchtap="chooseMedicinePhoto">
+          <view class="option-icon">🖼️</view>
+          <view class="option-text">选择照片</view>
+          <view class="option-desc">从相册选择</view>
+        </view>
+        <view class="photo-option-btn skip-btn" catchtap="skipMedicinePhoto">
+          <view class="option-icon">⏩</view>
+          <view class="option-text">跳过拍照</view>
+          <view class="option-desc">直接记录</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 服药照片墙弹窗 -->
+  <view wx:if="{{showMedicinePhotoWall}}" class="custom-modal photo-wall-modal">
+    <view class="modal-mask" catchtap="hideMedicinePhotoWall"></view>
+    <view class="photo-wall-content">
+      <view class="modal-header">
+        <text class="modal-title">📷 今日服药照片墙</text>
+        <text class="modal-close" catchtap="hideMedicinePhotoWall">✕</text>
+      </view>
+      <view class="modal-body photo-wall-body">
+        <view class="photo-grid">
+          <block wx:for="{{medicineData.todayRecords}}" wx:key="_id">
+            <view wx:if="{{item.hasPhoto && item.photoPath}}"
+                  class="photo-grid-item"
+                  bindtap="previewMedicinePhotoInWall"
+                  data-index="{{index}}">
+              <image src="{{item.photoPath}}" mode="aspectFill" class="grid-photo"></image>
+              <view class="photo-time">{{item.time}}</view>
+              <view class="photo-medicine-name">{{item.medicineName}}</view>
+            </view>
+          </block>
+        </view>
+        <view wx:if="{{!hasMedicinePhotoRecords}}" class="empty-photo-wall">
           <view class="empty-icon">📸</view>
           <view class="empty-text">还没有拍照打卡记录</view>
         </view>
