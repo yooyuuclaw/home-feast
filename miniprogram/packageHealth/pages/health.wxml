@@ -154,7 +154,7 @@
 
       <!-- 药品列表 -->
       <view class="medicine-list">
-        <view class="section-title">我的用药</view>
+        <view class="section-title"><text>我的用药</text></view>
         <view wx:if="{{medicineData.medicines.length === 0}}" class="empty-tip">
           <view class="empty-icon">💊</view>
           <view class="empty-text">还没有添加药品提醒</view>

@@ -534,7 +534,6 @@
   margin-bottom: 20rpx;
   display: flex;
   align-items: center;
-  gap: 8rpx;
 }
 
 .section-title::before {
@@ -543,6 +542,8 @@
   height: 28rpx;
   background: linear-gradient(180deg, #FF6B6B 0%, #FF5252 100%);
   border-radius: 3rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
 }
 
 /* 优化空状态 */
@@ -771,6 +772,98 @@
   padding: 8rpx 16rpx;
   border-radius: 12rpx;
   display: inline-block;
+}
+
+/* 服药记录样式 */
+.medicine-records {
+  background: white;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  border: 2rpx solid rgba(0, 0, 0, 0.04);
+}
+
+.medicine-records .section-title::before {
+  content: '';
+  width: 6rpx;
+  height: 28rpx;
+  background: linear-gradient(180deg, #AB47BC 0%, #9C27B0 100%);
+  border-radius: 3rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.medicine-record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.medicine-record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: linear-gradient(135deg, #F3E5F5 0%, #F5F5F5 100%);
+  border-radius: 16rpx;
+  transition: all 0.3s ease;
+  border: 2rpx solid rgba(156, 39, 176, 0.08);
+}
+
+.medicine-record-item:active {
+  transform: translateX(-4rpx);
+  box-shadow: 4rpx 0 12rpx rgba(156, 39, 176, 0.15);
+}
+
+.medicine-record-item.has-photo {
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx;
+}
+
+.record-medicine-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #6A1B9A;
+  margin-bottom: 6rpx;
+}
+
+.record-time-dosage {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.record-time-dosage .record-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.record-time-dosage .record-dosage {
+  font-size: 22rpx;
+  color: #999;
+  background: rgba(156, 39, 176, 0.08);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+/* 照片墙药品名称样式 */
+.photo-medicine-name {
+  position: absolute;
+  bottom: 8rpx;
+  left: 8rpx;
+  right: 8rpx;
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.9) 0%, rgba(123, 31, 162, 0.9) 100%);
+  color: white;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(156, 39, 176, 0.4);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ==================== 弹窗样式 ==================== */
@@ -2064,8 +2157,21 @@
 /* section-title 优化以支持照片墙按钮 */
 .water-records .section-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+}
+
+.water-records .section-title text:first-of-type {
+  flex: 1;
+}
+
+.medicine-records .section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.medicine-records .section-title text:first-of-type {
+  flex: 1;
 }
 
 

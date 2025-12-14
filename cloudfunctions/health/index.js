@@ -650,6 +650,8 @@ async function toggleMedicineTaken(event, openid) {
   }
 
   try {
+    console.log('[toggleMedicineTaken] 参数:', { medicineId, timeIndex, photoPath, hasPhoto })
+
     // 获取药品信息
     const medicineRes = await db.collection('medicines').doc(medicineId).get()
 
@@ -694,8 +696,9 @@ async function toggleMedicineTaken(event, openid) {
       }
     })
 
-    // 如果是服药（不是取消服药）且有照片或hasPhoto标记，添加服药记录
+    // 如果是服药（不是取消服药），添加服药记录
     if (!currentStatus) {
+      console.log('[toggleMedicineTaken] 添加服药记录')
       await db.collection('medicine_records').add({
         data: {
           _openid: openid,
@@ -709,31 +712,39 @@ async function toggleMedicineTaken(event, openid) {
           createTime: db.serverDate()
         }
       })
+      console.log('[toggleMedicineTaken] 服药记录添加成功')
     } else {
-      // 如果是取消服药，删除对应的服药记录
+      // 如果是取消服药，删除对应的服药记录（匹配 medicineId 和 time）
+      console.log('[toggleMedicineTaken] 删除服药记录')
       const recordRes = await db.collection('medicine_records').where({
         _openid: openid,
         medicineId: medicineId,
+        time: times[timeIndex].time,
         date: _.gte(today).and(_.lt(today + ' 23:59:59'))
       }).get()
+
+      console.log('[toggleMedicineTaken] 找到记录数:', recordRes.data.length)
 
       if (recordRes.data.length > 0) {
         const deletePromises = recordRes.data.map(record =>
           db.collection('medicine_records').doc(record._id).remove()
         )
         await Promise.all(deletePromises)
+        console.log('[toggleMedicineTaken] 服药记录删除成功')
       }
     }
 
+    console.log('[toggleMedicineTaken] 操作成功')
     return {
       success: true,
       message: '更新成功'
     }
   } catch (err) {
-    console.error('切换服药状态失败', err)
+    console.error('[toggleMedicineTaken] 切换服药状态失败', err)
+    console.error('[toggleMedicineTaken] 错误详情:', err.message, err.stack)
     return {
       success: false,
-      message: '操作失败'
+      message: '操作失败: ' + err.message
     }
   }
 }
@@ -775,6 +786,8 @@ async function getMedicineTodayRecords(event, openid) {
     const day = String(localTime.getUTCDate()).padStart(2, '0')
     const today = `${year}-${month}-${day}`
 
+    console.log('[getMedicineTodayRecords] 查询参数:', { queryOpenid, today })
+
     const result = await db.collection('medicine_records')
       .where({
         _openid: queryOpenid,
@@ -784,21 +797,41 @@ async function getMedicineTodayRecords(event, openid) {
       .limit(100)
       .get()
 
+    console.log('[getMedicineTodayRecords] 查询结果数量:', result.data.length)
+
     // 格式化记录
-    const records = result.data.map(record => ({
-      ...record,
-      time: record.date.substring(11, 16) // 提取时间部分 HH:mm
-    }))
+    const records = result.data.map(record => {
+      // date 格式为 "YYYY-MM-DD HH:mm:ss"，提取时间部分 "HH:mm"
+      let timeStr = ''
+      if (record.date && record.date.length >= 16) {
+        timeStr = record.date.substring(11, 16) // 提取 HH:mm
+      } else if (record.date) {
+        // 如果格式不对，尝试分割
+        const parts = record.date.split(' ')
+        if (parts.length >= 2) {
+          const timeParts = parts[1].split(':')
+          timeStr = `${timeParts[0]}:${timeParts[1]}`
+        }
+      }
+
+      return {
+        ...record,
+        time: timeStr || record.time || '未知时间'
+      }
+    })
+
+    console.log('[getMedicineTodayRecords] 格式化后记录数量:', records.length)
 
     return {
       success: true,
       data: records
     }
   } catch (err) {
-    console.error('获取今日服药记录失败', err)
+    console.error('[getMedicineTodayRecords] 获取今日服药记录失败', err)
+    console.error('[getMedicineTodayRecords] 错误详情:', err.message, err.stack)
     return {
       success: false,
-      message: '获取记录失败',
+      message: '获取记录失败: ' + err.message,
       data: []
     }
   }

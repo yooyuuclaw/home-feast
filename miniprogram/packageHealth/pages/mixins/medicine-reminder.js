@@ -65,6 +65,7 @@ export default {
    */
   async loadMedicineTodayRecords() {
     try {
+      console.log('[loadMedicineTodayRecords] 开始加载今日服药记录')
       const res = await wx.cloud.callFunction({
         name: 'health',
         data: {
@@ -73,8 +74,11 @@ export default {
         }
       })
 
+      console.log('[loadMedicineTodayRecords] 云函数返回结果:', res)
+
       if (res.result && res.result.success) {
         const records = res.result.data || []
+        console.log('[loadMedicineTodayRecords] 成功获取记录:', records.length, '条')
 
         // 检查是否有拍照记录
         const hasPhotoRecords = records.some(record => record.hasPhoto && record.photoPath)
@@ -84,10 +88,11 @@ export default {
           hasMedicinePhotoRecords: hasPhotoRecords
         })
       } else {
-        console.error('加载服药记录失败:', res.result ? res.result.message : '未知错误')
+        console.error('[loadMedicineTodayRecords] 加载服药记录失败:', res.result ? res.result.message : '未知错误')
+        console.error('[loadMedicineTodayRecords] 完整结果:', res)
       }
     } catch (err) {
-      console.error('加载服药记录失败', err)
+      console.error('[loadMedicineTodayRecords] 加载服药记录异常', err)
     }
   },
 
@@ -391,6 +396,8 @@ export default {
     try {
       wx.showLoading({ title: '记录中...' })
 
+      console.log('[submitMedicineRecord] 提交参数:', { medicineId, timeIndex, photoPath, hasPhoto })
+
       const res = await wx.cloud.callFunction({
         name: 'health',
         data: {
@@ -401,6 +408,8 @@ export default {
           hasPhoto: hasPhoto || false
         }
       })
+
+      console.log('[submitMedicineRecord] 云函数返回结果:', res)
 
       wx.hideLoading()
 
@@ -418,10 +427,11 @@ export default {
           tempMedicinePhotoPath: ''
         })
       } else {
+        console.error('[submitMedicineRecord] 操作失败:', res.result.message)
         wx.showToast({ title: res.result.message || '操作失败', icon: 'none' })
       }
     } catch (err) {
-      console.error('切换服药状态失败', err)
+      console.error('[submitMedicineRecord] 切换服药状态异常:', err)
       wx.hideLoading()
       wx.showToast({ title: '操作失败', icon: 'none' })
     }
