@@ -2072,7 +2072,6 @@
 /* ==================== 饮水图表样式 ==================== */
 .water-chart-section {
   background: white;
-  margin: 24rpx;
   border-radius: 24rpx;
   padding: 32rpx 24rpx;
   box-shadow: 0 4rpx 20rpx rgba(66, 165, 245, 0.08);
