@@ -166,25 +166,61 @@ export default {
         count: 1,
         mediaType: ['image'],
         sourceType: ['album'], // 只允许相册
-        sizeType: ['compressed'] // 压缩图
+        sizeType: ['compressed'] // 压缩图，避免文件过大
       })
 
       if (res.tempFiles && res.tempFiles.length > 0) {
-        const tempFilePath = res.tempFiles[0].tempFilePath
+        const tempFile = res.tempFiles[0]
+        const tempFilePath = tempFile.tempFilePath
 
-        // 保存到本地永久存储
-        const saveRes = await wx.saveFile({
-          tempFilePath: tempFilePath
+        // 简单友好的确认，不需要上传到云端验证
+        const confirmRes = await new Promise(resolve => {
+          wx.showModal({
+            title: '📷 确认打卡照片',
+            content: '请确认：这张照片是今天拍的吗？\n\n💡 小提示：为了记录更准确，建议使用今天拍摄的照片哦～',
+            confirmText: '是今天的',
+            confirmColor: '#2196F3',
+            cancelText: '不是',
+            success: (res) => resolve(res.confirm)
+          })
         })
 
-        const savedFilePath = saveRes.savedFilePath
+        if (!confirmRes) {
+          // 用户确认不是今天的照片，显示幽默提示
+          const tips = [
+            '那就再拍一张新鲜的吧！📸 今天的打卡要用今天的照片哦～',
+            '时光倒流失败！⏰ 换一张今天的照片试试？',
+            '我们只接受"新鲜出炉"的打卡照！🔥 重新拍一张吧～',
+            '要不现在拍一张？今天的打卡就要今天的照片！✨'
+          ]
+          const randomTip = tips[Math.floor(Math.random() * tips.length)]
 
-        this.setData({
-          tempPhotoPath: savedFilePath
-        })
+          wx.showToast({
+            title: randomTip,
+            icon: 'none',
+            duration: 2500
+          })
+          return
+        }
 
-        // 自动提交记录
-        this.submitWaterRecord()
+        // 用户确认是今天的照片，保存并提交
+        try {
+          const saveRes = await wx.saveFile({
+            tempFilePath: tempFilePath
+          })
+
+          const savedFilePath = saveRes.savedFilePath
+
+          this.setData({
+            tempPhotoPath: savedFilePath
+          })
+
+          // 自动提交记录
+          this.submitWaterRecord()
+        } catch (saveErr) {
+          console.error('保存照片失败:', saveErr)
+          wx.showToast({ title: '保存照片失败', icon: 'none' })
+        }
       }
     } catch (err) {
       console.error('选择照片失败', err)

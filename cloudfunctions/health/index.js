@@ -1,5 +1,6 @@
 // cloudfunctions/health/index.js
 const cloud = require('wx-server-sdk')
+const exifParser = require('exif-parser')
 
 cloud.init({
   env: 'cloudbase-1gdysknn57ce9b9f'
@@ -7,6 +8,118 @@ cloud.init({
 
 const db = cloud.database()
 const _ = db.command
+
+/**
+ * 解析照片EXIF信息获取拍摄时间
+ */
+async function parsePhotoExif(event, openid) {
+  const { fileID } = event
+
+  if (!fileID) {
+    return {
+      success: false,
+      message: '缺少文件ID'
+    }
+  }
+
+  try {
+    console.log('开始解析照片EXIF, fileID:', fileID)
+
+    // 从云存储下载文件
+    const res = await cloud.downloadFile({
+      fileID: fileID
+    })
+
+    const buffer = res.fileContent
+    console.log('文件下载成功, buffer长度:', buffer.length)
+
+    // 解析EXIF信息
+    try {
+      const parser = exifParser.create(buffer)
+      const result = parser.parse()
+
+      console.log('EXIF解析成功, tags:', JSON.stringify(result.tags))
+
+      // 获取拍摄时间
+      let photoDate = null
+      let dateSource = null
+
+      // 优先使用 DateTimeOriginal (原始拍摄时间)
+      if (result.tags && result.tags.DateTimeOriginal) {
+        photoDate = new Date(result.tags.DateTimeOriginal * 1000)
+        dateSource = 'DateTimeOriginal'
+        console.log('使用DateTimeOriginal:', result.tags.DateTimeOriginal)
+      }
+      // 其次使用 CreateDate
+      else if (result.tags && result.tags.CreateDate) {
+        photoDate = new Date(result.tags.CreateDate * 1000)
+        dateSource = 'CreateDate'
+        console.log('使用CreateDate:', result.tags.CreateDate)
+      }
+      // 最后使用 DateTime
+      else if (result.tags && result.tags.DateTime) {
+        photoDate = new Date(result.tags.DateTime * 1000)
+        dateSource = 'DateTime'
+        console.log('使用DateTime:', result.tags.DateTime)
+      }
+
+      if (photoDate && photoDate.getFullYear() >= 2000) {
+        console.log('成功获取照片日期:', photoDate.toISOString(), '来源:', dateSource)
+
+        // 转换为东八区时间
+        const offset = 8 * 60 * 60 * 1000 // 东八区偏移量
+        const localDate = new Date(photoDate.getTime() + offset)
+
+        const year = localDate.getUTCFullYear()
+        const month = localDate.getUTCMonth() + 1
+        const day = localDate.getUTCDate()
+        const hour = localDate.getUTCHours()
+        const minute = localDate.getUTCMinutes()
+        const second = localDate.getUTCSeconds()
+
+        return {
+          success: true,
+          data: {
+            hasExif: true,
+            photoDate: photoDate.toISOString(),
+            year: year,
+            month: month,
+            day: day,
+            hour: hour,
+            minute: minute,
+            second: second,
+            timestamp: photoDate.getTime(),
+            dateSource: dateSource
+          }
+        }
+      } else {
+        console.log('未找到有效的拍摄时间')
+        return {
+          success: true,
+          data: {
+            hasExif: false,
+            message: '照片中没有找到有效的拍摄时间信息'
+          }
+        }
+      }
+    } catch (parseErr) {
+      console.error('解析EXIF失败:', parseErr)
+      return {
+        success: true,
+        data: {
+          hasExif: false,
+          message: '照片不包含EXIF信息或格式不支持: ' + parseErr.message
+        }
+      }
+    }
+  } catch (err) {
+    console.error('下载文件失败:', err)
+    return {
+      success: false,
+      message: '下载照片失败: ' + err.message
+    }
+  }
+}
 
 /**
  * 检查用户权限（非未受邀访客可访问）
@@ -277,13 +390,26 @@ async function addWaterRecord(event, openid) {
 
   try {
     const now = new Date()
+    // 转换为东八区时间（北京时间）
+    const offset = 8 * 60 // 东八区偏移量（分钟）
+    const localTime = new Date(now.getTime() + offset * 60 * 1000)
+
+    // 格式化为本地时间字符串 YYYY-MM-DD HH:mm:ss
+    const year = localTime.getUTCFullYear()
+    const month = String(localTime.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(localTime.getUTCDate()).padStart(2, '0')
+    const hour = String(localTime.getUTCHours()).padStart(2, '0')
+    const minute = String(localTime.getUTCMinutes()).padStart(2, '0')
+    const second = String(localTime.getUTCSeconds()).padStart(2, '0')
+    const localDateStr = `${year}-${month}-${day} ${hour}:${minute}:${second}`
+
     const result = await db.collection('water_records').add({
       data: {
         _openid: openid,
         amount: amount,
         photoPath: photoPath || null,  // 照片本地路径
         hasPhoto: hasPhoto || false,   // 是否有照片
-        date: now.toISOString(),
+        date: localDateStr,  // 使用本地时间字符串
         createTime: db.serverDate()
       }
     })
@@ -955,7 +1081,8 @@ async function checkViewPermission(event, openid) {
  * 健康数据管理云函数
  * 支持操作：add, list, delete, statistics, addWaterRecord, getWaterRecords, deleteWaterRecord,
  * addMedicine, getMedicines, toggleMedicineTaken, deleteMedicine,
- * generateAuthCode, useAuthCode, getMyAuthorizations, getAuthorizedToMe, revokeAuthorization, checkViewPermission
+ * generateAuthCode, useAuthCode, getMyAuthorizations, getAuthorizedToMe, revokeAuthorization, checkViewPermission,
+ * parsePhotoExif
  */
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
@@ -963,6 +1090,11 @@ exports.main = async (event, context) => {
   const { action } = event
 
   console.log('health云函数被调用, action:', action, 'openid:', openid)
+
+  // parsePhotoExif 不需要权限检查，因为只是读取照片信息
+  if (action === 'parsePhotoExif') {
+    return await parsePhotoExif(event, openid)
+  }
 
   // 检查权限
   const hasPermission = await checkPermission(openid)
