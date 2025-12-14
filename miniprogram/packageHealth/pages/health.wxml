@@ -85,40 +85,16 @@
         </view>
       </view>
 
-      <!-- 本周统计与连续打卡 -->
-      <view class="stats-container">
-        <!-- 连续打卡天数 -->
-        <view class="streak-card">
-          <view class="streak-icon">🔥</view>
-          <view class="streak-info">
-            <view class="streak-number">{{waterData.streakDays}}</view>
-            <view class="streak-label">连续打卡(天)</view>
-          </view>
-        </view>
-
-        <!-- 本周统计 -->
-        <view class="weekly-stats-card">
-          <view class="stats-title">本周统计（近7天）</view>
-          <view class="stats-grid">
-            <view class="stat-item">
-              <view class="stat-value">{{waterData.weeklyStats.totalAmount}}</view>
-              <view class="stat-label">总量(ml)</view>
-            </view>
-            <view class="stat-item">
-              <view class="stat-value">{{waterData.weeklyStats.avgAmount}}</view>
-              <view class="stat-label">日均(ml)</view>
-            </view>
-            <view class="stat-item">
-              <view class="stat-value">{{waterData.weeklyStats.completeDays}}/7</view>
-              <view class="stat-label">达标天数</view>
-            </view>
-          </view>
-        </view>
-      </view>
 
       <!-- 今日饮水记录 -->
       <view class="water-records">
-        <view class="section-title">今日记录</view>
+        <view class="section-title">
+          <text>今日记录</text>
+          <view wx:if="{{waterData.todayRecords.length > 0}}" class="photo-wall-btn" bindtap="showPhotoWall">
+            <text class="btn-icon">📷</text>
+            <text class="btn-text">照片墙</text>
+          </view>
+        </view>
         <view wx:if="{{waterData.todayRecords.length === 0}}" class="empty-tip">
           <view class="empty-icon">💧</view>
           <view class="empty-text">今天还没有喝水记录哦</view>
@@ -127,12 +103,41 @@
           <view
             wx:for="{{waterData.todayRecords}}"
             wx:key="_id"
-            class="water-record-item"
+            class="water-record-item {{item.hasPhoto ? 'has-photo' : ''}}"
             bindlongpress="deleteWaterRecord"
             data-id="{{item._id}}">
-            <view class="record-time">{{item.time}}</view>
-            <view class="record-amount">{{item.amount}}ml</view>
+            <!-- 照片缩略图 -->
+            <view wx:if="{{item.hasPhoto && item.photoPath}}" class="record-photo" bindtap="previewPhoto" data-photo="{{item.photoPath}}">
+              <image src="{{item.photoPath}}" mode="aspectFill" class="photo-thumbnail"></image>
+              <view class="photo-badge">📷</view>
+            </view>
+            <!-- 记录信息 -->
+            <view class="record-info-wrapper">
+              <view class="record-time">{{item.time}}</view>
+              <view class="record-amount">{{item.amount}}ml</view>
+            </view>
           </view>
+        </view>
+      </view>
+
+      <!-- 近一个月饮水趋势图表 -->
+      <view class="water-chart-section">
+        <view class="water-chart-header">
+          <view class="chart-title">近一个月饮水趋势</view>
+        </view>
+        <health-echart
+          wx:if="{{waterChartData.length > 0}}"
+          title="饮水量"
+          chartData="{{waterChartData}}"
+          chartId="water"
+          unit="ml"
+          color="#42A5F5"
+          chartType="line">
+        </health-echart>
+        <view wx:else class="chart-empty-tip">
+          <view class="empty-icon">📊</view>
+          <view class="empty-text">暂无饮水数据</view>
+          <view class="empty-hint">开始记录后即可查看趋势图</view>
         </view>
       </view>
     </view>
@@ -598,6 +603,64 @@
           data-nickname="{{item.nickname}}">
           <view class="selector-nickname">{{item.nickname}}</view>
           <view wx:if="{{currentViewingOpenid === item.openid}}" class="selector-check">✓</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 拍照选项弹窗 -->
+  <view wx:if="{{showPhotoOptions}}" class="custom-modal photo-options-modal">
+    <view class="modal-mask" catchtap="hidePhotoOptions"></view>
+    <view class="photo-options-content">
+      <view class="modal-header">
+        <text class="modal-title">记录 {{pendingWaterAmount}}ml 喝水</text>
+        <text class="modal-close" catchtap="hidePhotoOptions">✕</text>
+      </view>
+      <view class="modal-body photo-options-body">
+        <view class="option-tip">💡 拍照打卡更有仪式感哦~</view>
+        <view class="photo-option-btn camera-btn" catchtap="takePhoto">
+          <view class="option-icon">📷</view>
+          <view class="option-text">拍照打卡</view>
+          <view class="option-desc">打开相机拍摄</view>
+        </view>
+        <view class="photo-option-btn album-btn" catchtap="choosePhoto">
+          <view class="option-icon">🖼️</view>
+          <view class="option-text">选择照片</view>
+          <view class="option-desc">从相册选择</view>
+        </view>
+        <view class="photo-option-btn skip-btn" catchtap="skipPhoto">
+          <view class="option-icon">⏩</view>
+          <view class="option-text">跳过拍照</view>
+          <view class="option-desc">直接记录</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 照片墙弹窗 -->
+  <view wx:if="{{showPhotoWall}}" class="custom-modal photo-wall-modal">
+    <view class="modal-mask" catchtap="hidePhotoWall"></view>
+    <view class="photo-wall-content">
+      <view class="modal-header">
+        <text class="modal-title">📷 今日打卡照片墙</text>
+        <text class="modal-close" catchtap="hidePhotoWall">✕</text>
+      </view>
+      <view class="modal-body photo-wall-body">
+        <view class="photo-grid">
+          <block wx:for="{{waterData.todayRecords}}" wx:key="_id">
+            <view wx:if="{{item.hasPhoto && item.photoPath}}"
+                  class="photo-grid-item"
+                  bindtap="previewPhotoInWall"
+                  data-index="{{index}}">
+              <image src="{{item.photoPath}}" mode="aspectFill" class="grid-photo"></image>
+              <view class="photo-time">{{item.time}}</view>
+              <view class="photo-amount">{{item.amount}}ml</view>
+            </view>
+          </block>
+        </view>
+        <view wx:if="{{!hasPhotoRecords}}" class="empty-photo-wall">
+          <view class="empty-icon">📸</view>
+          <view class="empty-text">还没有拍照打卡记录</view>
         </view>
       </view>
     </view>

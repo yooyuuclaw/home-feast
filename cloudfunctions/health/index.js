@@ -266,7 +266,7 @@ async function getStatistics(event, openid) {
  * 添加喝水记录
  */
 async function addWaterRecord(event, openid) {
-  const { amount } = event
+  const { amount, photoPath, hasPhoto } = event
 
   if (!amount || amount <= 0) {
     return {
@@ -281,6 +281,8 @@ async function addWaterRecord(event, openid) {
       data: {
         _openid: openid,
         amount: amount,
+        photoPath: photoPath || null,  // 照片本地路径
+        hasPhoto: hasPhoto || false,   // 是否有照片
         date: now.toISOString(),
         createTime: db.serverDate()
       }

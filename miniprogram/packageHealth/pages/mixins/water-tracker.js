@@ -23,7 +23,15 @@ export default {
     showWaterGoalModal: false,
     showCustomWaterModal: false,
     waterGoalInput: '',
-    customWaterAmount: ''
+    customWaterAmount: '',
+
+    // 拍照打卡相关
+    showPhotoOptions: false,      // 显示拍照选项弹窗
+    pendingWaterAmount: 0,        // 待记录的饮水量
+    tempPhotoPath: '',            // 临时照片路径
+    showPhotoWall: false,         // 显示照片墙
+    hasPhotoRecords: false,       // 是否有拍照记录
+    waterChartData: []            // 近一个月饮水图表数据
   },
 
   /**
@@ -61,12 +69,20 @@ export default {
         // 使用工具函数计算连续打卡天数
         const streakDays = calculateStreakDays(records, this.data.waterData.goalAmount)
 
+        // 检查是否有拍照记录
+        const hasPhotoRecords = todayRecords.some(record => record.hasPhoto && record.photoPath)
+
+        // 处理近一个月图表数据
+        const waterChartData = this.processWaterChartData(records)
+
         this.setData({
           'waterData.todayRecords': todayRecords,
           'waterData.todayAmount': todayAmount,
           'waterData.weeklyStats': weeklyStats,
           'waterData.streakDays': streakDays,
-          waterProgressPercent: percent
+          waterProgressPercent: percent,
+          hasPhotoRecords: hasPhotoRecords,
+          waterChartData: waterChartData
         })
       } else {
         console.error('加载喝水数据失败:', res.result ? res.result.message : '未知错误')
@@ -77,12 +93,122 @@ export default {
   },
 
   /**
-   * 添加喝水记录
+   * 添加喝水记录（显示拍照选项弹窗）
    */
-  async addWater(e) {
+  addWater(e) {
     if (this.checkViewMode()) return
 
     const amount = parseInt(e.currentTarget.dataset.amount)
+
+    // 显示拍照选项弹窗
+    this.setData({
+      showPhotoOptions: true,
+      pendingWaterAmount: amount,
+      tempPhotoPath: ''
+    })
+  },
+
+  /**
+   * 隐藏拍照选项弹窗
+   */
+  hidePhotoOptions() {
+    this.setData({
+      showPhotoOptions: false,
+      pendingWaterAmount: 0,
+      tempPhotoPath: ''
+    })
+  },
+
+  /**
+   * 拍照打卡
+   */
+  async takePhoto() {
+    try {
+      const res = await wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera'], // 只允许拍照
+        sizeType: ['compressed'], // 压缩图
+        camera: 'back' // 后置摄像头
+      })
+
+      if (res.tempFiles && res.tempFiles.length > 0) {
+        const tempFilePath = res.tempFiles[0].tempFilePath
+
+        // 保存到本地永久存储
+        const saveRes = await wx.saveFile({
+          tempFilePath: tempFilePath
+        })
+
+        const savedFilePath = saveRes.savedFilePath
+
+        this.setData({
+          tempPhotoPath: savedFilePath
+        })
+
+        // 自动提交记录
+        this.submitWaterRecord()
+      }
+    } catch (err) {
+      console.error('拍照失败', err)
+      if (err.errMsg && !err.errMsg.includes('cancel')) {
+        wx.showToast({ title: '拍照失败', icon: 'none' })
+      }
+    }
+  },
+
+  /**
+   * 选择相册照片
+   */
+  async choosePhoto() {
+    try {
+      const res = await wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album'], // 只允许相册
+        sizeType: ['compressed'] // 压缩图
+      })
+
+      if (res.tempFiles && res.tempFiles.length > 0) {
+        const tempFilePath = res.tempFiles[0].tempFilePath
+
+        // 保存到本地永久存储
+        const saveRes = await wx.saveFile({
+          tempFilePath: tempFilePath
+        })
+
+        const savedFilePath = saveRes.savedFilePath
+
+        this.setData({
+          tempPhotoPath: savedFilePath
+        })
+
+        // 自动提交记录
+        this.submitWaterRecord()
+      }
+    } catch (err) {
+      console.error('选择照片失败', err)
+      if (err.errMsg && !err.errMsg.includes('cancel')) {
+        wx.showToast({ title: '选择照片失败', icon: 'none' })
+      }
+    }
+  },
+
+  /**
+   * 跳过拍照，直接记录
+   */
+  skipPhoto() {
+    this.submitWaterRecord()
+  },
+
+  /**
+   * 提交喝水记录
+   */
+  async submitWaterRecord() {
+    const amount = this.data.pendingWaterAmount
+    const photoPath = this.data.tempPhotoPath
+
+    this.setData({ showPhotoOptions: false })
 
     try {
       wx.showLoading({ title: '记录中...' })
@@ -91,15 +217,26 @@ export default {
         name: 'health',
         data: {
           action: 'addWaterRecord',
-          amount: amount
+          amount: amount,
+          photoPath: photoPath || null,
+          hasPhoto: !!photoPath
         }
       })
 
       wx.hideLoading()
 
       if (res.result.success) {
-        wx.showToast({ title: '记录成功', icon: 'success' })
+        wx.showToast({
+          title: photoPath ? '拍照打卡成功' : '记录成功',
+          icon: 'success'
+        })
         this.loadWaterData()
+
+        // 重置状态
+        this.setData({
+          pendingWaterAmount: 0,
+          tempPhotoPath: ''
+        })
       } else {
         wx.showToast({ title: res.result.message || '记录失败', icon: 'none' })
       }
@@ -269,5 +406,100 @@ export default {
         }
       }
     })
+  },
+
+  /**
+   * 预览照片
+   */
+  previewPhoto(e) {
+    const photoPath = e.currentTarget.dataset.photo
+    if (!photoPath) {
+      wx.showToast({ title: '该记录无照片', icon: 'none' })
+      return
+    }
+
+    wx.previewImage({
+      urls: [photoPath],
+      current: photoPath
+    })
+  },
+
+  /**
+   * 显示照片墙
+   */
+  showPhotoWall() {
+    // 收集所有有照片的记录
+    const photosRecords = this.data.waterData.todayRecords.filter(record => record.hasPhoto && record.photoPath)
+
+    if (photosRecords.length === 0) {
+      wx.showToast({ title: '还没有拍照记录哦', icon: 'none' })
+      return
+    }
+
+    this.setData({ showPhotoWall: true })
+  },
+
+  /**
+   * 隐藏照片墙
+   */
+  hidePhotoWall() {
+    this.setData({ showPhotoWall: false })
+  },
+
+  /**
+   * 照片墙中预览照片
+   */
+  previewPhotoInWall(e) {
+    const index = e.currentTarget.dataset.index
+    const photosRecords = this.data.waterData.todayRecords.filter(record => record.hasPhoto && record.photoPath)
+    const urls = photosRecords.map(record => record.photoPath)
+
+    wx.previewImage({
+      urls: urls,
+      current: urls[index]
+    })
+  }
+,
+
+  /**
+   * 处理饮水图表数据（近30天）
+   */
+  processWaterChartData(records) {
+    if (!records || records.length === 0) {
+      return []
+    }
+
+    const now = new Date()
+    const chartData = []
+    const dailyData = {}
+
+    // 初始化近30天的数据
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(now)
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split('T')[0]
+      dailyData[dateStr] = 0
+    }
+
+    // 统计每天的饮水量
+    records.forEach(record => {
+      const recordDate = new Date(record.date).toISOString().split('T')[0]
+      if (dailyData.hasOwnProperty(recordDate)) {
+        dailyData[recordDate] += record.amount
+      }
+    })
+
+    // 转换为图表数据格式
+    Object.keys(dailyData).sort().forEach(dateStr => {
+      const date = new Date(dateStr)
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      chartData.push({
+        date: month + '/' + day,
+        value: dailyData[dateStr]
+      })
+    })
+
+    return chartData
   }
 }

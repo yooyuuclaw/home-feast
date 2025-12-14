@@ -1800,3 +1800,299 @@
   color: #BBB;
 }
 
+
+/* ==================== 拍照打卡样式 ==================== */
+
+/* 照片墙按钮 */
+.photo-wall-btn {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 18rpx;
+  background: linear-gradient(135deg, #AB47BC 0%, #9C27B0 100%);
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(156, 39, 176, 0.25);
+  transition: all 0.3s ease;
+}
+
+.photo-wall-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 1rpx 4rpx rgba(156, 39, 176, 0.3);
+}
+
+.photo-wall-btn .btn-icon {
+  font-size: 28rpx;
+  color: white;
+}
+
+.photo-wall-btn .btn-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: white;
+}
+
+/* 带照片的记录项 */
+.water-record-item.has-photo {
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx;
+}
+
+.record-photo {
+  position: relative;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.record-photo:active {
+  transform: scale(0.95);
+}
+
+.photo-thumbnail {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.photo-badge {
+  position: absolute;
+  top: 4rpx;
+  right: 4rpx;
+  font-size: 20rpx;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 4rpx 8rpx;
+  border-radius: 8rpx;
+}
+
+.record-info-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 拍照选项弹窗 */
+.photo-options-modal .photo-options-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 32rpx 32rpx 0 0;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.photo-options-body {
+  padding: 24rpx 32rpx 40rpx;
+}
+
+.option-tip {
+  text-align: center;
+  font-size: 26rpx;
+  color: #999;
+  padding: 16rpx 0 28rpx;
+}
+
+.photo-option-btn {
+  background: linear-gradient(135deg, #F5F5F5 0%, #FAFAFA 100%);
+  border-radius: 24rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  border: 2rpx solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-option-btn::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6rpx;
+  background: linear-gradient(180deg, #42A5F5 0%, #2196F3 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photo-option-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 16rpx rgba(33, 150, 243, 0.15);
+}
+
+.photo-option-btn:active::before {
+  opacity: 1;
+}
+
+.camera-btn::before {
+  background: linear-gradient(180deg, #42A5F5 0%, #2196F3 100%);
+}
+
+.album-btn::before {
+  background: linear-gradient(180deg, #AB47BC 0%, #9C27B0 100%);
+}
+
+.skip-btn::before {
+  background: linear-gradient(180deg, #78909C 0%, #607D8B 100%);
+}
+
+.option-icon {
+  font-size: 56rpx;
+  flex-shrink: 0;
+}
+
+.photo-option-btn > view {
+  flex: 1;
+}
+
+.option-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 4rpx;
+}
+
+.option-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 照片墙弹窗 */
+.photo-wall-modal .photo-wall-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 700rpx;
+  max-height: 80vh;
+  background: white;
+  border-radius: 28rpx;
+  animation: modalScaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.3);
+}
+
+.photo-wall-body {
+  padding: 24rpx;
+  max-height: calc(80vh - 120rpx);
+  overflow-y: auto;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+}
+
+.photo-grid-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.photo-grid-item:active {
+  transform: scale(0.95);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2);
+}
+
+.grid-photo {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.photo-time {
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.photo-amount {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  background: linear-gradient(135deg, #42A5F5 0%, #2196F3 100%);
+  color: white;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(33, 150, 243, 0.4);
+}
+
+.empty-photo-wall {
+  text-align: center;
+  padding: 80rpx 40rpx;
+  background: linear-gradient(135deg, #F5F5F5 0%, #FAFAFA 100%);
+  border-radius: 20rpx;
+  border: 2rpx dashed rgba(0, 0, 0, 0.08);
+}
+
+.empty-photo-wall .empty-icon {
+  font-size: 96rpx;
+  margin-bottom: 16rpx;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-photo-wall .empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* section-title 优化以支持照片墙按钮 */
+.water-records .section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+/* ==================== 饮水图表样式 ==================== */
+.water-chart-section {
+  background: white;
+  margin: 24rpx;
+  border-radius: 24rpx;
+  padding: 32rpx 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(66, 165, 245, 0.08);
+  border: 2rpx solid rgba(66, 165, 245, 0.1);
+}
+
+.water-chart-header {
+  margin-bottom: 24rpx;
+}
+
+.water-chart-header .chart-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.water-chart-header .chart-title::before {
+  content: '📊';
+  font-size: 36rpx;
+}
