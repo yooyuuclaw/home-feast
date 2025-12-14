@@ -332,39 +332,20 @@ export default {
   /**
    * 确认自定义水量
    */
-  async confirmCustomWater() {
+  confirmCustomWater() {
     const amount = parseInt(this.data.customWaterAmount)
     if (!amount || amount <= 0) {
       wx.showToast({ title: '请输入有效的水量', icon: 'none' })
       return
     }
 
-    this.setData({ showCustomWaterModal: false })
-
-    try {
-      wx.showLoading({ title: '记录中...' })
-
-      const res = await wx.cloud.callFunction({
-        name: 'health',
-        data: {
-          action: 'addWaterRecord',
-          amount: amount
-        }
-      })
-
-      wx.hideLoading()
-
-      if (res.result.success) {
-        wx.showToast({ title: '记录成功', icon: 'success' })
-        this.loadWaterData()
-      } else {
-        wx.showToast({ title: res.result.message || '记录失败', icon: 'none' })
-      }
-    } catch (err) {
-      console.error('添加喝水记录失败', err)
-      wx.hideLoading()
-      wx.showToast({ title: '记录失败', icon: 'none' })
-    }
+    // 关闭自定义水量弹窗，显示拍照选项弹窗
+    this.setData({
+      showCustomWaterModal: false,
+      showPhotoOptions: true,
+      pendingWaterAmount: amount,
+      tempPhotoPath: ''
+    })
   },
 
   /**
