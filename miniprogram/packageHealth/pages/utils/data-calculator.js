@@ -11,14 +11,15 @@ import { getDateString } from './date-formatter.js'
  * @returns {Object} 包含totalAmount, avgAmount, completeDays
  */
 export function calculateWeeklyStats(records, goalAmount) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const now = new Date()
+  const todayTimestamp = now.getTime()
 
   // 创建最近7天的日期映射
   const dailyAmounts = {}
   for (let i = 0; i < 7; i++) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
+    // 使用时间戳计算，避免 iOS 兼容性问题
+    const dateTimestamp = todayTimestamp - i * 24 * 60 * 60 * 1000
+    const date = new Date(dateTimestamp)
     const dateStr = getDateString(date)
     dailyAmounts[dateStr] = 0
   }
@@ -51,8 +52,8 @@ export function calculateWeeklyStats(records, goalAmount) {
  * @returns {number} 连续打卡天数
  */
 export function calculateStreakDays(records, goalAmount) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const now = new Date()
+  const todayTimestamp = now.getTime()
 
   // 按日期分组统计每天的饮水量
   const dailyAmounts = {}
@@ -66,18 +67,21 @@ export function calculateStreakDays(records, goalAmount) {
 
   // 从今天开始往前检查连续打卡
   let streakDays = 0
-  let checkDate = new Date(today)
+  let checkTimestamp = todayTimestamp
 
   while (true) {
+    // 使用时间戳创建日期对象，避免 iOS 兼容性问题
+    const checkDate = new Date(checkTimestamp)
     const dateStr = getDateString(checkDate)
 
     if (dailyAmounts[dateStr] && dailyAmounts[dateStr] >= goalAmount) {
       streakDays++
-      checkDate.setDate(checkDate.getDate() - 1)
+      // 减去一天的毫秒数
+      checkTimestamp -= 24 * 60 * 60 * 1000
     } else {
       // 如果检查的是今天且未达标，继续检查昨天
-      if (streakDays === 0 && checkDate.getTime() === today.getTime()) {
-        checkDate.setDate(checkDate.getDate() - 1)
+      if (streakDays === 0 && Math.abs(checkTimestamp - todayTimestamp) < 1000) {
+        checkTimestamp -= 24 * 60 * 60 * 1000
         continue
       }
       break
