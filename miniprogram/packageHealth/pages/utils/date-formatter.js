@@ -35,14 +35,18 @@ export function parseDateSafe(dateStr) {
 }
 
 /**
- * 获取今天日期字符串
+ * 获取今天日期字符串（东八区时间）
  * @returns {string} 格式: YYYY年MM月DD日
  */
 export function getTodayDateString() {
   const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
+  // 转换为东八区时间（北京时间）
+  const offset = 8 * 60 // 东八区偏移量（分钟）
+  const localTime = new Date(now.getTime() + offset * 60 * 1000)
+
+  const year = localTime.getUTCFullYear()
+  const month = String(localTime.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(localTime.getUTCDate()).padStart(2, '0')
   return `${year}年${month}月${day}日`
 }
 
@@ -54,10 +58,12 @@ export function getTodayDateString() {
 export function formatRelativeDate(dateStr) {
   const date = parseDateSafe(dateStr)
   const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const recordDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
 
-  const diffDays = Math.floor((today - recordDate) / (1000 * 60 * 60 * 24))
+  // 使用时间戳方式创建日期，避免 iOS 兼容性问题
+  const todayTimestamp = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  const recordTimestamp = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+
+  const diffDays = Math.floor((todayTimestamp - recordTimestamp) / (1000 * 60 * 60 * 24))
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
 
@@ -75,19 +81,23 @@ export function formatRelativeDate(dateStr) {
 }
 
 /**
- * 获取日期字符串(YYYY-MM-DD)
+ * 获取日期字符串(YYYY-MM-DD)，使用东八区时间
  * @param {Date} date - 日期对象
  * @returns {string}
  */
 export function getDateString(date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
+  // 转换为东八区时间（北京时间）
+  const offset = 8 * 60 // 东八区偏移量（分钟）
+  const localTime = new Date(date.getTime() + offset * 60 * 1000)
+
+  const year = localTime.getUTCFullYear()
+  const month = String(localTime.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(localTime.getUTCDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
 
 /**
- * 获取今天日期字符串(YYYY-MM-DD)
+ * 获取今天日期字符串(YYYY-MM-DD)，使用东八区时间
  * @returns {string}
  */
 export function getTodayString() {

@@ -545,7 +545,6 @@ async function addMedicine(event, openid) {
   }
 
   try {
-    const today = new Date().toISOString().split('T')[0]
     const timesWithStatus = times.map(time => ({
       time: time,
       taken: false,
@@ -612,8 +611,15 @@ async function getMedicines(event, openid) {
       .orderBy('createTime', 'desc')
       .get()
 
-    // 处理今日服用状态
-    const today = new Date().toISOString().split('T')[0]
+    // 处理今日服用状态（使用东八区时间）
+    const now = new Date()
+    const offset = 8 * 60 // 东八区偏移量（分钟）
+    const localTime = new Date(now.getTime() + offset * 60 * 1000)
+    const year = localTime.getUTCFullYear()
+    const month = String(localTime.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(localTime.getUTCDate()).padStart(2, '0')
+    const today = `${year}-${month}-${day}`
+
     const medicines = result.data.map(medicine => {
       medicine.times = medicine.times.map(timeItem => ({
         ...timeItem,

@@ -141,7 +141,9 @@ Component({
       // 提取日期和数值
       const dates = chartData.map(item => {
         // 格式化日期显示，修复 iOS 兼容性问题
-        const date = new Date(item.date.replace(/-/g, '/'))
+        // 将 YYYY-MM-DD 格式转换为 YYYY/MM/DD 格式，或添加时间部分以符合ISO标准
+        const dateStr = item.date.indexOf('/') >= 0 ? item.date : item.date + 'T00:00:00'
+        const date = new Date(dateStr)
         return `${date.getMonth() + 1}/${date.getDate()}`
       })
       const values = chartData.map(item => item.value)

@@ -490,17 +490,22 @@ export default {
     const chartData = []
     const dailyData = {}
 
-    // 初始化近30天的数据
+    // 初始化近30天的数据（使用东八区时间）
+    const offset = 8 * 60 // 东八区偏移量（分钟）
     for (let i = 29; i >= 0; i--) {
-      const date = new Date(now)
-      date.setDate(date.getDate() - i)
-      const dateStr = date.toISOString().split('T')[0]
+      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
+      const localTime = new Date(date.getTime() + offset * 60 * 1000)
+      const year = localTime.getUTCFullYear()
+      const month = String(localTime.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(localTime.getUTCDate()).padStart(2, '0')
+      const dateStr = `${year}-${month}-${day}`
       dailyData[dateStr] = 0
     }
 
     // 统计每天的饮水量
     records.forEach(record => {
-      const recordDate = new Date(record.date).toISOString().split('T')[0]
+      // record.date 格式为 "YYYY-MM-DD HH:mm:ss"
+      const recordDate = record.date.substring(0, 10)
       if (dailyData.hasOwnProperty(recordDate)) {
         dailyData[recordDate] += record.amount
       }
@@ -508,7 +513,7 @@ export default {
 
     // 转换为图表数据格式
     Object.keys(dailyData).sort().forEach(dateStr => {
-      const date = new Date(dateStr)
+      const date = new Date(dateStr + 'T00:00:00')
       const month = date.getMonth() + 1
       const day = date.getDate()
       chartData.push({
