@@ -511,13 +511,10 @@ export default {
       }
     })
 
-    // 转换为图表数据格式
+    // 转换为图表数据格式 - 保持 YYYY-MM-DD 格式，让图表组件自己处理
     Object.keys(dailyData).sort().forEach(dateStr => {
-      const date = new Date(dateStr + 'T00:00:00')
-      const month = date.getMonth() + 1
-      const day = date.getDate()
       chartData.push({
-        date: month + '/' + day,
+        date: dateStr,  // 保持 YYYY-MM-DD 格式
         value: dailyData[dateStr]
       })
     })

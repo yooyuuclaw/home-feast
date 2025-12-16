@@ -141,8 +141,19 @@ Component({
       // 提取日期和数值
       const dates = chartData.map(item => {
         // 格式化日期显示，修复 iOS 兼容性问题
-        // 将 YYYY-MM-DD 格式转换为 YYYY/MM/DD 格式，或添加时间部分以符合ISO标准
-        const dateStr = item.date.indexOf('/') >= 0 ? item.date : item.date + 'T00:00:00'
+        let dateStr = item.date
+
+        // 如果是 YYYY-MM-DD 格式，添加时间部分
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          dateStr = dateStr + 'T00:00:00'
+        }
+        // 如果是 M/D 或 MM/DD 格式（短日期），不要用 new Date 解析
+        else if (dateStr.match(/^\d{1,2}\/\d{1,2}$/)) {
+          // 直接返回这个格式，不需要转换
+          return dateStr
+        }
+
+        // 使用 ISO 格式创建日期对象
         const date = new Date(dateStr)
         return `${date.getMonth() + 1}/${date.getDate()}`
       })
