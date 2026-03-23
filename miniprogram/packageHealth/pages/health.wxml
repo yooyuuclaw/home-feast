@@ -233,6 +233,13 @@
     <view class="category-title">健康指标</view>
 
     <view class="category-grid">
+      <!-- 身高 -->
+      <view class="category-card {{selectedHealthType === 'height' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="height">
+        <view class="category-icon">📏</view>
+        <view class="category-name">身高</view>
+        <view class="category-count">{{counts.height}}条记录</view>
+      </view>
+
       <!-- 体重 -->
       <view class="category-card {{selectedHealthType === 'weight' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="weight">
         <view class="category-icon">⚖️</view>
@@ -266,13 +273,6 @@
         <view class="category-icon">💧</view>
         <view class="category-name">尿酸</view>
         <view class="category-count">{{counts.uricAcid}}条记录</view>
-      </view>
-
-      <!-- 身高 -->
-      <view class="category-card {{selectedHealthType === 'height' ? 'selected' : ''}}" bindtap="selectHealthType" data-type="height">
-        <view class="category-icon">📏</view>
-        <view class="category-name">身高</view>
-        <view class="category-count">{{counts.height}}条记录</view>
       </view>
     </view>
   </view>

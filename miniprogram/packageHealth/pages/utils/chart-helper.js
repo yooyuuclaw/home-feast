@@ -98,6 +98,12 @@ export function processHealthChartData(records, type, days = 7) {
 export function getChartTypeOptions() {
   return [
     {
+      type: 'height',
+      label: '身高',
+      unit: 'cm',
+      color: '#30cfd0'
+    },
+    {
       type: 'weight',
       label: '体重',
       unit: 'kg',
@@ -110,28 +116,22 @@ export function getChartTypeOptions() {
       color: '#f093fb'
     },
     {
-      type: 'bloodSugar',
-      label: '血糖',
-      unit: 'mmol/L',
-      color: '#4facfe'
-    },
-    {
       type: 'bloodOxygen',
       label: '血氧',
       unit: '%',
       color: '#43e97b'
     },
     {
+      type: 'bloodSugar',
+      label: '血糖',
+      unit: 'mmol/L',
+      color: '#4facfe'
+    },
+    {
       type: 'uricAcid',
       label: '尿酸',
       unit: 'μmol/L',
       color: '#fa709a'
-    },
-    {
-      type: 'height',
-      label: '身高',
-      unit: 'cm',
-      color: '#30cfd0'
     }
   ]
 }

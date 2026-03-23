@@ -167,8 +167,9 @@ export default {
   goToAdd() {
     if (this.checkViewMode()) return
 
+    const type = this.data.selectedHealthType || 'weight'
     wx.navigateTo({
-      url: '/packageHealth/pages/health-add/health-add'
+      url: `/packageHealth/pages/health-add/health-add?type=${type}`
     })
   },
 
@@ -204,12 +205,12 @@ export default {
 
     // 更新图表类型索引
     const typeMapping = {
-      'weight': 0,
-      'bloodPressure': 1,
-      'bloodOxygen': 2,
-      'bloodSugar': 3,
-      'uricAcid': 4,
-      'height': 5
+      'height': 0,
+      'weight': 1,
+      'bloodPressure': 2,
+      'bloodOxygen': 3,
+      'bloodSugar': 4,
+      'uricAcid': 5
     }
 
     const chartIndex = typeMapping[type]

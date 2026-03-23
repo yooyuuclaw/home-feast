@@ -5,8 +5,8 @@ Page({
   data: {
     selectedType: 'weight',
     healthTypes: [
-      { name: '体重', value: 'weight', icon: '⚖️' },
       { name: '身高', value: 'height', icon: '📏' },
+      { name: '体重', value: 'weight', icon: '⚖️' },
       { name: '血压', value: 'bloodPressure', icon: '❤️' },
       { name: '血氧', value: 'bloodOxygen', icon: '💨' },
       { name: '血糖', value: 'bloodSugar', icon: '🩸' },
@@ -36,8 +36,12 @@ Page({
     note: ''
   },
 
-  onLoad() {
+  onLoad(options) {
     this.initDateTime()
+    // 接收从健康页面传来的类型参数
+    if (options && options.type) {
+      this.setData({ selectedType: options.type })
+    }
   },
 
   /**
