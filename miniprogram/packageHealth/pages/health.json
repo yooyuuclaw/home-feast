@@ -1,7 +1,6 @@
 {
   "navigationBarTitleText": "健康小本本",
   "usingComponents": {
-    "line-chart": "/components/line-chart/line-chart",
     "health-echart": "/packageHealth/components/health-echart/health-echart"
   }
 }

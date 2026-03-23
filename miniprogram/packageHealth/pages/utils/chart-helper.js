@@ -152,8 +152,8 @@ export function calculateHealthStats(chartData) {
   }
 
   const values = chartData.map(d => d.value)
-  const max = Math.max(...values)
-  const min = Math.min(...values)
+  const max = Math.max.apply(null, values)
+  const min = Math.min.apply(null, values)
   const avg = (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2)
 
   // 计算趋势（最近3条数据的平均值 vs 整体平均值）

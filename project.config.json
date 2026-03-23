@@ -23,7 +23,10 @@
     "useApiHook": true,
     "useApiHostProcess": true,
     "babelSetting": {
-      "ignore": [],
+      "ignore": [
+        "**/ec-canvas/echarts.min.js",
+        "**/node_modules/**"
+      ],
       "disablePlugins": [],
       "outputPath": ""
     },

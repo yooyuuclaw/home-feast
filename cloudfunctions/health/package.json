@@ -4,6 +4,7 @@
   "description": "健康数据管理云函数",
   "main": "index.js",
   "dependencies": {
+    "@babel/runtime": "^7.29.2",
     "exif-parser": "^0.1.12",
     "wx-server-sdk": "~2.6.3"
   }
